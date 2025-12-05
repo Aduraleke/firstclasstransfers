@@ -67,7 +67,7 @@ export default function CustomerReviews() {
               <Icon icon={starIcon} width={18} height={18} className="text-[#f9d55c]" />
               <span className="text-sm">
                 <span className="font-semibold">4.9 / 5</span>{" "}
-                <span className="text-white/70">average rating</span>
+                <span className="text-white/70">Average rating</span>
               </span>
             </div>
             <p className="text-[11px] text-white/55">
