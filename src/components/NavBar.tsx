@@ -378,7 +378,7 @@ export default function NavBar() {
 
                     <div className="flex flex-col gap-1 text-sm text-(--brand-neutral)/80 border-t border-white/10 mt-3 pt-3">
                       <a href="tel:+35712345678">Call us: +357 12 345678</a>
-                      <a href="mailto:info@firstclass.cy">info@firstclass.cy</a>
+                      <a href="mailto:info@firstclass.cy">booking@firstclasstransfers.eu</a>
                     </div>
                   </div>
                 </motion.div>
