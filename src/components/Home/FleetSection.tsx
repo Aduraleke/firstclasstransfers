@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { motion } from "framer-motion";
+import { motion, type Variants } from "framer-motion";
 import Image from "next/image";
 import { Icon } from "@iconify/react";
 import leafIcon from "@iconify/icons-mdi/leaf";
@@ -18,133 +18,243 @@ const FLEET = [
     id: "sedan",
     title: "Business & Comfort Sedans",
     subtitle: "Mercedes E-Class or similar · up to 4 passengers",
-    desc: "Ideal for most airport transfers, business trips and city-to-city rides — quiet, comfortable and stylish.",
-    img: "/ford-carpri.jpg", // Replace with your real image
+    desc: "Perfect for airport transfers, corporate travel and executive guests. Quiet ride, leather interiors and discreet presence.",
+    img: "/ford-carpri.jpg", // update with your real sedan image
     icon: carSports,
+    highlights: ["Up to 4 passengers", "2–3 suitcases", "Ideal for business"],
   },
   {
     id: "vclass",
     title: "Mercedes V-Class Premium Minivan",
     subtitle: "Up to 6 passengers · VIP-style comfort",
-    desc: "Spacious beige interior, room for bags & buggies, and a smooth ride — perfect for families or groups.",
+    desc: "Spacious cabin with room for family, friends and luggage. Popular for groups, weddings, events and VIP transfers.",
     img: "/mercedesVclass.jpg",
     icon: usersGroup,
     tag: "Most Requested",
+    highlights: ["Up to 6 passengers", "Family & group friendly", "Extra luggage space"],
   },
   {
     id: "capri",
     title: "Ford Capri — All-Electric",
     subtitle: "Eco-friendly · up to 4 passengers",
-    desc: "A quieter, smoother and lower-emission ride — for guests who care about sustainability.",
+    desc: "A smooth, all-electric ride for guests who care about quieter, cleaner travel without sacrificing comfort.",
     img: "/capri.jpg",
     icon: leafIcon,
     tag: "Electric",
+    highlights: ["Zero local emissions", "Quiet & smooth", "Ideal for city trips"],
   },
 ];
 
+const containerVariants: Variants = {
+  hidden: { opacity: 0, y: 40 },
+  visible: { opacity: 1, y: 0 },
+};
+
 export default function FleetSection() {
   return (
-    <section className="relative bg-[#04050B] text-white py-28 overflow-hidden">
-      {/* subtle lighting */}
+    <section className="relative bg-[#04050B] text-white py-24 sm:py-28 overflow-hidden">
+      {/* background glow */}
       <div
-        className="pointer-events-none absolute inset-0 opacity-[0.45] -z-20"
+        className="pointer-events-none absolute inset-0 opacity-[0.55] -z-20"
         style={{
           background:
-            "radial-gradient(circle at 25% 30%, rgba(176,114,8,0.25), transparent 55%), radial-gradient(circle at 70% 75%, rgba(22,44,75,0.35), transparent 60%)",
+            "radial-gradient(circle at 15% 20%, rgba(176,114,8,0.3), transparent 55%), radial-gradient(circle at 80% 80%, rgba(15,23,42,0.85), transparent 58%)",
         }}
       />
 
-      <div className="text-center max-w-4xl mx-auto px-4 mb-16">
-        <p className="uppercase tracking-[0.25em] text-[11px] text-white/60">
-          Our Fleet – Comfort, Space & Cleaner Travel
-        </p>
-        <h2 className="text-3xl sm:text-4xl font-semibold mt-3 leading-tight">
-          Our Fleet – Comfort, Space & Cleaner Travel
-        </h2>
-        <p className="text-sm sm:text-[15px] text-white/75 mt-4 leading-relaxed">
-          We select vehicles for comfort, safety and reliability, with modern
-          amenities, licensed drivers and an all-electric option for greener travel.
-        </p>
-      </div>
+      {/* soft grid overlay */}
+      <div className="pointer-events-none absolute inset-0 -z-10 opacity-[0.12] bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.15)_0,transparent_55%),linear-gradient(to_bottom,rgba(148,163,184,0.18)_1px,transparent_1px),linear-gradient(to_right,rgba(148,163,184,0.18)_1px,transparent_1px)] bg-size-[100%_100%,80px_80px,80px_80px]" />
 
-      {/* fleet cards */}
-      <div className="flex flex-col gap-12 max-w-6xl mx-auto px-4">
-        {FLEET.map((v, i) => (
-          <motion.div
-            key={v.id}
-            initial={{ opacity: 0, y: 40 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6, ease: "easeOut", delay: i * 0.1 }}
-            className="grid lg:grid-cols-2 gap-10 items-center"
-          >
-            {/* image */}
-            <motion.div
-              whileHover={{ scale: 1.04, rotateX: 2, rotateY: -2 }}
-              transition={{ type: "spring", stiffness: 70 }}
-              className="relative rounded-[34px] overflow-hidden bg-black shadow-[0_28px_80px_rgba(0,0,0,0.75)]"
-            >
-              <Image
-                src={v.img}
-                alt={v.title}
-                width={900}
-                height={600}
-                className="object-cover w-full h-[300px] sm:h-[360px] lg:h-[420px]"
-              />
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+        {/* heading + mini stats */}
+        <div className="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between mb-16">
+          <div className="max-w-xl">
+            <p className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] font-medium uppercase tracking-[0.22em] text-white/70">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 shadow-[0_0_0_4px_rgba(74,222,128,0.35)]" />
+              Our Fleet
+            </p>
+            <h2 className="mt-4 text-3xl sm:text-4xl font-semibold leading-tight">
+              Comfort, space and a cleaner way
+              <span className="block text-[rgba(229,231,235,0.88)]">
+                to travel across Cyprus
+              </span>
+            </h2>
+            <p className="mt-4 text-sm sm:text-[15px] text-white/75 leading-relaxed">
+              Every vehicle in our fleet is carefully selected for safety, comfort and
+              reliability with professional drivers, Wi-Fi on board and an electric
+              option for greener journeys.
+            </p>
+          </div>
 
-              {/* gold light streak */}
-              <div
-                className="absolute inset-x-0 bottom-0 h-1.5"
-                style={{
-                  background: `linear-gradient(90deg, transparent, ${BRAND.gold}, transparent)`,
-                  opacity: 0.7,
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-xs sm:text-[11px]">
+            <FleetStat
+              label="Average driver rating"
+              value="4.9/5"
+              icon="mdi:star-circle"
+            />
+            <FleetStat
+              label="Baby / child seats"
+              value="On request"
+              icon="mdi:shield-check"
+            />
+            <FleetStat
+              label="Wi-Fi & water"
+              value="Included"
+              icon="mdi:wifi"
+            />
+          </div>
+        </div>
+
+        {/* fleet cards */}
+        <div className="space-y-12 sm:space-y-14">
+          {FLEET.map((v, i) => {
+            const isEven = i % 2 === 0;
+            return (
+              <motion.div
+                key={v.id}
+                variants={containerVariants}
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true, amount: 0.3 }}
+                transition={{
+                  duration: 0.6,
+                  ease: "easeOut", // cast to satisfy TS
+                  delay: i * 0.1,
                 }}
-              />
-            </motion.div>
-
-            {/* details */}
-            <div className="space-y-5 max-w-[480px]">
-              <div className="inline-flex items-center gap-2 text-sm font-medium text-white/85">
-                <Icon icon={v.icon} width={20} height={20} />
-                {v.subtitle}
-              </div>
-
-              <h3 className="text-2xl font-semibold text-white">{v.title}</h3>
-
-              <p className="text-white/70 text-[14px] leading-relaxed">
-                {v.desc}
-              </p>
-
-              {v.tag && (
-                <span
-                  className="inline-block mt-2 text-[11px] font-semibold rounded-full px-3 py-1 border"
-                  style={{
-                    backgroundColor: "rgba(176,114,8,0.14)",
-                    borderColor: "rgba(176,114,8,0.5)",
-                    color: BRAND.gold,
-                  }}
+                className={[
+                  "grid gap-8 lg:gap-12 items-center",
+                  "lg:grid-cols-2",
+                  isEven ? "" : "lg:[&>*:first-child]:order-2 lg:[&>*:last-child]:order-1",
+                ].join(" ")}
+              >
+                {/* image wrapper */}
+                <motion.div
+                  whileHover={{ scale: 1.03, rotateX: 3, rotateY: -2 }}
+                  transition={{ type: "spring", stiffness: 70, damping: 14 }}
+                  className="relative rounded-4xl overflow-hidden bg-black shadow-[0_26px_80px_rgba(0,0,0,0.85)] border border-white/5"
                 >
-                  {v.tag}
-                </span>
-              )}
-            </div>
-          </motion.div>
-        ))}
-      </div>
+                  {/* subtle inner gradient */}
+                  <div className="pointer-events-none absolute inset-0 opacity-60 bg-[radial-gradient(circle_at_15%_0%,rgba(176,114,8,0.3),transparent_55%),radial-gradient(circle_at_100%_100%,rgba(15,23,42,0.8),transparent_50%)]" />
 
-      {/* CTA */}
-      <div className="text-center mt-20">
-        <a
-          href="/fleet"
-          className="inline-flex items-center gap-2 text-sm font-semibold px-6 py-3 rounded-full shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition"
-          style={{
-            background: `linear-gradient(135deg, ${BRAND.gold}, ${BRAND.navy})`,
-          }}
-        >
-          View Our Full Fleet
-          <Icon icon="mdi:arrow-right" width={16} height={16} />
-        </a>
+                  <Image
+                    src={v.img}
+                    alt={v.title}
+                    width={980}
+                    height={640}
+                    className="object-cover w-full h-[260px] sm:h-80 lg:h-[380px]"
+                    priority={i === 0}
+                  />
+
+                  {/* bottom gold streak */}
+                  <div
+                    className="absolute inset-x-10 bottom-4 h-0.5 rounded-full"
+                    style={{
+                      background: `linear-gradient(90deg, transparent, ${BRAND.gold}, transparent)`,
+                      opacity: 0.9,
+                    }}
+                  />
+                </motion.div>
+
+                {/* details */}
+                <div className="relative max-w-[480px]">
+                  {/* floating accent bar */}
+                  <div
+                    className="pointer-events-none absolute -left-6 top-2 h-10 w-0.5 rounded-full hidden sm:block"
+                    style={{
+                      background: `linear-gradient(to bottom, ${BRAND.gold}, transparent)`,
+                      opacity: 0.9,
+                    }}
+                  />
+
+                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-[11px] font-medium text-white/80 mb-3">
+                    <Icon icon={v.icon} width={16} height={16} />
+                    <span>{v.subtitle}</span>
+                  </div>
+
+                  <div className="flex items-center gap-3">
+                    <h3 className="text-2xl font-semibold text-white">
+                      {v.title}
+                    </h3>
+                    {v.tag && (
+                      <span
+                        className="inline-flex items-center gap-1.5 text-[11px] font-semibold rounded-full px-3 py-1 border"
+                        style={{
+                          backgroundColor: "rgba(176,114,8,0.12)",
+                          borderColor: "rgba(176,114,8,0.6)",
+                          color: BRAND.gold,
+                        }}
+                      >
+                        <span className="h-1.5 w-1.5 rounded-full bg-[rgba(250,204,21,0.95)]" />
+                        {v.tag}
+                      </span>
+                    )}
+                  </div>
+
+                  <p className="mt-3 text-[14px] text-white/75 leading-relaxed">
+                    {v.desc}
+                  </p>
+
+                  {/* highlights */}
+                  <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                    {v.highlights?.map((h) => (
+                      <div
+                        key={h}
+                        className="flex items-center gap-2 rounded-2xl bg-white/5 border border-white/5 px-3 py-2 text-[12px] text-white/80"
+                      >
+                        <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+                        <span>{h}</span>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* micro copy */}
+                  <p className="mt-4 text-[11px] text-white/55">
+                    All vehicles include air-conditioning, licensed professional drivers,
+                    and full insurance. Child seats are available on request at no extra
+                    cost.
+                  </p>
+                </div>
+              </motion.div>
+            );
+          })}
+        </div>
+
+        {/* CTA */}
+        <div className="text-center mt-16 sm:mt-20">
+          <a
+            href="/fleet"
+            className="inline-flex items-center gap-2 text-sm font-semibold px-6 sm:px-7 py-3 rounded-full shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition transform border border-white/10"
+            style={{
+              background: `linear-gradient(135deg, ${BRAND.gold}, ${BRAND.navy})`,
+            }}
+          >
+            View our full fleet
+            <Icon icon="mdi:arrow-right" width={18} height={18} />
+          </a>
+          <p className="mt-3 text-[11px] text-white/55">
+            Need something special? We also arrange custom vehicles for events, VIPs and
+            corporate roadshows.
+          </p>
+        </div>
       </div>
     </section>
+  );
+}
+
+type FleetStatProps = {
+  label: string;
+  value: string;
+  icon: string;
+};
+
+function FleetStat({ label, value, icon }: FleetStatProps) {
+  return (
+    <div className="rounded-2xl border border-white/10 bg-white/5 px-3.5 py-3 flex flex-col gap-1">
+      <div className="flex items-center gap-1.5 text-[11px] text-white/60">
+        <Icon icon={icon} width={14} height={14} />
+        <span>{label}</span>
+      </div>
+      <p className="text-sm font-semibold text-white">{value}</p>
+    </div>
   );
 }
