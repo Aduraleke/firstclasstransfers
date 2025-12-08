@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { motion, useReducedMotion } from "framer-motion";
+import { motion, useReducedMotion, AnimatePresence } from "framer-motion";
 import { Icon } from "@iconify/react";
 import planeIcon from "@iconify/icons-mdi/airplane";
 import checkCircle from "@iconify/icons-mdi/check-circle";
@@ -49,12 +49,17 @@ const bullets = [
   },
 ];
 
-const bgImages = ["/FirstClassTransfersAirplane2.jpg", "/FirstClassTransfersAirplane4.jpg"];
+const bgImages = [
+  "/FirstClassTransfersAirplane2.jpg",
+  "/FirstClassTransfersAirplane4.jpg",
+];
 
 export default function HeroSection() {
   const prefersReducedMotion = useReducedMotion();
   const [bgIndex, setBgIndex] = useState(0);
+  const [activeHighlight, setActiveHighlight] = useState(0);
 
+  // Background crossfade
   useEffect(() => {
     if (prefersReducedMotion) return;
     const interval = setInterval(() => {
@@ -62,6 +67,17 @@ export default function HeroSection() {
     }, 6000);
     return () => clearInterval(interval);
   }, [prefersReducedMotion]);
+
+  // Right-side slider autoplay
+  useEffect(() => {
+    if (prefersReducedMotion) return;
+    const interval = setInterval(() => {
+      setActiveHighlight((prev) => (prev + 1) % bullets.length);
+    }, 5500);
+    return () => clearInterval(interval);
+  }, [prefersReducedMotion]);
+
+  const active = bullets[activeHighlight];
 
   return (
     <section className="relative isolate overflow-hidden text-white">
@@ -85,10 +101,9 @@ export default function HeroSection() {
       <div className="absolute inset-0 -z-10 bg-linear-to-b from-black/70 via-black/60 to-[#050814]/95" />
 
       {/* CONTENT */}
-      <div className="mx-auto flex max-w-6xl flex-col gap-12 px-4 pb-20 pt-32 sm:px-6 lg:grid lg:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)] lg:items-center lg:px-8 lg:pb-28 lg:pt-40">
+      <div className="mx-auto flex max-w-6xl flex-col gap-12 lg:gap-16 px-4 pb-20 pt-32 sm:px-6 lg:grid lg:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)] lg:items-center lg:px-8 lg:pb-28 lg:pt-40">
         {/* LEFT */}
         <div className="space-y-7">
-
           {/* eyebrow */}
           <div className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-black/30 px-3 py-1 text-[11px] font-extrabold uppercase tracking-[0.18em] text-white/80">
             <span>Cyprus Airport Taxi Transfers</span>
@@ -150,36 +165,107 @@ export default function HeroSection() {
           </p>
         </div>
 
-        {/* RIGHT – Bullet grid */}
-        <motion.div
-          initial={{ opacity: 0, x: 25 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.6, ease: "easeOut", delay: 0.1 }}
-          className="grid w-full gap-2 sm:grid-cols-2"
-        >
-          {bullets.map((item) => (
-            <div
-              key={item.label}
-              className="rounded-2xl border border-white/20 bg-white/10 px-3 py-2.5 backdrop-blur-md shadow-sm"
+        {/* RIGHT – Slider-style highlight card */}
+        <div className="flex flex-col items-center justify-center w-full">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={active.label}
+              initial={{ opacity: 0, y: 40 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -40 }}
+              transition={{ duration: 0.6, ease: "easeInOut" }}
+              className="relative w-full h-[360px] sm:h-[400px] rounded-3xl overflow-hidden border border-white/10 shadow-[0_18px_45px_rgba(0,0,0,0.45)] flex flex-col justify-center items-center px-8 py-10 bg-white/5 backdrop-blur-sm"
             >
-              <div className="mb-1.5 flex items-center gap-2">
-                <Icon
-                  icon={item.icon}
-                  width={18}
-                  height={18}
-                  className="text-(--brand-accent)"
-                  style={
-                    {
-                      "--brand-accent": BRAND.accent,
-                    } as React.CSSProperties
-                  }
-                />
-                <span className="text-[12px] font-semibold">{item.label}</span>
-              </div>
-              <p className="text-[11px] text-white/75">{item.text}</p>
-            </div>
-          ))}
-        </motion.div>
+              {/* animated soft gradient */}
+              <motion.div
+                animate={{
+                  background: [
+                    `radial-gradient(circle at 30% 30%, ${BRAND.accent}33, transparent 60%)`,
+                    `radial-gradient(circle at 70% 70%, ${BRAND.primary}44, transparent 60%)`,
+                  ],
+                }}
+                transition={{
+                  duration: 6,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                }}
+                className="absolute inset-0 opacity-40"
+              />
+
+              {/* ICON */}
+              <motion.div
+                initial={{ scale: 0.7, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ type: "spring", stiffness: 120, damping: 10 }}
+                className="mb-6 relative"
+              >
+                <div className="p-5 rounded-full bg-black/40 border border-white/10 relative overflow-hidden">
+                  <Icon
+                    icon={active.icon}
+                    className="text-[2.8rem]"
+                    style={{ color: BRAND.accent }}
+                  />
+                  <motion.div
+                    animate={{
+                      scale: [1, 1.6, 1],
+                      opacity: [0.35, 0, 0.35],
+                    }}
+                    transition={{
+                      duration: 3,
+                      repeat: Infinity,
+                    }}
+                    className="absolute inset-0 bg-[rgba(0,0,0,0.35)] blur-2xl rounded-full"
+                  />
+                </div>
+              </motion.div>
+
+              {/* TEXT */}
+              <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-white/70 mb-2">
+                {String(activeHighlight + 1).padStart(2, "0")} /{" "}
+                {String(bullets.length).padStart(2, "0")} • Key benefit
+              </p>
+              <h2 className="text-xl sm:text-2xl font-bold text-center mb-2">
+                {active.label}
+              </h2>
+              <p className="text-sm text-white/80 max-w-md text-center leading-relaxed">
+                {active.text}
+              </p>
+            </motion.div>
+          </AnimatePresence>
+
+          {/* progress dots */}
+          <div className="flex items-center space-x-2 mt-5">
+            {bullets.map((item, i) => {
+              const isActive = i === activeHighlight;
+              return (
+                <button
+                  key={item.label}
+                  onClick={() => setActiveHighlight(i)}
+                  aria-label={`Show: ${item.label}`}
+                  className="relative"
+                >
+                  <div
+                    className={`h-2 rounded-full transition-all duration-300 ${
+                      isActive
+                        ? "w-8"
+                        : "w-3 hover:w-5 bg-white/25"
+                    }`}
+                    style={{
+                      backgroundColor: isActive ? BRAND.accent : undefined,
+                    }}
+                  />
+                  {isActive && (
+                    <motion.div
+                      layoutId="hero-highlight-glow"
+                      className="absolute -top-1 left-0 right-0 h-4 rounded-full blur-sm"
+                      style={{ backgroundColor: `${BRAND.accent}66` }}
+                    />
+                  )}
+                </button>
+              );
+            })}
+          </div>
+        </div>
       </div>
     </section>
   );

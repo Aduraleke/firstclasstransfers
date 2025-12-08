@@ -3,6 +3,7 @@
 "use client";
 
 import React from "react";
+import Image from "next/image";
 import {
   TRANSFER_ROUTES,
   VEHICLE_TYPES,
@@ -22,6 +23,11 @@ type Props = {
 const BRAND_PRIMARY = "#162c4b";
 const BRAND_ACCENT = "#b07208";
 
+const VEHICLE_IMAGE_MAP: Record<string, string> = {
+  sedan: "/capri.jpg",
+  vclass: "/mercedesVclass.jpg",
+};
+
 export default function Step1Trip({ data, onChange, onNext }: Props) {
   const handleRouteChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     onChange("routeId", e.target.value);
@@ -33,6 +39,26 @@ export default function Step1Trip({ data, onChange, onNext }: Props) {
 
   const handleTimePeriodChange = (id: "day" | "night") => {
     onChange("timePeriod", id);
+  };
+
+  const handleTimeChange = (value: string) => {
+    // Always update the raw time field
+    onChange("time", value);
+
+    if (!value) return;
+
+    const [hourStr] = value.split(":");
+    const hour = Number(hourStr);
+
+    if (Number.isNaN(hour)) return;
+
+    // 06:00–21:59 => day, 22:00–05:59 => night
+    const nextPeriod: "day" | "night" =
+      hour >= 6 && hour < 22 ? "day" : "night";
+
+    if (nextPeriod !== data.timePeriod) {
+      onChange("timePeriod", nextPeriod);
+    }
   };
 
   const canContinue =
@@ -131,51 +157,70 @@ export default function Step1Trip({ data, onChange, onNext }: Props) {
           Choose the vehicle that best fits your group and luggage.
         </p>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {VEHICLE_TYPES.map((vehicle) => {
             const active = data.vehicleTypeId === vehicle.id;
+            const imgSrc = VEHICLE_IMAGE_MAP[vehicle.id] ?? null;
+
             return (
               <button
                 key={vehicle.id}
                 type="button"
                 onClick={() => handleVehicleChange(vehicle.id)}
-                className={`text-left rounded-2xl border px-3.5 py-3 shadow-sm transition-all ${
+                className={[
+                  "group overflow-hidden rounded-2xl border shadow-sm transition-all",
                   active
-                    ? "border-transparent shadow-md"
-                    : "border-gray-200 hover:border-gray-300"
-                }`}
+                    ? "border-[#b07208] shadow-[0_12px_30px_rgba(176,114,8,0.35)] scale-[1.01]"
+                    : "border-gray-200 hover:border-gray-300 hover:shadow-md",
+                ].join(" ")}
                 style={{
                   background: active
-                    ? `linear-gradient(135deg, ${BRAND_ACCENT}, ${BRAND_PRIMARY})`
+                    ? `linear-gradient(150deg, ${BRAND_ACCENT} 0%, ${BRAND_PRIMARY} 85%)`
                     : "#ffffff",
                   color: active ? "#ffffff" : "#111827",
                 }}
               >
-                <div className="flex flex-col gap-1.5">
-                  <span className="text-sm font-semibold">
-                    {vehicle.name}
-                  </span>
-                  <span
+                {/* IMAGE FULL WIDTH */}
+                <div className="relative w-full h-36 sm:h-60 bg-gray-100 overflow-hidden">
+                  {imgSrc ? (
+                    <Image
+                      src={imgSrc}
+                      alt={vehicle.name}
+                      fill
+                      className="object-cover transition-transform duration-500 group-hover:scale-105"
+                      priority={active}
+                    />
+                  ) : (
+                    <div className="h-full w-full flex items-center justify-center text-3xl">
+                      🚘
+                    </div>
+                  )}
+                </div>
+
+                {/* CONTENT */}
+                <div className="flex flex-col items-start p-4 gap-1.5 text-left">
+                  <p className="text-sm font-semibold">{vehicle.name}</p>
+                  <p
                     className={`text-xs ${
                       active ? "text-white/80" : "text-gray-600"
                     }`}
                   >
                     {vehicle.subtitle}
-                  </span>
-                  <span
+                  </p>
+                  <p
                     className={`text-[11px] ${
-                      active ? "text-white/80" : "text-gray-500"
+                      active ? "text-white/70" : "text-gray-500"
                     }`}
                   >
                     {vehicle.luggage}
-                  </span>
-                  <span
+                  </p>
+                  <p
                     className={`text-[11px] ${
-                      active ? "text-white/90" : "text-gray-500"
+                      active ? "text-white/85" : "text-gray-500"
                     }`}
                   >
                     {vehicle.recommendedFor}
-                  </span>
+                  </p>
                 </div>
               </button>
             );
@@ -209,7 +254,7 @@ export default function Step1Trip({ data, onChange, onNext }: Props) {
             <input
               type="time"
               value={data.time}
-              onChange={(e) => onChange("time", e.target.value)}
+              onChange={(e) => handleTimeChange(e.target.value)}
               className="mt-1 block w-full rounded-2xl border border-gray-300 bg-white px-3 py-2.5 text-sm shadow-sm focus:border-[#b07208] focus:ring-[#b07208]"
             />
           </div>
@@ -228,18 +273,14 @@ export default function Step1Trip({ data, onChange, onNext }: Props) {
                   type="button"
                   onClick={() => handleTimePeriodChange(tp.id)}
                   className={`flex flex-col px-3 py-1.5 rounded-2xl text-left transition-all ${
-                    active
-                      ? "shadow-sm"
-                      : "hover:bg-white hover:shadow-sm"
+                    active ? "shadow-sm" : "hover:bg-white hover:shadow-sm"
                   }`}
                   style={{
                     backgroundColor: active ? BRAND_PRIMARY : "transparent",
                     color: active ? "#ffffff" : "#111827",
                   }}
                 >
-                  <span className="text-xs font-semibold">
-                    {tp.label}
-                  </span>
+                  <span className="text-xs font-semibold">{tp.label}</span>
                   <span
                     className={`text-[10px] ${
                       active ? "text-white/80" : "text-gray-500"

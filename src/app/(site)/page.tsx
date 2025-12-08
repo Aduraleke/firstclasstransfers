@@ -7,14 +7,6 @@ import WhereWeOperateSection from "@/components/Home/WhereWeOperateSection";
 import CustomerReviews from "@/components/Home/CustomerReviews";
 import FleetSection from "@/components/Home/FleetSection";
 import FaqTeaser from "@/components/Home/FaqTeaser";
-// import PopularRoutesSection from "@/components/home/PopularRoutesSection";
-// import PaphosAndCitiesTeaser from "@/components/home/PaphosAndCitiesTeaser";
-// import WhyChooseSection from "@/components/home/WhyChooseSection";
-// import HowItWorksSection from "@/components/home/HowItWorksSection";
-// import ServiceAreaSection from "@/components/home/ServiceAreaSection";
-// import ReviewsSection from "@/components/home/ReviewsSection";
-// import FleetSection from "@/components/home/FleetSection";
-// import FaqTeaserSection from "@/components/home/FaqTeaserSection";
 
 export const metadata: Metadata = {
   title: "Cyprus Airport Taxi Transfers – Fixed Price Larnaca & Paphos",

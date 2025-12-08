@@ -126,8 +126,8 @@ export default function NavBar() {
           <div
             className={`relative flex items-center justify-between gap-4 rounded-3xl border border-white/10 bg-[rgba(5,10,20,0.94)] backdrop-blur-2xl px-3 sm:px-5 py-2.5 sm:py-3.5 transition-all duration-300 ${
               scrolled
-                ? "shadow-[0_12px_40px_rgba(0,0,0,0.6)] scale-[0.99]"
-                : "shadow-[0_18px_60px_rgba(0,0,0,0.75)]"
+                ? "shadow-[0_6px_10px_rgba(0,0,0,0.6)] scale-[0.99]"
+                : "shadow-[0_8px_20px_rgba(0,0,0,0.75)]"
             }`}
           >
             {/* LEFT: Logo + tagline */}

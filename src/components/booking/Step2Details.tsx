@@ -8,6 +8,7 @@ import {
   BAGGAGE_OPTIONS,
   TRANSFER_ROUTES,
   VEHICLE_TYPES,
+  TIME_PERIODS,
 } from "@/lib/booking/options";
 
 type Props = {
@@ -33,9 +34,15 @@ export default function Step2Details({
     () => TRANSFER_ROUTES.find((r) => r.id === data.routeId),
     [data.routeId]
   );
+
   const vehicle = useMemo(
     () => VEHICLE_TYPES.find((v) => v.id === data.vehicleTypeId),
     [data.vehicleTypeId]
+  );
+
+  const timePeriod = useMemo(
+    () => TIME_PERIODS.find((tp) => tp.id === data.timePeriod),
+    [data.timePeriod]
   );
 
   const totalPassengers = (data.adults || 0) + (data.children || 0);
@@ -75,8 +82,11 @@ export default function Step2Details({
             <p className="text-sm text-gray-900">
               {data.date || "—"} · {data.time || "—"}
             </p>
-            <p className="text-[11px] text-gray-500 capitalize">
-              Tariff: {data.timePeriod || "—"}
+            <p className="text-[11px] text-gray-500">
+              Tariff:{" "}
+              {timePeriod
+                ? `${timePeriod.label} (${timePeriod.range})`
+                : data.timePeriod || "—"}
             </p>
           </div>
 

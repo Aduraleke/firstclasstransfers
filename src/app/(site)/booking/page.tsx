@@ -1,6 +1,7 @@
+// app/(site)/booking/page.tsx
+
 import type { Metadata } from "next";
 import Booking from "./Booking";
-
 
 export const metadata: Metadata = {
   title: "Book Your Cyprus Airport Transfer",
@@ -11,6 +12,13 @@ export const metadata: Metadata = {
   },
 };
 
-export default function BookingPage() {
-  return <Booking />;
+type BookingPageProps = {
+  searchParams?: {
+    routeId?: string;
+  };
+};
+
+export default function BookingPage({ searchParams }: BookingPageProps) {
+  const initialRouteId = searchParams?.routeId ?? "";
+  return <Booking initialRouteId={initialRouteId} />;
 }

@@ -1,13 +1,21 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
-import { motion } from "framer-motion";
+import Image from "next/image";
+import { motion, AnimatePresence } from "framer-motion";
 import { Icon } from "@iconify/react";
 import mapMarkerIcon from "@iconify/icons-mdi/map-marker";
 import carIcon from "@iconify/icons-mdi/car-sports";
 import arrowRightIcon from "@iconify/icons-mdi/arrow-right";
 import airplaneTakeoff from "@iconify/icons-mdi/airplane-takeoff";
+
+// 🔑 Import your shared route data
+import {
+  ROUTE_DETAILS,
+  RouteDetailSlug,
+  RouteDetail,
+} from "@/lib/routes";
 
 const BRAND = {
   primary: "#162c4b",
@@ -15,307 +23,397 @@ const BRAND = {
 };
 
 type RouteCard = {
-  id: string;
-  from: "Larnaca Airport" | "Paphos Airport";
+  id: RouteDetailSlug;
+  from: string;
   to: string;
   sedanPrice: string;
   vanPrice: string;
   description: string;
   href: string;
-  tag?: string;
+  tag?: string;            // ✅ keep this optional
+  image: string;
 };
 
-const POPULAR_ROUTES: RouteCard[] = [
-  {
-    id: "lca-ayia-napa",
-    from: "Larnaca Airport",
-    to: "Ayia Napa",
-    sedanPrice: "€54",
-    vanPrice: "€80",
-    description:
-      "Beach hotels, villas and family resorts across Ayia Napa. No shared shuttles and no meter surprises.",
-    href: "/routes/ayia-napa",
-    tag: "Most booked",
-  },
-  {
-    id: "lca-protaras",
-    from: "Larnaca Airport",
-    to: "Protaras",
-    sedanPrice: "€59",
-    vanPrice: "€90",
-    description:
-      "Fig Tree Bay, Pernera and all Protaras seafront hotels and apartments.",
-    href: "/routes/protaras",
-  },
-  {
-    id: "lca-nicosia",
-    from: "Larnaca Airport",
-    to: "Nicosia",
-    sedanPrice: "€65",
-    vanPrice: "€95",
-    description:
-      "Capital city hotels, embassies, universities and long-stay apartments.",
-    href: "/routes/nicosia",
-  },
-  {
-    id: "lca-limassol",
-    from: "Larnaca Airport",
-    to: "Limassol",
-    sedanPrice: "€64",
-    vanPrice: "€90",
-    description:
-      "Limassol Marina, seafront hotels and business district transfers.",
-    href: "/routes/limassol",
-  },
-  {
-    id: "lca-paphos",
-    from: "Larnaca Airport",
-    to: "Paphos",
-    sedanPrice: "€110",
-    vanPrice: "€140",
-    description:
-      "Comfortable long-distance transfers to Paphos and Kato Paphos.",
-    href: "/routes/paphos",
-  },
-  {
-    id: "pfo-nicosia",
-    from: "Paphos Airport",
-    to: "Nicosia",
-    sedanPrice: "€110",
-    vanPrice: "€140",
-    description:
-      "Direct transfer from PFO to the capital – ideal for business and student stays.",
-    href: "/routes/paphos-to-nicosia",
-  },
-  {
-    id: "lca-famagusta",
-    from: "Larnaca Airport",
-    to: "Famagusta (North Cyprus)",
-    sedanPrice: "€95",
-    vanPrice: "€125",
-    description:
-      "Cross-border transfer with checkpoint assistance to Famagusta resorts.",
-    href: "/routes/famagusta",
-  },
-  {
-    id: "pfo-limassol",
-    from: "Paphos Airport",
-    to: "Limassol",
-    sedanPrice: "€60",
-    vanPrice: "€85",
-    description:
-      "Fast, fixed-price connection to Limassol city, marina and seafront hotels.",
-    href: "/routes/paphos-to-limassol",
-  },
+// Pick which detailed routes to feature in the slider
+const POPULAR_ROUTE_SLUGS: RouteDetailSlug[] = [
+  "larnaca-airport-nicosia",
+  "larnaca-airport-limassol",
+  "larnaca-airport-paphos",
+  "paphos-airport-nicosia",
+  "paphos-airport-limassol",
+  "paphos-airport-larnaca",
+  "limassol-nicosia",
+  "limassol-paphos",
 ];
 
-export default function PopularRoutesSection() {
-  return (
-    <section className="relative bg-slate-50 py-14 sm:py-16 lg:py-20">
-      {/* soft background */}
-      <div
-        className="pointer-events-none absolute inset-0 opacity-70"
-        aria-hidden
-      >
-        <div
-          className="h-full w-full"
-          style={{
-            background:
-              "radial-gradient(circle at 0% 0%, rgba(22,44,75,0.06), transparent 60%), radial-gradient(circle at 100% 100%, rgba(176,114,8,0.1), transparent 55%)",
-          }}
-        />
-      </div>
+const POPULAR_ROUTE_TAGS: Partial<Record<RouteDetailSlug, string>> = {
+  "larnaca-airport-nicosia": "Most booked",
+  "larnaca-airport-limassol": "Business favourite",
+  "limassol-paphos": "Coastal favourite",
+};
 
-      <div className="relative mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 space-y-10">
-        {/* HEADER */}
-        <div className="max-w-3xl space-y-3">
-          <div className="inline-flex items-center gap-2 rounded-full bg-white/80 px-2.5 py-1 border border-slate-200 text-[11px] uppercase tracking-[0.2em] text-slate-600">
-            <span>Popular airport taxi routes</span>
-            <span className="h-0.5 w-5 rounded-full bg-slate-300" />
-            <span className="inline-flex items-center gap-1 font-medium text-[10px] text-slate-700">
-              <Icon icon={airplaneTakeoff} width={14} height={14} />
-              Larnaca &amp; Paphos
+// Small helper for card text
+function buildDescription(route: RouteDetail): string {
+  const base =
+    route.metaDescription ||
+    route.body.split("\n\n")[0] ||
+    `${route.from} to ${route.to} – fixed-price private transfer.`;
+
+  return base.length <= 180 ? base : base.slice(0, 177) + "…";
+}
+
+// ✅ Build POPULAR_ROUTES without nulls
+const POPULAR_ROUTES: RouteCard[] = POPULAR_ROUTE_SLUGS.reduce<RouteCard[]>(
+  (acc, slug) => {
+    const route = ROUTE_DETAILS.find((r) => r.slug === slug);
+    if (!route) return acc; // just skip if slug not found
+
+    acc.push({
+      id: route.slug,
+      from: route.from,
+      to: route.to,
+      sedanPrice: route.sedanPrice,
+      vanPrice: route.vanPrice,
+      description: buildDescription(route),
+      href: `/routes/${route.slug}`, // matches /routes/[slug]
+      tag: POPULAR_ROUTE_TAGS[route.slug],
+      image: route.image,
+    });
+
+    return acc;
+  },
+  []
+);
+
+export default function PopularRoutesShowcase() {
+  const [activeIndex, setActiveIndex] = useState<number>(-1);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setActiveIndex(0), 2000);
+    return () => clearTimeout(timer);
+  }, []);
+
+  useEffect(() => {
+    if (activeIndex < 0) return;
+    const interval = setInterval(
+      () => setActiveIndex((prev) => (prev + 1) % POPULAR_ROUTES.length),
+      7000
+    );
+    return () => clearInterval(interval);
+  }, [activeIndex]);
+
+  const active = activeIndex >= 0 ? POPULAR_ROUTES[activeIndex] : null;
+
+  return (
+    <section className="relative py-16 px-4 sm:px-6 lg:px-8 bg-white">
+      {/* soft subtle background accents */}
+      <div className="pointer-events-none absolute inset-0" />
+
+      <div className="relative mx-auto max-w-6xl">
+        {/* Header */}
+        <div className="text-center mb-10 sm:mb-12">
+          <div className="inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 mb-4 border border-slate-200 shadow-sm">
+            <span className="inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-600">
+              <Icon
+                icon={airplaneTakeoff}
+                width={16}
+                height={16}
+                className="text-slate-500"
+              />
+              Popular airport taxi routes
             </span>
           </div>
-
-          <h2 className="text-2xl sm:text-3xl font-semibold tracking-tight text-slate-900">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-slate-900 mb-3 capitalize">
             Fixed-price transfers with{" "}
             <span style={{ color: BRAND.accent }}>
               no meter and no surprises
             </span>
           </h2>
-          <p className="text-sm sm:text-[15px] text-slate-600">
-            These are some of our most-booked routes from Larnaca (LCA) and
-            Paphos (PFO) Airports. Prices are{" "}
-            <span className="font-semibold">per vehicle</span>, day and night,
-            for modern sedans (up to 4 passengers) and Mercedes V-Class minivans
+          <p className="text-sm sm:text-[15px] max-w-2xl mx-auto text-slate-600">
+            Our most-booked routes between Larnaca, Paphos, Limassol and
+            Nicosia. Prices are{" "}
+            <span className="font-semibold text-slate-900">per vehicle</span>,
+            day and night, for modern sedans (up to 4 passengers) and minivans
             (up to 6 passengers).
           </p>
         </div>
 
-        {/* GRID */}
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.2 }}
-          transition={{ duration: 0.45, ease: "easeOut" }}
-          className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
-        >
-          {POPULAR_ROUTES.map((route) => (
-            <article
-              key={route.id}
-              className="flex h-full flex-col rounded-2xl border border-slate-200 bg-white/95 p-4 shadow-[0_12px_30px_rgba(15,23,42,0.08)] hover:-translate-y-0.5 hover:shadow-[0_16px_40px_rgba(15,23,42,0.14)] transition-transform"
-            >
-              {/* top row: from/to + tag */}
-              <div className="mb-3 flex items-start justify-between gap-2">
-                <div className="flex flex-col gap-1">
-                  <div className="inline-flex items-center gap-2 rounded-full bg-slate-50 px-2 py-0.5 text-[10px] font-medium text-slate-700 border border-slate-200">
-                    <Icon icon={mapMarkerIcon} width={13} height={13} />
-                    <span>{route.from}</span>
-                  </div>
-                  <p className="text-[13px] font-semibold text-slate-900">
-                    {route.to}
+        {/* Hero / Image card */}
+        <div className="relative rounded-3xl overflow-hidden bg-slate-900 border border-slate-200/70 shadow-[0_18px_45px_rgba(15,23,42,0.16)]">
+          {/* Taller on mobile, aspect on md+ */}
+          <div className="relative h-[420px] sm:h-[460px] md:h-auto md:aspect-video">
+            <AnimatePresence mode="wait">
+              {activeIndex === -1 ? (
+                <motion.div
+                  key="intro"
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.7 }}
+                  className="absolute inset-0 flex flex-col items-center justify-center bg-linear-to-tr from-slate-900 via-slate-800 to-slate-600"
+                >
+                  <Icon
+                    icon={airplaneTakeoff}
+                    width={42}
+                    height={42}
+                    className="mb-4 text-slate-100"
+                  />
+                  <h3 className="text-2xl md:text-3xl font-semibold text-slate-50 mb-2">
+                    Browse our most popular routes
+                  </h3>
+                  <p className="text-sm md:text-base text-slate-200 max-w-md text-center">
+                    From coastal resorts to capital city stays – choose a
+                    destination below to preview fares and details.
                   </p>
-                </div>
+                </motion.div>
+              ) : (
+                <motion.div
+                  key={active?.id}
+                  initial={{ opacity: 0, scale: 1.02 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 1.02 }}
+                  transition={{ duration: 0.9, ease: "easeInOut" }}
+                  className="absolute inset-0"
+                >
+                  {/* Background image with gentle zoom */}
+                  <motion.div
+                    initial={{ scale: 1 }}
+                    animate={{ scale: 1.04 }}
+                    transition={{
+                      duration: 7,
+                      ease: "easeInOut",
+                      repeat: Infinity,
+                      repeatType: "reverse",
+                    }}
+                    className="absolute inset-0"
+                  >
+                    <Image
+                      src={active?.image || ""}
+                      alt={`${active?.from} to ${active?.to}`}
+                      fill
+                      priority
+                      className="object-cover"
+                    />
+                  </motion.div>
 
-                <div className="flex flex-col items-end gap-1">
-                  {route.tag && (
-                    <span
-                      className="rounded-full px-2 py-0.5 text-[10px] font-semibold text-amber-900/90"
-                      style={{
-                        backgroundColor: "rgba(251,191,36,0.2)",
-                        border: "1px solid rgba(245,158,11,0.6)",
-                      }}
-                    >
-                      {route.tag}
-                    </span>
-                  )}
-                  {route.from === "Paphos Airport" && (
-                    <span className="rounded-full bg-slate-50 px-2 py-0.5 text-[10px] text-slate-600 border border-slate-200">
-                      From Paphos (PFO)
-                    </span>
-                  )}
-                </div>
-              </div>
+                  {/* Gradient overlay for readability */}
+                  <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/55 to-black/20" />
 
-              {/* prices */}
-              <div className="mb-3 space-y-1.5 rounded-2xl bg-slate-50 px-3 py-2.5 border border-slate-200">
-                <div className="flex items-center justify-between gap-2 text-[11px]">
-                  <span className="inline-flex items-center gap-1 text-slate-700">
-                    <Icon icon={carIcon} width={14} height={14} />
-                    Sedan · up to 4
-                  </span>
-                  <span className="font-semibold text-slate-900">
-                    {route.sedanPrice}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between gap-2 text-[11px]">
-                  <span className="inline-flex items-center gap-1 text-slate-700">
-                    <Icon icon={carIcon} width={14} height={14} />
-                    V-Class · up to 6
-                  </span>
-                  <span className="font-semibold text-slate-900">
-                    {route.vanPrice}
-                  </span>
-                </div>
-              </div>
+                  {/* Content overlay */}
+                  <div className="relative z-10 h-full flex flex-col justify-between px-5 sm:px-7 md:px-9 py-5 sm:py-7 md:py-8">
+                    {/* top row: from & tag */}
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="space-y-2">
+                        <div className="inline-flex items-center gap-2 rounded-full bg-black/55 px-3 py-1 border border-white/15">
+                          <Icon
+                            icon={mapMarkerIcon}
+                            width={16}
+                            height={16}
+                            className="text-slate-100"
+                          />
+                          <span className="text-[11px] font-medium uppercase tracking-[0.16em] text-slate-100">
+                            From {active?.from}
+                          </span>
+                        </div>
+                        <h3 className="text-2xl md:text-3xl lg:text-4xl font-bold text-white leading-tight">
+                          {active?.to}
+                        </h3>
+                      </div>
+                      <div className="flex flex-col items-end gap-2">
+                        {active?.tag && (
+                          <span
+                            className="rounded-full px-3 py-1 text-[11px] font-semibold text-amber-900 shadow-lg"
+                            style={{
+                              background:
+                                "linear-gradient(135deg, rgba(251,191,36,0.98), rgba(245,158,11,0.96))",
+                              boxShadow: "0 10px 30px rgba(245,158,11,0.6)",
+                            }}
+                          >
+                            {active.tag}
+                          </span>
+                        )}
+                        <span className="rounded-full bg-black/60 px-3 py-1 text-[11px] text-slate-100 border border-white/10">
+                          Private transfer · No meter · Fixed fare
+                        </span>
+                      </div>
+                    </div>
 
-              {/* description */}
-              <p className="mb-3 flex-1 text-[12px] leading-relaxed text-slate-600">
-                {route.description}
-              </p>
+                    {/* middle: description & prices */}
+                    <div className="grid gap-4 mt-4 md:mt-2 md:grid-cols-[minmax(0,2.1fr)_minmax(0,1.4fr)]">
+                      <div className="space-y-2 max-w-xl">
+                        <p className="text-[13px] md:text-sm text-slate-100 leading-relaxed">
+                          {active?.description}
+                        </p>
+                        <div className="flex flex-wrap gap-2">
+                          {[
+                            "Meet & greet or door pickup",
+                            "Flight-safe planning",
+                            "24/7 local support",
+                          ].map((badge) => (
+                            <span
+                              key={badge}
+                              className="text-[11px] font-medium rounded-full border border-white/15 bg-black/40 px-2.5 py-1 text-slate-100"
+                            >
+                              {badge}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
 
-              {/* CTA */}
-              <Link
-                href={route.href}
-                className="mt-auto inline-flex items-center gap-1 text-[13px] font-semibold text-slate-900 hover:text-[rgb(22,44,75)]"
-              >
-                <span>View route details</span>
-                <Icon icon={arrowRightIcon} width={15} height={15} />
-              </Link>
-            </article>
-          ))}
-        </motion.div>
+                      {/* prices card */}
+                      <div className="justify-self-end max-w-xs w-full">
+                        <div className="rounded-2xl border border-white/18 bg-black/75 px-4 py-3.5 shadow-[0_16px_40px_rgba(0,0,0,0.7)] backdrop-blur-md space-y-2.5">
+                          <div className="flex items-center justify-between gap-2 text-[12px]">
+                            <span className="inline-flex items-center gap-1 text-slate-100">
+                              <Icon
+                                icon={carIcon}
+                                width={15}
+                                height={15}
+                                className="text-slate-100"
+                              />
+                              Sedan · up to 4
+                            </span>
+                            <span className="font-semibold text-slate-50">
+                              {active?.sedanPrice}
+                            </span>
+                          </div>
+                          <div className="flex items-center justify-between gap-2 text-[12px]">
+                            <span className="inline-flex items-center gap-1 text-slate-100">
+                              <Icon
+                                icon={carIcon}
+                                width={15}
+                                height={15}
+                                className="text-slate-100"
+                              />
+                              V-Class · up to 6
+                            </span>
+                            <span className="font-semibold text-slate-50">
+                              {active?.vanPrice}
+                            </span>
+                          </div>
+                          <p className="text-[11px] text-slate-200 pt-1">
+                            Price per vehicle, day &amp; night. Airport charges
+                            and taxes included.
+                          </p>
+                          <Link
+                            href={active?.href || "#"}
+                            className="mt-1 inline-flex items-center justify-center gap-1.5 w-full rounded-full px-4 py-2 text-[12px] font-semibold text-slate-900 bg-white hover:bg-slate-100 transition"
+                          >
+                            <span>View route details &amp; book</span>
+                            <Icon
+                              icon={arrowRightIcon}
+                              width={14}
+                              height={14}
+                            />
+                          </Link>
+                        </div>
+                      </div>
+                    </div>
 
-        {/* LOWER STRIP + PAPHOS/CITIES MINI-BLOCK */}
-        <div className="space-y-4 pt-3">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between text-sm">
-            <p className="text-slate-600">
-              See all car and minivan fares on our{" "}
-              <Link
-                href="/pricing"
-                className="font-semibold text-slate-900 underline underline-offset-4 decoration-slate-300 hover:decoration-[rgba(176,114,8,0.9)]"
-              >
-                Prices page
-              </Link>
-              .
+                    {/* bottom note */}
+                    <div className="mt-4 flex flex-wrap items-center justify-between gap-2 text-[11px] text-slate-200">
+                      <p>
+                        From{" "}
+                        <span className="font-semibold text-slate-50">
+                          {active?.from}
+                        </span>{" "}
+                        to{" "}
+                        <span className="font-semibold text-slate-50">
+                          {active?.to}
+                        </span>{" "}
+                        — your fare is confirmed before pick-up.
+                      </p>
+                      <p className="opacity-85">
+                        Don&apos;t see your exact hotel? Add it in the booking
+                        form and we&apos;ll confirm the route.
+                      </p>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        </div>
+
+        {/* Tabs: each location as switch */}
+        <div className="mt-7 sm:mt-8">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-3">
+            <p className="text-xs sm:text-sm text-slate-600">
+              Tap a destination to preview the route, prices and details.
             </p>
-            <p className="text-[11px] text-slate-500">
-              If you don&apos;t see your exact route, you can still request it
-              in our booking form.
-            </p>
+            <Link
+              href="/routes"
+              className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-800 hover:text-slate-900"
+            >
+              <span>View all routes</span>
+              <Icon icon={arrowRightIcon} width={14} height={14} />
+            </Link>
           </div>
 
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, amount: 0.3 }}
-            transition={{ duration: 0.45, ease: "easeOut" }}
-            className="rounded-3xl border border-slate-200 bg-white shadow-[0_12px_35px_rgba(15,23,42,0.10)] px-4 py-5 sm:px-6 sm:py-6"
-          >
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-              <div className="max-w-xl space-y-2">
-                {/* headline with icon */}
-                <div className="flex items-center gap-2">
-                  <Icon
-                    icon="mdi:map"
-                    className="text-slate-600"
-                    width={18}
-                    height={18}
-                  />
-                  <p className="text-base font-semibold text-slate-900">
-                    Also operating from Paphos Airport &amp; major cities
-                  </p>
-                </div>
-
-                {/* supporting text */}
-                <p className="text-sm text-slate-600 leading-relaxed">
-                  We provide private taxi transfers from Paphos Airport (PFO)
-                  and between popular city destinations — including Nicosia,
-                  Larnaca, Limassol, Troodos and more.
-                </p>
-
-                {/* small trust badges */}
-                <div className="flex flex-wrap gap-2 pt-1">
-                  {[
-                    "Fixed-price fares",
-                    "Cross-city transfers",
-                    "24/7 availability",
-                  ].map((badge) => (
+          <div className="flex gap-3 overflow-x-auto pb-1.5 -mx-1 px-1">
+            {POPULAR_ROUTES.map((route, idx) => {
+              const isActive = idx === activeIndex;
+              return (
+                <button
+                  key={route.id}
+                  onClick={() => setActiveIndex(idx)}
+                  className="relative min-w-[145px] sm:min-w-40 rounded-2xl px-3 py-2.5 text-left transition-all focus:outline-none"
+                  style={{
+                    background: isActive
+                      ? `linear-gradient(135deg, ${BRAND.accent}, ${BRAND.primary})`
+                      : "white",
+                    border: isActive
+                      ? "1px solid rgba(15,23,42,0.12)"
+                      : "1px solid rgba(148,163,184,0.55)",
+                    boxShadow: isActive
+                      ? "0 10px 30px rgba(15,23,42,0.19)"
+                      : "0 4px 18px rgba(15,23,42,0.08)",
+                  }}
+                >
+                  <div className="flex items-center gap-2 mb-1">
+                    <Icon
+                      icon={mapMarkerIcon}
+                      width={14}
+                      height={14}
+                      className={
+                        isActive ? "text-slate-50" : "text-slate-500"
+                      }
+                    />
                     <span
-                      key={badge}
-                      className="text-[11px] font-medium rounded-full border border-slate-200 bg-slate-50 px-2 py-0.5 text-slate-600"
+                      className="text-[11px] font-semibold uppercase tracking-[0.14em]"
+                      style={{
+                        color: isActive ? "#f9fafb" : "#475569",
+                      }}
                     >
-                      {badge}
+                      {route.from}
                     </span>
-                  ))}
-                </div>
-              </div>
-
-              {/* CTA button */}
-              <Link
-                href="/pricing"
-                className="inline-flex items-center gap-1.5 rounded-full px-5 py-2.5 text-sm font-semibold text-white shadow-lg transition hover:shadow-xl hover:-translate-y-px"
-                style={{
-                  background: `linear-gradient(135deg, ${BRAND.accent}, ${BRAND.primary})`,
-                  boxShadow: "0px 8px 25px rgba(22,44,75,0.22)",
-                }}
-              >
-                <span>View all routes &amp; prices</span>
-                <Icon icon={arrowRightIcon} width={16} height={16} />
-              </Link>
-            </div>
-          </motion.div>
+                  </div>
+                  <div
+                    className="text-[13px] font-semibold line-clamp-1"
+                    style={{ color: isActive ? "#f9fafb" : "#0f172a" }}
+                  >
+                    {route.to}
+                  </div>
+                  <div className="mt-1 flex items-center justify-between text-[11px]">
+                    <span
+                      style={{
+                        color: isActive ? "#fefce8" : "#64748b",
+                      }}
+                    >
+                      Sedan {route.sedanPrice}
+                    </span>
+                    <span
+                      style={{
+                        color: isActive ? "#fefce8" : "#64748b",
+                      }}
+                    >
+                      V-Class {route.vanPrice}
+                    </span>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
         </div>
       </div>
     </section>

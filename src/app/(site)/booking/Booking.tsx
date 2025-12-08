@@ -1,3 +1,5 @@
+// app/(site)/booking/Booking.tsx
+
 "use client";
 
 import React, { useRef, useState } from "react";
@@ -23,12 +25,20 @@ const initialDraft: BookingDraft = {
   notes: "",
 };
 
-export default function Booking() {
+type BookingProps = {
+  initialRouteId?: string;
+};
+
+export default function Booking({ initialRouteId }: BookingProps) {
   const [step, setStep] = useState<1 | 2>(1);
-  const [draft, setDraft] = useState<BookingDraft>(initialDraft);
+
+  const [draft, setDraft] = useState<BookingDraft>(() => ({
+    ...initialDraft,
+    routeId: initialRouteId || "",
+  }));
+
   const [submitted, setSubmitted] = useState(false);
 
-  // This ref marks the top of the booking content (below the navbar)
   const topRef = useRef<HTMLDivElement | null>(null);
 
   const scrollToTop = () => {
@@ -66,15 +76,12 @@ export default function Booking() {
   if (submitted) {
     return (
       <div className="bg-white min-h-screen">
-        {/* offset for fixed navbar */}
         <div ref={topRef} className="pt-32 sm:pt-36 pb-16">
           <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="relative max-w-xl mx-auto overflow-hidden rounded-3xl border border-gray-100 bg-white/95 shadow-[0_24px_70px_rgba(15,23,42,0.16)]">
-              {/* top accent line */}
               <div className="absolute inset-x-0 top-0 h-1 bg-linear-to-r from-[#162c4b] via-[#b07208] to-[#162c4b]" />
 
               <div className="px-6 sm:px-8 py-7 sm:py-8 text-center space-y-5">
-                {/* status pill */}
                 <div className="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1 border border-emerald-100">
                   <span className="h-2 w-2 rounded-full bg-emerald-500 shadow-[0_0_0_3px_rgba(16,185,129,0.35)]" />
                   <span className="text-[11px] font-medium uppercase tracking-[0.2em] text-emerald-700">
@@ -133,12 +140,11 @@ export default function Booking() {
                   >
                     Back to homepage
                   </Link>
-                  <Link 
+                  <Link
                     href="/booking"
                     className="inline-flex items-center justify-center px-5 py-2.5 rounded-full text-sm font-semibold shadow-md transition"
                     style={{
-                      background:
-                        "linear-gradient(135deg, #b07208, #162c4b)",
+                      background: "linear-gradient(135deg, #b07208, #162c4b)",
                       color: "#ffffff",
                     }}
                   >
@@ -156,7 +162,6 @@ export default function Booking() {
   // Normal 2-step flow
   return (
     <div className="bg-white min-h-screen">
-      {/* offset for fixed floating navbar */}
       <div ref={topRef} className="pt-32 sm:pt-36 pb-12">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-4xl mx-auto">
