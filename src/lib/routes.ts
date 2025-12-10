@@ -369,7 +369,7 @@ We plan pickup times to ensure you reach PFO with plenty of time for check-in, s
       },
     ],
 
-    image: "/paphos-airport.webp",
+    image: "/paphos-airport.jpg",
     bookHref: "/booking?route=nicosia-paphos-airport",
     bookCtaLabel: "Book Your Taxi from Nicosia to Paphos Airport",
     bookCtaSupport:
@@ -570,7 +570,7 @@ For €110 per car (up to 4 passengers) or €140 per minivan (up to 6 passenger
       },
     ],
 
-    image: "/nicosia.jpeg",
+    image: "/nicosia.jpg",
     bookHref: "/booking?route=paphos-airport-nicosia",
     bookCtaLabel: "Reserve Your Taxi from Paphos Airport to Nicosia",
     bookCtaSupport:
@@ -1405,7 +1405,7 @@ All vehicles offer air-conditioning, Wi-Fi and bottled water, and child seats ar
       },
     ],
 
-    image: "/nicosia.jpeg",
+    image: "/nicosia.jpg",
     bookHref: "/booking?route=larnaca-airport-nicosia",
     bookCtaLabel: "Reserve Your Taxi to Nicosia",
     bookCtaSupport:
@@ -1726,7 +1726,7 @@ No timetables, no bus changes, no dragging luggage – just a direct city-to-cit
       },
     ],
 
-    image: "/nicosia.jpeg",
+    image: "/nicosia.jpg",
     bookHref: "/booking?route=limassol-nicosia",
     bookCtaLabel: "Book Your Taxi from Limassol to Nicosia",
     bookCtaSupport:
@@ -1828,7 +1828,7 @@ You just choose your pickup time, meet your driver at the door and enjoy a smoot
       },
     ],
 
-    image: "/paphos-airport.webp",
+    image: "/paphos-airport.jpg",
     bookHref: "/booking?route=limassol-paphos-airport",
     bookCtaLabel: "Book Your Taxi from Limassol to Paphos Airport",
     bookCtaSupport:

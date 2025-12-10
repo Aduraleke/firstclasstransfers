@@ -58,7 +58,7 @@ const REGIONS: RegionConfig[] = [
     tag: "Ayia Napa · Protaras",
     description:
       "Lively beach resorts, family hotels and villas in Ayia Napa, Protaras, Pernera, Paralimni and Kapparis.",
-    image: "/regions/east-coast.jpg", // update with your real asset
+    image: "/east-coast.jpg", // update with your real asset
   },
   {
     id: "west",
@@ -66,7 +66,7 @@ const REGIONS: RegionConfig[] = [
     tag: "Limassol · Paphos · Coral Bay",
     description:
       "Coastal hotels and marinas in Limassol, Limassol Marina, Pissouri, Paphos, Coral Bay, Polis and Latchi.",
-    image: "/regions/west-south.jpg",
+    image: "/west-south.jpg",
   },
   {
     id: "inland",
@@ -74,7 +74,7 @@ const REGIONS: RegionConfig[] = [
     tag: "Nicosia · Troodos",
     description:
       "Transfers to the capital Nicosia (Lefkosia) and Troodos mountain villages on request.",
-    image: "/regions/inland-mountains.jpg",
+    image: "/inland-mountains.jpg",
   },
   {
     id: "crossborder",
@@ -82,7 +82,7 @@ const REGIONS: RegionConfig[] = [
     tag: "Kyrenia · Famagusta",
     description:
       "Selected cross-border routes to Kyrenia and Famagusta, subject to current regulations and checks.",
-    image: "/regions/cross-border.jpg",
+    image: "/cross-border.jpg",
   },
 ];
 
