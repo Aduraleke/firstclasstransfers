@@ -153,8 +153,36 @@ export default async function RouteDetailsPage({
                 )}
               </div>
 
+              {/* 💰 MAIN PRICE RIBBON (hero) */}
+              <div className="mt-2">
+                <div className="inline-flex flex-col gap-1 rounded-2xl bg-linear-to-r from-[#b07208] via-[#e0b15a] to-[#b07208] px-4 py-3 shadow-lg shadow-black/25">
+                  <p className="text-[9px] font-semibold uppercase tracking-[0.22em] text-white/85">
+                    Fixed fare · Per vehicle · Not per person
+                  </p>
+                  <div className="flex flex-wrap items-baseline gap-4 text-white">
+                    <div className="flex items-baseline gap-1">
+                      <span className="text-[10px] font-medium uppercase tracking-[0.16em] opacity-85">
+                        From · Sedan
+                      </span>
+                      <span className="text-[19px] font-extrabold sm:text-[21px]">
+                        {route.sedanPrice}
+                      </span>
+                    </div>
+                    <span className="h-4 w-px bg-white/40 hidden sm:block" />
+                    <div className="flex items-baseline gap-1">
+                      <span className="text-[10px] font-medium uppercase tracking-[0.16em] opacity-85">
+                        Mercedes V-Class
+                      </span>
+                      <span className="text-[19px] font-extrabold sm:text-[21px]">
+                        {route.vanPrice}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
               {/* stats */}
-              <dl className="mt-2 grid gap-3 text-[11px] text-slate-200/90 sm:grid-cols-3">
+              <dl className="mt-3 grid gap-3 text-[11px] text-slate-200/90 sm:grid-cols-3">
                 <div className="rounded-2xl bg-slate-900/60 px-3 py-2.5 ring-1 ring-slate-800/80">
                   <dt className="text-slate-400">Distance</dt>
                   <dd className="mt-0.5 text-sm font-semibold text-slate-50">
@@ -204,7 +232,7 @@ export default async function RouteDetailsPage({
                 {route.bookCtaLabel || "Book this route"}
               </Link>
               <p className="text-slate-300">
-                Flight tracking · Meet &amp; greet · Fixed fare 
+                Flight tracking · Meet &amp; greet · Fixed fare
               </p>
             </div>
           </div>
@@ -228,13 +256,13 @@ export default async function RouteDetailsPage({
                   Private airport transfer · {route.time}
                 </p>
               </div>
-              {/* 🔥 Make this “From” price pop */}
+              {/* 🔄 Removed price from image overlay to keep all pricing on the ribbon & sidebar */}
               <div className="text-right text-[10px] text-slate-300">
                 <p className="uppercase tracking-[0.16em] text-slate-400">
-                  From
+                  Fixed fare
                 </p>
-                <p className="mt-0.5 text-base font-extrabold text-[#fbbf24] drop-shadow-[0_0_6px_rgba(0,0,0,0.65)]">
-                  {route.sedanPrice}
+                <p className="mt-0.5 text-[11px] text-slate-200">
+                  Sedan &amp; Mercedes V-Class
                 </p>
               </div>
             </div>
@@ -322,6 +350,21 @@ export default async function RouteDetailsPage({
                 <div className="absolute -right-10 top-0 h-32 w-32 rounded-full bg-[#b07208]/20 blur-3xl" />
                 <div className="absolute -left-10 bottom-0 h-32 w-32 rounded-full bg-sky-400/15 blur-3xl" />
               </div>
+
+              {/* mini "from price" pill to echo hero ribbon */}
+              <div className="relative mb-3 inline-flex rounded-full bg-linear-to-r from-[#b07208] via-[#e0b15a] to-[#b07208] px-3 py-1 text-[11px] font-semibold text-slate-950 shadow-md">
+                <span className="uppercase tracking-[0.18em] text-slate-900/80">
+                  From
+                </span>
+                <span className="mx-2 h-3 w-px bg-slate-900/20" />
+                <span className="text-[12px] font-extrabold">
+                  {route.sedanPrice}
+                </span>
+                <span className="ml-2 text-[10px] uppercase tracking-[0.16em] text-slate-900/75">
+                  Sedan · Per vehicle
+                </span>
+              </div>
+
               <div className="relative flex items-start justify-between gap-3">
                 <div>
                   <h3 className="text-sm font-semibold text-slate-50">
@@ -453,9 +496,11 @@ export default async function RouteDetailsPage({
                       </span>
                     )}
 
-                    {/* 🔥 emphasise vehicle fixed price */}
+                    {/* emphasised fixed price per vehicle */}
                     <div className="absolute bottom-3 right-3 z-20 rounded-full bg-slate-950/90 px-4 py-1.5 text-[11px] text-slate-50 shadow-md backdrop-blur-sm ring-1 ring-slate-800">
-
+                      <span className="mr-2 text-[9px] uppercase tracking-[0.16em] text-slate-300">
+                        Fixed fare
+                      </span>
                       <span className="text-sm font-extrabold text-[#fbbf24]">
                         {vehicle.fixedPrice}
                       </span>
@@ -521,7 +566,7 @@ export default async function RouteDetailsPage({
             <h2 className="text-base font-semibold text-slate-900">
               Frequently asked questions
             </h2>
-            <div className="inline-flex items-center gap-1 rounded-full bg-slate-50 px-2.5 py-1 text-[11px] text-slate-600 ring-1 ring-slate-200">
+          <div className="inline-flex items-center gap-1 rounded-full bg-slate-50 px-2.5 py-1 text-[11px] text-slate-600 ring-1 ring-slate-200">
               <span className="h-1.5 w-1.5 rounded-full bg-[#b07208]" />
               <span>Most asked for this route</span>
             </div>
