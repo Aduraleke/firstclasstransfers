@@ -1,65 +1,109 @@
-"use client";
+"use client"
 
-import React from "react";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { Icon } from "@iconify/react";
-import gaugeIcon from "@iconify/icons-mdi/view-dashboard-outline";
-import calendarIcon from "@iconify/icons-mdi/calendar-clock";
-import cashIcon from "@iconify/icons-mdi/cash-multiple";
-import carIcon from "@iconify/icons-mdi/car-estate";
-import cogIcon from "@iconify/icons-mdi/cog-outline";
+import { Dispatch, SetStateAction } from "react"
+import { Icon } from "@iconify/react"
+import { BRAND } from "./brand"
+import Image from "next/image"
 
-const navLinks = [
-  { href: "/admin/dashboard", label: "Dashboard", icon: gaugeIcon },
-  { href: "/admin/bookings", label: "Bookings", icon: calendarIcon },
-  { href: "/admin/pricing", label: "Pricing", icon: cashIcon },
-  { href: "/admin/drivers", label: "Drivers", icon: carIcon },
-  { href: "/admin/settings", label: "Settings", icon: cogIcon },
-];
+export type AdminViewId =
+  | "dashboard"
+  | "bookings"
+  | "drivers"
+  | "pricing"
+  | "routes"
+  | "payments"
+  | "emails"
+  | "admins"
+  | "audit"
+  | "settings"
 
-export const AdminSidebar: React.FC = () => {
-  const pathname = usePathname();
+interface SidebarProps {
+  sidebarOpen: boolean
+  setSidebarOpen: Dispatch<SetStateAction<boolean>>
+  currentView: AdminViewId
+  setCurrentView: Dispatch<SetStateAction<AdminViewId>>
+  onLogout: () => void
+}
 
-  const isActive = (href: string) =>
-    pathname === href || pathname?.startsWith(href + "/");
+const NAV_ITEMS: { id: AdminViewId; label: string; icon: string }[] = [
+  { id: "dashboard", label: "Dashboard", icon: "mdi:view-dashboard-outline" },
+  { id: "bookings", label: "Bookings", icon: "mdi:calendar-month-outline" },
+  { id: "drivers", label: "Drivers", icon: "mdi:steering" },
+  { id: "pricing", label: "Pricing", icon: "mdi:cash-multiple" },
+  { id: "routes", label: "Routes", icon: "mdi:map-marker-path" },
+  { id: "payments", label: "Payments", icon: "mdi:credit-card-outline" },
+  { id: "emails", label: "Emails", icon: "mdi:email-outline" },
+  { id: "admins", label: "Admin Users", icon: "mdi:account-group-outline" },
+  { id: "audit", label: "Audit Logs", icon: "mdi:clipboard-text-search-outline" },
+  { id: "settings", label: "Settings", icon: "mdi:cog-outline" },
+]
 
+export const AdminSidebar = ({
+  sidebarOpen,
+  setSidebarOpen,
+  currentView,
+  setCurrentView,
+  onLogout,
+}: SidebarProps) => {
   return (
-    <aside className="hidden md:flex md:flex-col w-60 lg:w-64 border-r border-white/10 bg-[#050814]/95">
-      <div className="px-4 pt-4 pb-3 border-b border-white/10">
-        <p className="text-[11px] uppercase tracking-[0.22em] text-white/50">
-          Admin
-        </p>
-        <p className="text-xs text-white/70 mt-1">
-          First Class Transfers · Cyprus
-        </p>
+    <aside
+      className={`flex flex-col border-r transition-all duration-300 ${
+        sidebarOpen ? "w-64" : "w-20"
+      }`}
+      style={{ backgroundColor: "#020617", borderColor: "#1f2937" }}
+    >
+      <div className="flex items-center justify-between bg-white px-4 py-3">
+        {sidebarOpen && (
+          <Image
+            src="/firstclass.png"
+            alt="FirstClass Transfers"
+            width={140}        // 👈 required
+            height={40}        // 👈 required
+            className="h-10 w-auto"
+            priority
+          />
+        )}
+        <button
+          onClick={() => setSidebarOpen((prev) => !prev)}
+          className="rounded-lg p-2 text-slate-700 hover:bg-slate-100"
+        >
+          <Icon icon={sidebarOpen ? "mdi:chevron-left" : "mdi:menu"} className="text-xl" />
+        </button>
       </div>
 
-      <nav className="flex-1 px-3 py-4 space-y-1">
-        {navLinks.map((link) => {
-          const active = isActive(link.href);
+      <nav className="flex-1 space-y-1 p-3">
+        {NAV_ITEMS.map((item) => {
+          const active = currentView === item.id
           return (
-            <Link
-              key={link.href}
-              href={link.href}
-              className={[
-                "flex items-center gap-2.5 rounded-2xl px-3 py-2.5 text-[13px] transition-colors",
+            <button
+              key={item.id}
+              onClick={() => setCurrentView(item.id)}
+              className={`flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
                 active
-                  ? "bg-white/10 text-white border border-white/20"
-                  : "text-white/70 hover:bg-white/5",
-              ].join(" ")}
+                  ? "bg-slate-900 text-white"
+                  : "text-slate-400 hover:bg-slate-800 hover:text-slate-100"
+              }`}
             >
-              <Icon icon={link.icon} width={18} height={18} />
-              <span>{link.label}</span>
-            </Link>
-          );
+              <Icon
+                icon={item.icon}
+                className="text-lg"
+                style={active ? { color: BRAND.gold } : { color: "#9ca3af" }}
+              />
+              {sidebarOpen && <span>{item.label}</span>}
+            </button>
+          )
         })}
       </nav>
 
-      <div className="px-4 pb-4 pt-2 border-t border-white/10 text-[11px] text-white/55">
-        <p>Dispatch center · 24/7</p>
-        <p className="mt-0.5">LCA &amp; PFO coverage</p>
+      <div className="border-t px-4 py-3" style={{ borderColor: "#1f2937" }}>
+        <button
+          onClick={onLogout}
+          className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-red-400 hover:bg-red-950/40"
+        >
+          <Icon icon="mdi:logout" className="text-lg" />
+          {sidebarOpen && <span>Logout</span>}
+        </button>
       </div>
     </aside>
-  );
-};
+  )
+}
