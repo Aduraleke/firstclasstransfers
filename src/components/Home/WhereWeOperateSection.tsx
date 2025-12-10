@@ -251,7 +251,7 @@ export default function WhereWeOperateSection() {
                     key={d.label}
                     href={d.href}
                     className={`inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-[12px] text-slate-700 transition-colors hover:border-[rgba(176,114,8,0.8)] hover:bg-white hover:text-[rgb(22,44,75)] ${
-                      idx % 2 === 0 ? "justify-start" : "sm:justify-end"
+                      idx % 2 === 0 ? "justify-start" : "sm:justify-start"
                     }`}
                   >
                     <Icon icon={mapMarkerIcon} width={14} height={14} />
@@ -286,7 +286,7 @@ export default function WhereWeOperateSection() {
                     key={d.label}
                     href={d.href}
                     className={`inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-[12px] text-slate-700 transition-colors hover:border-[rgba(176,114,8,0.8)] hover:bg-white hover:text-[rgb(22,44,75)] ${
-                      idx % 2 === 0 ? "justify-start" : "sm:justify-end"
+                      idx % 2 === 0 ? "justify-start" : "sm:justify-start"
                     }`}
                   >
                     <Icon icon={mapMarkerIcon} width={14} height={14} />

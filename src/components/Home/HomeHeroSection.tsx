@@ -50,7 +50,7 @@ const bullets = [
 ];
 
 const bgImages = [
-  "/FirstClassTransfersAirplane2.jpg",
+  "/FirstClassHero.jpg",
   "/FirstClassTransfersAirplane4.jpg",
 ];
 
