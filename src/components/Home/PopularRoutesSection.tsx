@@ -103,7 +103,7 @@ export default function PopularRoutesShowcase() {
   const active = activeIndex >= 0 ? POPULAR_ROUTES[activeIndex] : null;
 
   return (
-    <section className="relative py-16 px-4 sm:px-6 lg:px-8 bg-white">
+    <section className="relative py-12 sm:py-16 px-4 sm:px-6 lg:px-8 bg-white">
       <div className="pointer-events-none absolute inset-0" />
 
       <div className="relative mx-auto max-w-6xl">
@@ -195,7 +195,7 @@ export default function PopularRoutesShowcase() {
                   <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/55 to-black/20" />
 
                   {/* Content overlay */}
-                  <div className="relative z-10 h-full flex flex-col justify-between px-5 sm:px-7 md:px-9 py-5 sm:py-7 md:py-8">
+                  <div className="relative z-10 h-full flex flex-col justify-between px-5 sm:px-7 md:px-9 py-4 sm:py-6 md:py-8">
                     {/* top row */}
                     <div className="flex items-start justify-between gap-3">
                       <div className="space-y-2">

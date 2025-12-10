@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState } from "react";
-import Link from "next/link";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { Icon } from "@iconify/react";
@@ -15,29 +14,28 @@ const BRAND = {
 
 type DestLink = {
   label: string;
-  href: string;
 };
 
 const LARNACA_DESTINATIONS: DestLink[] = [
-  { label: "Larnaca City & Mackenzie Beach", href: "/routes/larnaca" },
-  { label: "Ayia Napa, Nissi Beach & Makronissos", href: "/routes/ayia-napa" },
-  { label: "Protaras, Pernera, Paralimni & Kapparis", href: "/routes/protaras" },
-  { label: "Nicosia (Lefkosia)", href: "/routes/nicosia" },
-  { label: "Limassol & Limassol Marina", href: "/routes/limassol" },
-  { label: "Pissouri, Paphos, Coral Bay, Polis & Latchi", href: "/routes/paphos" },
+  { label: "Larnaca City & Mackenzie Beach", },
+  { label: "Ayia Napa, Nissi Beach & Makronissos" },
+  { label: "Protaras, Pernera, Paralimni & Kapparis"},
+  { label: "Nicosia (Lefkosia)" },
+  { label: "Limassol & Limassol Marina", },
+  { label: "Pissouri, Paphos, Coral Bay, Polis & Latchi"},
   {
     label: "Kyrenia & Famagusta (selected cross-border routes)",
-    href: "/routes/famagusta",
+
   },
 ];
 
 const PAPHOS_DESTINATIONS: DestLink[] = [
-  { label: "Limassol & Amathus seafront", href: "/routes/limassus" },
-  { label: "Nicosia (capital)", href: "/routes/paphos-to-nicosia" },
-  { label: "Larnaca City & Larnaca Airport", href: "/routes/larnaca" },
+  { label: "Limassol & Amathus seafront", },
+  { label: "Nicosia (capital)" },
+  { label: "Larnaca City & Larnaca Airport"},
   {
     label: "Ayia Napa, Protaras & Famagusta (long-distance)",
-    href: "/routes/ayia-napa",
+
   },
 ];
 
@@ -247,16 +245,15 @@ export default function WhereWeOperateSection() {
 
               <div className="grid gap-2 sm:grid-cols-2">
                 {LARNACA_DESTINATIONS.map((d, idx) => (
-                  <Link
+                  <div
                     key={d.label}
-                    href={d.href}
                     className={`inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-[12px] text-slate-700 transition-colors hover:border-[rgba(176,114,8,0.8)] hover:bg-white hover:text-[rgb(22,44,75)] ${
                       idx % 2 === 0 ? "justify-start" : "sm:justify-start"
                     }`}
                   >
                     <Icon icon={mapMarkerIcon} width={14} height={14} />
                     <span className="line-clamp-1">{d.label}</span>
-                  </Link>
+                  </div>
                 ))}
               </div>
             </div>
@@ -282,16 +279,15 @@ export default function WhereWeOperateSection() {
 
               <div className="grid gap-2 sm:grid-cols-2">
                 {PAPHOS_DESTINATIONS.map((d, idx) => (
-                  <Link
+                  <div
                     key={d.label}
-                    href={d.href}
                     className={`inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-[12px] text-slate-700 transition-colors hover:border-[rgba(176,114,8,0.8)] hover:bg-white hover:text-[rgb(22,44,75)] ${
                       idx % 2 === 0 ? "justify-start" : "sm:justify-start"
                     }`}
                   >
                     <Icon icon={mapMarkerIcon} width={14} height={14} />
                     <span className="line-clamp-1">{d.label}</span>
-                  </Link>
+                  </div>
                 ))}
               </div>
             </div>
