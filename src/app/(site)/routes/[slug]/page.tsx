@@ -15,8 +15,8 @@ type RouteParams = {
 };
 
 const VEHICLE_IMAGE_MAP: Record<string, string> = {
-  "Standard Car": "/capri.jpg",
-  Sedan: "/capri.jpg",
+  "Standard Car": "/ford-carpri.jpg",
+  Sedan: "/ford-carpri.jpg",
   Minivan: "/mercedesVclass.jpg",
   "V-Class": "/mercedesVclass.jpg",
 };

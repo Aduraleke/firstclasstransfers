@@ -24,7 +24,7 @@ const BRAND_PRIMARY = "#162c4b";
 const BRAND_ACCENT = "#b07208";
 
 const VEHICLE_IMAGE_MAP: Record<string, string> = {
-  sedan: "/capri.jpg",
+  sedan: "/ford-carpri.jpg",
   vclass: "/mercedesVclass.jpg",
 };
 
