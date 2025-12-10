@@ -106,7 +106,21 @@ export default function Footer() {
                   className="flex items-center gap-2 hover:text-white transition-colors"
                 >
                   <Icon icon={phoneIcon} width={16} height={16} />
-                  <span>+357 99 240868, +357 94 005511, +357 96 565385</span>
+                  <span>+357 99 240868</span>
+                </a>
+                <a
+                  href="tel:+35794005511"
+                  className="flex items-center gap-2 hover:text-white transition-colors"
+                >
+                  <Icon icon={phoneIcon} width={16} height={16} />
+                  <span>+357 94 005511</span>
+                </a>
+                <a
+                  href="tel:+35796565385"
+                  className="flex items-center gap-2 hover:text-white transition-colors"
+                >
+                  <Icon icon={phoneIcon} width={16} height={16} />
+                  <span>+357 96 565385</span>
                 </a>
                 <a
                   href="mailto:info@firstclass.cy"
