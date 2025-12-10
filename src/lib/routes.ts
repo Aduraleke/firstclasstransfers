@@ -480,7 +480,7 @@ Our drivers are experienced on cross-border routes and can help you plan enough 
       },
     ],
 
-    image: "/ercan-airport.webp",
+    image: "/ercan-airport.jpg",
     bookHref: "/booking?route=nicosia-ercan-airport",
     bookCtaLabel: "Reserve Your Taxi from Nicosia to Ercan Airport",
     bookCtaSupport:
@@ -976,7 +976,7 @@ Because this route involves a long drive and a border crossing, we strongly reco
       },
     ],
 
-    image: "/ercan-airport.webp",
+    image: "/ercan-airport.jpg",
     bookHref: "/booking?route=paphos-airport-ercan-airport",
     bookCtaLabel: "Reserve Your Paphos → Ercan Airport Transfer",
     bookCtaSupport:
@@ -1620,7 +1620,7 @@ Because this route involves a border crossing, we strongly recommend allowing ex
       },
     ],
 
-    image: "/ercan-airport.webp",
+    image: "/ercan-airport.jpg",
     bookHref: "/booking?route=limassol-ercan-airport",
     bookCtaLabel: "Reserve Your Taxi from Limassol to Ercan Airport",
     bookCtaSupport:

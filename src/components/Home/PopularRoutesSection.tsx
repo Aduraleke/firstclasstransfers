@@ -257,66 +257,77 @@ export default function PopularRoutesShowcase() {
                         </div>
                       </div>
 
-                      {/* 🔶 PRICE BLOCK – SAME FOR DESKTOP & MOBILE */}
+                      {/* 🔶 PRICE BLOCK – BOTH PRICES EQUAL, BRAND COLOURS */}
                       <div className="justify-self-end max-w-xs w-full">
-                        <div className="rounded-3xl border border-white/18 bg-black/65 px-3.5 py-4 backdrop-blur-md shadow-[0_16px_40px_rgba(0,0,0,0.7)]">
+                        <div className="rounded-3xl border border-white/18 bg-black/65 px-4 py-4 backdrop-blur-md shadow-[0_16px_40px_rgba(0,0,0,0.7)]">
                           <p className="text-[11px] uppercase tracking-[0.18em] text-slate-200 text-center mb-2">
-                            Fixed price · per vehicle
+                            Fixed price per vehicle
                           </p>
 
-                          <div className="relative flex justify-center">
-                            {/* side folds / tails */}
-                            <div className="absolute -left-6 top-1/2 h-7 w-7 -translate-y-1/2 -rotate-12 bg-[#7a4c06] shadow-[0_8px_20px_rgba(0,0,0,0.45)] rounded-sm" />
-                            <div className="absolute -right-6 top-1/2 h-7 w-7 -translate-y-1/2 rotate-12 bg-[#7a4c06] shadow-[0_8px_20px_rgba(0,0,0,0.45)] rounded-sm" />
-
-                            {/* main ribbon band */}
-                            <div
-                              className="relative w-full rounded-2xl border border-amber-100/50 px-4 py-3 md:px-5 md:py-3.5 shadow-[0_10px_26px_rgba(0,0,0,0.6)]"
-                              style={{
-                                background: `linear-gradient(135deg, ${BRAND.accent}, #f9d976)`,
-                              }}
-                            >
-                              <div className="grid grid-cols-2 gap-4 items-center">
-                                {/* Sedan side */}
-                                <div className="text-center border-r border-amber-200/60 pr-3">
-                                  <div className="inline-flex items-center justify-center gap-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-900/90">
+                          <div className="space-y-2.5">
+                            {/* Sedan ribbon */}
+                            <div className="relative overflow-hidden rounded-2xl border border-slate-900/60">
+                              <div
+                                className="absolute inset-0 opacity-95"
+                                style={{
+                                  background: `linear-gradient(135deg, ${BRAND.accent}, #facc6b)`,
+                                }}
+                              />
+                              {/* subtle navy edge */}
+                              <div className="relative px-3.5 py-3 flex items-center justify-between gap-3">
+                                <div className="flex flex-col">
+                                  <span className="inline-flex items-center gap-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-900/90">
                                     <Icon
                                       icon={carIcon}
                                       width={13}
                                       height={13}
                                       className="text-slate-900/90"
                                     />
-                                    <span>Sedan · up to 4</span>
-                                  </div>
-                                  <div className="mt-0.5 text-[11px] text-slate-900/75">
+                                    Sedan · up to 4
+                                  </span>
+                                  <span className="mt-0.5 text-[11px] text-slate-900/80">
                                     from
-                                  </div>
-                                  <div className="mt-0.5 text-[24px] md:text-[26px] leading-none font-extrabold text-slate-900">
+                                  </span>
+                                </div>
+                                <div className="text-right leading-none">
+                                  <div className="text-2xl md:text-[26px] font-extrabold text-slate-900">
                                     {active?.sedanPrice}
                                   </div>
-                                  <div className="mt-0.5 text-[10px] text-slate-900/75">
+                                  <div className="mt-0.5 text-[11px] text-slate-900/85">
                                     per trip
                                   </div>
                                 </div>
+                              </div>
+                            </div>
 
-                                {/* V-Class side */}
-                                <div className="text-center pl-3">
-                                  <div className="inline-flex items-center justify-center gap-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-900/90">
+                            {/* V-Class ribbon */}
+                            <div className="relative overflow-hidden rounded-2xl border border-slate-900/60">
+                              <div
+                                className="absolute inset-0 opacity-95"
+                                style={{
+                                  background: `linear-gradient(135deg, ${BRAND.primary}, #1f3b6b)`,
+                                }}
+                              />
+                              <div className="relative px-3.5 py-3 flex items-center justify-between gap-3">
+                                <div className="flex flex-col">
+                                  <span className="inline-flex items-center gap-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-50">
                                     <Icon
                                       icon={carIcon}
                                       width={13}
                                       height={13}
-                                      className="text-slate-900/90"
+                                      className="text-slate-50"
                                     />
-                                    <span>V-Class · up to 6</span>
-                                  </div>
-                                  <div className="mt-0.5 text-[11px] text-slate-900/75">
+                                    V-Class · up to 6
+                                  </span>
+                                  <span className="mt-0.5 text-[11px] text-slate-100/90">
                                     from
-                                  </div>
-                                  <div className="mt-0.5 text-[24px] md:text-[26px] leading-none font-extrabold text-slate-900">
+                                  </span>
+                                </div>
+                                <div className="text-right leading-none">
+                                  <div className="text-2xl md:text-[26px] font-extrabold text-slate-50">
                                     {active?.vanPrice}
                                   </div>
-                                  <div className="mt-0.5 text-[10px] text-slate-900/75">
+                                  <div className="mt-0.5 text-[11px] text-slate-100/90">
                                     per trip
                                   </div>
                                 </div>
@@ -324,7 +335,6 @@ export default function PopularRoutesShowcase() {
                             </div>
                           </div>
 
-                          {/* CTA + fine print under the ribbon */}
                           <Link
                             href={active?.href || "#"}
                             className="mt-3 inline-flex items-center justify-center gap-1.5 w-full rounded-full px-4 py-2.5 text-[12px] font-semibold text-slate-900 bg-white hover:bg-slate-100 transition"
