@@ -11,11 +11,7 @@ import arrowRightIcon from "@iconify/icons-mdi/arrow-right";
 import airplaneTakeoff from "@iconify/icons-mdi/airplane-takeoff";
 
 // 🔑 Import your shared route data
-import {
-  ROUTE_DETAILS,
-  RouteDetailSlug,
-  RouteDetail,
-} from "@/lib/routes";
+import { ROUTE_DETAILS, RouteDetailSlug, RouteDetail } from "@/lib/routes";
 
 const BRAND = {
   primary: "#162c4b",
@@ -221,8 +217,7 @@ export default function PopularRoutesShowcase() {
                                 style={{
                                   background:
                                     "linear-gradient(135deg, rgba(251,191,36,0.98), rgba(245,158,11,0.96))",
-                                  boxShadow:
-                                    "0 10px 30px rgba(245,158,11,0.6)",
+                                  boxShadow: "0 10px 30px rgba(245,158,11,0.6)",
                                 }}
                               >
                                 {active.tag}
@@ -241,7 +236,7 @@ export default function PopularRoutesShowcase() {
                           </p>
                           <div className="flex flex-wrap gap-2">
                             {[
-                              "Private transfer · no meter",
+                              "Private transfer",
                               "Flight tracking & pickup",
                               "24/7 local support",
                             ].map((badge) => (
@@ -271,7 +266,7 @@ export default function PopularRoutesShowcase() {
                           {/* Two equal price columns */}
                           <div className="grid grid-cols-2 gap-3">
                             {/* Sedan */}
-                            <div className="rounded-xl border border-white/15 bg-black/60 px-3 py-3 flex flex-col gap-1">
+                            <div className="rounded-xl border border-white/15 bg-black/60 px-3 py-3 flex flex-col items-center gap-1 text-center">
                               <span className="inline-flex items-center gap-1 text-[11px] text-slate-200">
                                 <Icon
                                   icon={carIcon}
@@ -296,7 +291,7 @@ export default function PopularRoutesShowcase() {
                             </div>
 
                             {/* V-Class */}
-                            <div className="rounded-xl border border-white/15 bg-black/60 px-3 py-3 flex flex-col gap-1">
+                            <div className="rounded-xl border border-white/15 bg-black/60 px-3 py-3 flex flex-col items-center gap-1 text-center">
                               <span className="inline-flex items-center gap-1 text-[11px] text-slate-200">
                                 <Icon
                                   icon={carIcon}

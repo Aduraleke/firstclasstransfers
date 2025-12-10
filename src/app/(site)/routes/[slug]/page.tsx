@@ -204,7 +204,7 @@ export default async function RouteDetailsPage({
                 {route.bookCtaLabel || "Book this route"}
               </Link>
               <p className="text-slate-300">
-                Flight tracking · Meet &amp; greet · Fixed fare · No meter
+                Flight tracking · Meet &amp; greet · Fixed fare 
               </p>
             </div>
           </div>
@@ -428,7 +428,7 @@ export default async function RouteDetailsPage({
                   ].join(" ")}
                 >
                   {/* IMAGE FULL-WIDTH */}
-                  <div className="relative h-40 w-full overflow-hidden sm:h-44 md:h-48">
+                  <div className="relative h-40 w-full overflow-hidden sm:h-54 md:h-68">
                     <div className="absolute inset-0 bg-linear-to-tr from-slate-950 via-slate-900/90 to-slate-800" />
                     <div className="absolute -left-16 top-0 h-40 w-40 rounded-full bg-[#b07208]/25 blur-3xl" />
                     <div className="absolute -right-16 bottom-0 h-40 w-40 rounded-full bg-sky-400/15 blur-3xl" />
@@ -489,7 +489,7 @@ export default async function RouteDetailsPage({
 
                     <div className="mt-1 space-y-2 text-[11px] text-slate-300">
                       <ul className="space-y-1">
-                        <li>• Fixed fare, no meter</li>
+                        <li>• Fixed fare</li>
                         <li>• Meet &amp; greet at arrivals</li>
                         <li>• Luggage assistance included</li>
                       </ul>

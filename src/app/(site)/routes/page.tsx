@@ -27,7 +27,7 @@ export default function RoutesIndexPage() {
 
           <p className="max-w-2xl text-sm text-slate-600 sm:text-[15px]">
             Browse all our fixed-price private transfers between airports,
-            cities and resorts. Every fare is per vehicle, with no meter and no
+            cities and resorts. Every fare is per vehicle, with no
             surprise extras — day and night.
           </p>
         </header>
@@ -122,9 +122,7 @@ function RouteCard({ route }: RouteCardProps) {
         <div className="mt-4 rounded-2xl border border-slate-200 bg-slate-50/90 px-3 py-3">
           <div className="mb-1 flex items-center justify-between text-[11px] uppercase tracking-[0.14em] text-slate-500">
             <span>Per vehicle · fixed fare</span>
-            <span className="rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] font-semibold text-emerald-700">
-              No meter
-            </span>
+            
           </div>
           <div className="flex items-center justify-between gap-4 text-slate-900">
             <div className="flex flex-col">

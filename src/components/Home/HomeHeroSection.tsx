@@ -20,7 +20,7 @@ const BRAND = {
 };
 
 const bullets = [
-  { icon: checkCircle, label: "Fixed Price", text: "No meter, no surprises" },
+  { icon: checkCircle, label: "Fixed Price", text: "No surprises" },
   {
     icon: carIcon,
     label: "Modern, Comfortable Vehicles",
@@ -131,7 +131,7 @@ export default function HeroSection() {
           <p className="max-w-xl text-sm text-white/80 sm:text-base">
             Fixed-price private taxis from Larnaca and Paphos Airports to Ayia
             Napa, Protaras, Limassol, Nicosia, Paphos, Famagusta and more.
-            Modern sedans and Mercedes V-Class minivans, 24/7, with no meter
+            Modern sedans and Mercedes V-Class minivans, 24/7,
             and no hidden extras.
           </p>
 
@@ -151,7 +151,7 @@ export default function HeroSection() {
             </motion.div>
 
             <Link
-              href="/pricing"
+              href="/routes"
               className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/5 px-4 py-2 text-sm text-white/90 backdrop-blur-sm hover:bg-white/10 transition-colors"
             >
               View Routes &amp; Prices
@@ -165,106 +165,114 @@ export default function HeroSection() {
           </p>
         </div>
 
-        {/* RIGHT – Slider-style highlight card */}
-        <div className="flex flex-col items-center justify-center w-full">
+        {/* RIGHT – More interesting highlight card */}
+        <div className="relative flex w-full items-center justify-center lg:justify-end">
+          {/* soft glow behind card */}
+          <div className="pointer-events-none absolute -inset-x-6 top-4 h-[340px] rounded-4xl bg-[radial-gradient(circle_at_0%_0%,rgba(176,114,8,0.35),transparent_55%),radial-gradient(circle_at_100%_0%,rgba(15,23,42,0.65),transparent_55%)] opacity-70 blur-3xl" />
+
           <AnimatePresence mode="wait">
             <motion.div
               key={active.label}
-              initial={{ opacity: 0, y: 40 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -40 }}
+              initial={{ opacity: 0, y: 40, scale: 0.98 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -40, scale: 0.98 }}
               transition={{ duration: 0.6, ease: "easeInOut" }}
-              className="relative w-full h-[360px] sm:h-[400px] rounded-3xl overflow-hidden border border-white/10 shadow-[0_18px_45px_rgba(0,0,0,0.45)] flex flex-col justify-center items-center px-8 py-10 bg-white/5 backdrop-blur-sm"
+              className="relative w-full max-w-sm rounded-3xl overflow-hidden border border-white/12 bg-white/8 shadow-[0_22px_60px_rgba(0,0,0,0.6)] backdrop-blur-xl px-5 py-6 sm:px-6 sm:py-7 flex flex-col gap-5"
             >
-              {/* animated soft gradient */}
-              <motion.div
-                animate={{
-                  background: [
-                    `radial-gradient(circle at 30% 30%, ${BRAND.accent}33, transparent 60%)`,
-                    `radial-gradient(circle at 70% 70%, ${BRAND.primary}44, transparent 60%)`,
-                  ],
-                }}
-                transition={{
-                  duration: 6,
-                  repeat: Infinity,
-                  ease: "easeInOut",
-                }}
-                className="absolute inset-0 opacity-40"
-              />
-
-              {/* ICON */}
-              <motion.div
-                initial={{ scale: 0.7, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                transition={{ type: "spring", stiffness: 120, damping: 10 }}
-                className="mb-6 relative"
-              >
-                <div className="p-5 rounded-full bg-black/40 border border-white/10 relative overflow-hidden">
-                  <Icon
-                    icon={active.icon}
-                    className="text-[2.8rem]"
-                    style={{ color: BRAND.accent }}
-                  />
-                  <motion.div
-                    animate={{
-                      scale: [1, 1.6, 1],
-                      opacity: [0.35, 0, 0.35],
-                    }}
-                    transition={{
-                      duration: 3,
-                      repeat: Infinity,
-                    }}
-                    className="absolute inset-0 bg-[rgba(0,0,0,0.35)] blur-2xl rounded-full"
-                  />
+              {/* top eyebrow + counter */}
+              <div className="flex items-center justify-center gap-3 text-[11px]">
+                <div className="inline-flex items-center gap-1.5 rounded-full bg-black/30 px-2.5 py-1 ring-1 ring-white/15">
+                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+                  <span className="font-semibold uppercase tracking-[0.12em] text-white/75">
+                    Why travellers book with us
+                  </span>
                 </div>
-              </motion.div>
+                
+              </div>
 
-              {/* TEXT */}
-              <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-white/70 mb-2">
-                {String(activeHighlight + 1).padStart(2, "0")} /{" "}
-                {String(bullets.length).padStart(2, "0")} • Key benefit
-              </p>
-              <h2 className="text-xl sm:text-2xl font-bold text-center mb-2">
-                {active.label}
-              </h2>
-              <p className="text-sm text-white/80 max-w-md text-center leading-relaxed">
-                {active.text}
-              </p>
+              {/* main content: icon + text */}
+              <div className="flex items-center gap-4 sm:gap-5">
+                {/* ICON STACK */}
+                <motion.div
+                  initial={{ scale: 0.7, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={{ type: "spring", stiffness: 120, damping: 12 }}
+                  className="relative"
+                >
+                  <div className="relative flex h-20 w-20 items-center justify-center rounded-3xl bg-black/40 ring-1 ring-white/15 overflow-hidden">
+                    {/* subtle rotating highlight */}
+                    {!prefersReducedMotion && (
+                      <motion.div
+                        animate={{ rotate: [0, 360] }}
+                        transition={{
+                          duration: 14,
+                          repeat: Infinity,
+                          ease: "linear",
+                        }}
+                        className="absolute inset-0"
+                      >
+                        <div className="absolute -inset-6 bg-[conic-gradient(from_0deg,rgba(255,255,255,0.1),rgba(176,114,8,0.5),rgba(15,23,42,0.6),rgba(255,255,255,0.1))]" />
+                      </motion.div>
+                    )}
+                    <div className="relative z-10 flex h-14 w-14 items-center justify-center rounded-2xl bg-black/70">
+                      <Icon
+                        icon={active.icon}
+                        className="text-[1.9rem]"
+                        style={{ color: BRAND.accent }}
+                      />
+                    </div>
+                  </div>
+                </motion.div>
+
+                {/* TEXT */}
+                <div className="flex-1 space-y-2">
+                  <h2 className="text-lg sm:text-xl font-bold leading-snug">
+                    {active.label}
+                  </h2>
+                  <p className="text-sm text-white/80 leading-relaxed">
+                    {active.text}
+                  </p>
+                  <p className="text-[11px] text-white/60">
+                    Every booking includes meet &amp; greet at arrivals, flight
+                    tracking and a fixed fare agreed in advance.
+                  </p>
+                </div>
+              </div>
+
+              {/* mini perks strip */}
+              <div className="mt-2 grid grid-cols-3 gap-2 text-[11px]">
+                <div className="rounded-2xl bg-black/35 px-2.5 py-2 ring-1 ring-white/10">
+                  <div className="flex items-center gap-1.5 text-white/80">
+                    <Icon icon={checkCircle} width={13} height={13} />
+                    <span className="font-semibold">Fixed fare</span>
+                  </div>
+                  <p className="mt-1 text-[10px] text-white/65">
+                    No extras
+                  </p>
+                </div>
+                <div className="rounded-2xl bg-black/35 px-2.5 py-2 ring-1 ring-white/10">
+                  <div className="flex items-center gap-1.5 text-white/80">
+                    <Icon icon={clockOutlineIcon} width={13} height={13} />
+                    <span className="font-semibold">24/7</span>
+                  </div>
+                  <p className="mt-1 text-[10px] text-white/65">
+                    Same price day &amp; night
+                  </p>
+                </div>
+                <div className="rounded-2xl bg-black/35 px-2.5 py-2 ring-1 ring-white/10">
+                  <div className="flex items-center gap-1.5 text-white/80">
+                    <Icon icon={shieldCheckIcon} width={13} height={13} />
+                    <span className="font-semibold">Licensed</span>
+                  </div>
+                  <p className="mt-1 text-[10px] text-white/65">
+                    Checked, insured drivers
+                  </p>
+                </div>
+              </div>
             </motion.div>
           </AnimatePresence>
 
-          {/* progress dots */}
-          <div className="flex items-center space-x-2 mt-5">
-            {bullets.map((item, i) => {
-              const isActive = i === activeHighlight;
-              return (
-                <button
-                  key={item.label}
-                  onClick={() => setActiveHighlight(i)}
-                  aria-label={`Show: ${item.label}`}
-                  className="relative"
-                >
-                  <div
-                    className={`h-2 rounded-full transition-all duration-300 ${
-                      isActive
-                        ? "w-8"
-                        : "w-3 hover:w-5 bg-white/25"
-                    }`}
-                    style={{
-                      backgroundColor: isActive ? BRAND.accent : undefined,
-                    }}
-                  />
-                  {isActive && (
-                    <motion.div
-                      layoutId="hero-highlight-glow"
-                      className="absolute -top-1 left-0 right-0 h-4 rounded-full blur-sm"
-                      style={{ backgroundColor: `${BRAND.accent}66` }}
-                    />
-                  )}
-                </button>
-              );
-            })}
-          </div>
+    
         </div>
       </div>
     </section>

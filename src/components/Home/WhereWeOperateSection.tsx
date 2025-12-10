@@ -1,12 +1,12 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { motion } from "framer-motion";
 import { Icon } from "@iconify/react";
 import airplaneIcon from "@iconify/icons-mdi/airplane";
 import mapMarkerIcon from "@iconify/icons-mdi/map-marker";
-import compassIcon from "@iconify/icons-mdi/compass";
 
 const BRAND = {
   primary: "#162c4b",
@@ -32,7 +32,7 @@ const LARNACA_DESTINATIONS: DestLink[] = [
 ];
 
 const PAPHOS_DESTINATIONS: DestLink[] = [
-  { label: "Limassol & Amathus seafront", href: "/routes/limassol" },
+  { label: "Limassol & Amathus seafront", href: "/routes/limassus" },
   { label: "Nicosia (capital)", href: "/routes/paphos-to-nicosia" },
   { label: "Larnaca City & Larnaca Airport", href: "/routes/larnaca" },
   {
@@ -41,9 +41,57 @@ const PAPHOS_DESTINATIONS: DestLink[] = [
   },
 ];
 
+type RegionId = "east" | "west" | "inland" | "crossborder";
+
+type RegionConfig = {
+  id: RegionId;
+  name: string;
+  tag: string;
+  description: string;
+  image: string;
+};
+
+const REGIONS: RegionConfig[] = [
+  {
+    id: "east",
+    name: "East Coast",
+    tag: "Ayia Napa · Protaras",
+    description:
+      "Lively beach resorts, family hotels and villas in Ayia Napa, Protaras, Pernera, Paralimni and Kapparis.",
+    image: "/regions/east-coast.jpg", // update with your real asset
+  },
+  {
+    id: "west",
+    name: "West & South",
+    tag: "Limassol · Paphos · Coral Bay",
+    description:
+      "Coastal hotels and marinas in Limassol, Limassol Marina, Pissouri, Paphos, Coral Bay, Polis and Latchi.",
+    image: "/regions/west-south.jpg",
+  },
+  {
+    id: "inland",
+    name: "Inland & Mountains",
+    tag: "Nicosia · Troodos",
+    description:
+      "Transfers to the capital Nicosia (Lefkosia) and Troodos mountain villages on request.",
+    image: "/regions/inland-mountains.jpg",
+  },
+  {
+    id: "crossborder",
+    name: "Cross-border",
+    tag: "Kyrenia · Famagusta",
+    description:
+      "Selected cross-border routes to Kyrenia and Famagusta, subject to current regulations and checks.",
+    image: "/regions/cross-border.jpg",
+  },
+];
+
 export default function WhereWeOperateSection() {
+  const [activeRegion, setActiveRegion] = useState<RegionId>("east");
+  const region = REGIONS.find((r) => r.id === activeRegion)!;
+
   return (
-    <section className="relative bg-[#f5f6fb] text-slate-900 py-20 sm:py-24 overflow-hidden">
+    <section className="relative overflow-hidden bg-[#f5f6fb] py-20 text-slate-900 sm:py-24">
       {/* Background: soft map grid + gradients */}
       <div
         className="pointer-events-none absolute inset-0 opacity-80"
@@ -61,25 +109,26 @@ export default function WhereWeOperateSection() {
 
       <div className="relative mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
         {/* HEADER */}
-        <div className="max-w-3xl space-y-3 mb-10">
-          <p className="uppercase tracking-[0.25em] text-[11px] text-slate-500">
+        <div className="mb-10 max-w-3xl space-y-3">
+          <p className="text-[11px] uppercase tracking-[0.25em] text-slate-500">
             Where We Operate in Cyprus
           </p>
-          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-semibold tracking-tight">
+          <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl lg:text-4xl">
             Where We Operate in Cyprus
           </h2>
-          <p className="text-sm sm:text-[15px] text-slate-600 leading-relaxed">
-            From Larnaca and Paphos Airports we provide fixed-price taxi transfers
-            to all major cities and resorts across Cyprus. Whether you’re heading
-            east to Ayia Napa and Protaras, west to Limassol and Paphos, inland to
-            Nicosia and the Troodos mountains, or across the Green Line to Kyrenia
-            and Famagusta (where permitted), we’ve got you covered.
+          <p className="text-sm leading-relaxed text-slate-600 sm:text-[15px]">
+            From Larnaca and Paphos Airports we provide fixed-price taxi
+            transfers to all major cities and resorts across Cyprus. Whether
+            you’re heading east to Ayia Napa and Protaras, west to Limassol and
+            Paphos, inland to Nicosia and the Troodos mountains, or across the
+            Green Line to Kyrenia and Famagusta (where permitted), we’ve got
+            you covered.
           </p>
         </div>
 
-        {/* MAIN LAYOUT: Map card + belts */}
+        {/* MAIN LAYOUT */}
         <div className="grid gap-10 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1.3fr)] lg:items-center">
-          {/* LEFT: “map” / radar card */}
+          {/* LEFT – region images instead of radar circle */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -87,101 +136,99 @@ export default function WhereWeOperateSection() {
             transition={{ duration: 0.5, ease: "easeOut" }}
             className="w-full"
           >
-            <div className="relative rounded-4xl border border-slate-200 bg-white/90 shadow-[0_22px_60px_rgba(15,23,42,0.16)] px-5 py-6 sm:px-7 sm:py-7 overflow-hidden">
-              {/* inner “island radar” circle */}
-              <div className="relative flex items-center justify-center py-6">
-                <div
-                  className="relative h-52 w-52 sm:h-60 sm:w-60 rounded-full border border-slate-200 bg-linear-to-br from-slate-50 via-white to-slate-100 shadow-[0_10px_30px_rgba(15,23,42,0.16)]"
-                  style={{
-                    backgroundImage:
-                      "radial-gradient(circle at 30% 20%, rgba(22,44,75,0.18), transparent 55%), radial-gradient(circle at 70% 80%, rgba(176,114,8,0.22), transparent 55%)",
-                  }}
-                >
-                  {/* radar rings */}
-                  <div className="absolute inset-6 rounded-full border border-slate-200/70" />
-                  <div className="absolute inset-11 rounded-full border border-slate-200/40" />
-                  <div className="absolute inset-16 rounded-full border border-slate-200/30" />
+            <div className="relative overflow-hidden rounded-3xl border border-slate-200 bg-white/90 px-5 py-6 shadow-[0_22px_60px_rgba(15,23,42,0.16)] sm:px-7 sm:py-7">
+              {/* Active region image */}
+              <div className="relative mb-5 overflow-hidden rounded-2xl">
+                <div className="relative h-56 w-full sm:h-64">
+                  <Image
+                    src={region.image}
+                    alt={region.name}
+                    fill
+                    className="object-cover"
+                  />
+                  <div className="absolute inset-0 bg-linear-to-t from-slate-900/70 via-slate-900/30 to-transparent" />
 
-                  {/* Larnaca marker */}
-                  <div className="absolute left-[20%] top-[40%] flex flex-col items-center gap-1">
-                    <span className="inline-flex h-2 w-2 rounded-full bg-[rgba(176,114,8,0.95)] shadow-[0_0_10px_rgba(176,114,8,0.8)]" />
-                    <span className="text-[10px] font-semibold text-slate-800 bg-white/90 px-1.5 py-0.5 rounded-full border border-slate-200">
-                      Larnaca (LCA)
-                    </span>
-                  </div>
-
-                  {/* Paphos marker */}
-                  <div className="absolute right-[18%] bottom-[25%] flex flex-col items-center gap-1">
-                    <span className="inline-flex h-2 w-2 rounded-full bg-[rgba(22,44,75,0.95)] shadow-[0_0_10px_rgba(22,44,75,0.8)]" />
-                    <span className="text-[10px] font-semibold text-slate-800 bg-white/90 px-1.5 py-0.5 rounded-full border border-slate-200">
-                      Paphos (PFO)
-                    </span>
-                  </div>
-
-                  {/* Compass icon */}
-                  <div className="absolute top-3 right-4 flex items-center gap-1 text-[10px] text-slate-500">
-                    <Icon icon={compassIcon} width={16} height={16} />
-                    <span>N</span>
+                  <div className="absolute left-4 right-4 bottom-4 flex items-end justify-between gap-3">
+                    <div>
+                      <p className="text-[11px] uppercase tracking-[0.18em] text-slate-200">
+                        Operating area
+                      </p>
+                      <p className="text-lg font-semibold text-white sm:text-xl">
+                        {region.name}
+                      </p>
+                      <p className="text-[11px] text-slate-100/90">
+                        {region.tag}
+                      </p>
+                    </div>
+                    <div className="rounded-full bg-black/40 px-3 py-1 text-[11px] text-slate-100 ring-1 ring-white/20">
+                      From Larnaca &amp; Paphos
+                    </div>
                   </div>
                 </div>
               </div>
 
-              {/* zone labels */}
-              <div className="grid gap-3 sm:grid-cols-2 text-[11px] sm:text-[12px] text-slate-700 mt-2">
-                <div className="space-y-1.5">
-                  <p className="font-semibold flex items-center gap-1">
-                    <span className="inline-flex h-2 w-2 rounded-full bg-[rgba(176,114,8,0.9)]" />
-                    East Coast
-                  </p>
-                  <p className="text-slate-600">
-                    Ayia Napa, Nissi Beach, Protaras, Pernera, Paralimni &amp; Kapparis.
-                  </p>
-                </div>
+              {/* Description */}
+              <p className="text-sm leading-relaxed text-slate-700 sm:text-[14px]">
+                {region.description}
+              </p>
 
-                <div className="space-y-1.5">
-                  <p className="font-semibold flex items-center gap-1">
-                    <span className="inline-flex h-2 w-2 rounded-full bg-[rgba(22,44,75,0.95)]" />
-                    West &amp; South
-                  </p>
-                  <p className="text-slate-600">
-                    Limassol, Limassol Marina, Pissouri, Paphos, Coral Bay, Polis &amp; Latchi.
-                  </p>
-                </div>
-
-                <div className="space-y-1.5">
-                  <p className="font-semibold flex items-center gap-1">
-                    <span className="inline-flex h-2 w-2 rounded-full bg-emerald-600" />
-                    Inland &amp; Mountains
-                  </p>
-                  <p className="text-slate-600">
-                    Nicosia (Lefkosia) and Troodos mountain areas on request.
-                  </p>
-                </div>
-
-                <div className="space-y-1.5">
-                  <p className="font-semibold flex items-center gap-1">
-                    <span className="inline-flex h-2 w-2 rounded-full bg-amber-500" />
-                    Cross-border
-                  </p>
-                  <p className="text-slate-600">
-                    Selected routes to Kyrenia &amp; Famagusta, subject to current regulations.
-                  </p>
-                </div>
+              {/* Region selector with active ring */}
+              <div className="mt-5 grid gap-2 sm:grid-cols-2">
+                {REGIONS.map((r) => {
+                  const isActive = r.id === activeRegion;
+                  return (
+                    <button
+                      key={r.id}
+                      type="button"
+                      onClick={() => setActiveRegion(r.id)}
+                      className={`group relative flex items-start gap-2 rounded-2xl px-3 py-2 text-left text-[12px] transition-shadow ${
+                        isActive
+                          ? "bg-[rgba(176,114,8,0.06)] shadow-[0_0_0_1px_rgba(176,114,8,0.65)]"
+                          : "bg-slate-50 hover:bg-white shadow-[0_0_0_1px_rgba(148,163,184,0.6)] hover:shadow-[0_0_0_1px_rgba(148,163,184,0.9)]"
+                      }`}
+                    >
+                      {isActive && (
+                        <motion.span
+                          layoutId="region-ring"
+                          className="pointer-events-none absolute -inset-0.5 rounded-3xl border border-[rgba(176,114,8,0.8)]"
+                        />
+                      )}
+                      <span
+                        className={`mt-1 inline-block h-1.5 w-1.5 rounded-full ${
+                          isActive
+                            ? "bg-[rgba(176,114,8,0.95)]"
+                            : "bg-slate-400"
+                        }`}
+                      />
+                      <div className="relative z-10">
+                        <p
+                          className={`text-[11px] font-semibold uppercase tracking-[0.16em] ${
+                            isActive ? "text-[rgb(22,44,75)]" : "text-slate-500"
+                          }`}
+                        >
+                          {r.name}
+                        </p>
+                        <p className="text-[11px] text-slate-600">
+                          {r.tag}
+                        </p>
+                      </div>
+                    </button>
+                  );
+                })}
               </div>
 
-              <p className="mt-3 text-[11px] text-slate-500">
-                Unsure if your hotel, villa or village is covered? Share your address
-                with us and we&apos;ll confirm price and availability for your exact
-                location.
+              <p className="mt-4 text-[11px] text-slate-500">
+                Tap a region to see a typical area we serve. We also cover many
+                smaller villages and resorts nearby.
               </p>
             </div>
           </motion.div>
 
-          {/* RIGHT: Larnaca + Paphos “belt” lists */}
+          {/* RIGHT – intertwined locations: some left, some right (two clean columns) */}
           <div className="space-y-7">
             {/* Larnaca belt */}
-            <div className="rounded-3xl border border-slate-200 bg-white/90 shadow-[0_14px_40px_rgba(15,23,42,0.08)] px-4 py-5 sm:px-5 sm:py-6">
-              <div className="mb-3 flex items-center gap-2">
+            <div className="rounded-3xl border border-slate-200 bg-white/90 px-4 py-5 shadow-[0_14px_40px_rgba(15,23,42,0.08)] sm:px-5 sm:py-6">
+              <div className="mb-4 flex items-center gap-2">
                 <div
                   className="inline-flex h-9 w-9 items-center justify-center rounded-2xl border border-slate-200 bg-slate-50"
                   style={{ color: BRAND.primary }}
@@ -193,28 +240,30 @@ export default function WhereWeOperateSection() {
                     From Larnaca Airport (LCA)
                   </span>
                   <p className="text-[12px] text-slate-500">
-                    Fixed-price private taxis to city, coast, mountains &amp; beyond.
+                    East coast, capital and cross-island routes.
                   </p>
                 </div>
               </div>
 
-              <div className="flex flex-wrap gap-2">
-                {LARNACA_DESTINATIONS.map((d) => (
+              <div className="grid gap-2 sm:grid-cols-2">
+                {LARNACA_DESTINATIONS.map((d, idx) => (
                   <Link
                     key={d.label}
                     href={d.href}
-                    className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-[12px] text-slate-700 hover:border-[rgba(176,114,8,0.8)] hover:bg-white hover:text-[rgb(22,44,75)] transition-colors"
+                    className={`inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-[12px] text-slate-700 transition-colors hover:border-[rgba(176,114,8,0.8)] hover:bg-white hover:text-[rgb(22,44,75)] ${
+                      idx % 2 === 0 ? "justify-start" : "sm:justify-end"
+                    }`}
                   >
                     <Icon icon={mapMarkerIcon} width={14} height={14} />
-                    <span>{d.label}</span>
+                    <span className="line-clamp-1">{d.label}</span>
                   </Link>
                 ))}
               </div>
             </div>
 
             {/* Paphos belt */}
-            <div className="rounded-3xl border border-slate-200 bg-white/90 shadow-[0_14px_40px_rgba(15,23,42,0.08)] px-4 py-5 sm:px-5 sm:py-6">
-              <div className="mb-3 flex items-center gap-2">
+            <div className="rounded-3xl border border-slate-200 bg-white/90 px-4 py-5 shadow-[0_14px_40px_rgba(15,23,42,0.08)] sm:px-5 sm:py-6">
+              <div className="mb-4 flex items-center gap-2">
                 <div
                   className="inline-flex h-9 w-9 items-center justify-center rounded-2xl border border-slate-200 bg-slate-50"
                   style={{ color: BRAND.primary }}
@@ -231,23 +280,25 @@ export default function WhereWeOperateSection() {
                 </div>
               </div>
 
-              <div className="flex flex-wrap gap-2">
-                {PAPHOS_DESTINATIONS.map((d) => (
+              <div className="grid gap-2 sm:grid-cols-2">
+                {PAPHOS_DESTINATIONS.map((d, idx) => (
                   <Link
                     key={d.label}
                     href={d.href}
-                    className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-[12px] text-slate-700 hover:border-[rgba(176,114,8,0.8)] hover:bg-white hover:text-[rgb(22,44,75)] transition-colors"
+                    className={`inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-[12px] text-slate-700 transition-colors hover:border-[rgba(176,114,8,0.8)] hover:bg-white hover:text-[rgb(22,44,75)] ${
+                      idx % 2 === 0 ? "justify-start" : "sm:justify-end"
+                    }`}
                   >
                     <Icon icon={mapMarkerIcon} width={14} height={14} />
-                    <span>{d.label}</span>
+                    <span className="line-clamp-1">{d.label}</span>
                   </Link>
                 ))}
               </div>
             </div>
 
             <p className="text-[12px] text-slate-500">
-              Each destination name links to a detailed route page with pricing and
-              typical journey times.
+              Each destination name links to a detailed route page with pricing
+              and typical journey times.
             </p>
           </div>
         </div>

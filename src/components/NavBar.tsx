@@ -73,9 +73,8 @@ export default function NavBar() {
   }, [open]);
 
   const navLinks = [
-    { href: "/pricing", label: "Pricing" },
+    { href: "/routes", label: "Pricing" },
     { href: "/service-guide", label: "Service Guide" },
-    { href: "/blog", label: "Blog" },
     { href: "/contact", label: "Contact" },
   ];
 
@@ -283,7 +282,7 @@ export default function NavBar() {
                 aria-expanded={open}
                 aria-controls="mobile-menu"
                 aria-haspopup="true"
-                className="lg:hidden inline-flex items-center justify-center p-2 rounded-full bg-white/5 hover:bg-white/10 border border-white/15 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-(--brand-primary) focus-visible:ring-(--brand-accent)"
+                className="lg:hidden inline-flex items-center justify-center p-2 rounded-full bg-white hover:bg-white/10 border border-white/15 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-(--brand-primary) focus-visible:ring-(--brand-accent)"
               >
                 <span className="sr-only">Toggle menu</span>
                 <Icon
