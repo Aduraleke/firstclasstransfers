@@ -228,9 +228,12 @@ export default async function RouteDetailsPage({
                   Private airport transfer · {route.time}
                 </p>
               </div>
+              {/* 🔥 Make this “From” price pop */}
               <div className="text-right text-[10px] text-slate-300">
-                <p>From</p>
-                <p className="text-sm font-semibold text-slate-50">
+                <p className="uppercase tracking-[0.16em] text-slate-400">
+                  From
+                </p>
+                <p className="mt-0.5 text-base font-extrabold text-[#fbbf24] drop-shadow-[0_0_6px_rgba(0,0,0,0.65)]">
                   {route.sedanPrice}
                 </p>
               </div>
@@ -238,7 +241,6 @@ export default async function RouteDetailsPage({
           </div>
         </div>
       </section>
-
 
       {/* MAIN CONTENT + SIDEBAR */}
       <section className="mt-10 grid gap-8 md:grid-cols-[minmax(0,1.7fr)_minmax(0,1.1fr)]">
@@ -338,7 +340,7 @@ export default async function RouteDetailsPage({
               <div className="relative mt-4 space-y-2 rounded-2xl bg-slate-900/80 px-3 py-3 text-[12px] ring-1 ring-slate-800">
                 <div className="flex items-center justify-between">
                   <span className="text-slate-300">Sedan · up to 4</span>
-                  <span className="font-semibold text-slate-50">
+                  <span className="text-sm font-extrabold text-[#fbbf24]">
                     {route.sedanPrice}
                   </span>
                 </div>
@@ -346,7 +348,7 @@ export default async function RouteDetailsPage({
                   <span className="text-slate-300">
                     V-Class / Minivan · up to 6
                   </span>
-                  <span className="font-semibold text-slate-50">
+                  <span className="text-sm font-extrabold text-[#fbbf24]">
                     {route.vanPrice}
                   </span>
                 </div>
@@ -451,9 +453,10 @@ export default async function RouteDetailsPage({
                       </span>
                     )}
 
+                    {/* 🔥 emphasise vehicle fixed price */}
                     <div className="absolute bottom-3 right-3 z-20 rounded-full bg-slate-950/90 px-4 py-1.5 text-[11px] text-slate-50 shadow-md backdrop-blur-sm ring-1 ring-slate-800">
-                      <span className="text-slate-300">From</span>{" "}
-                      <span className="font-semibold">
+
+                      <span className="text-sm font-extrabold text-[#fbbf24]">
                         {vehicle.fixedPrice}
                       </span>
                     </div>
@@ -578,7 +581,10 @@ export default async function RouteDetailsPage({
                     {r.heroTitle}
                   </p>
                   <p className="text-[12px] text-slate-600">
-                    From <span className="font-semibold">{r.sedanPrice}</span>
+                    From{" "}
+                    <span className="text-[13px] font-extrabold text-[#b07208]">
+                      {r.sedanPrice}
+                    </span>
                   </p>
                 </div>
               </Link>

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
@@ -88,10 +88,6 @@ const POPULAR_ROUTES: RouteCard[] = POPULAR_ROUTE_SLUGS.reduce<RouteCard[]>(
 export default function PopularRoutesShowcase() {
   const [activeIndex, setActiveIndex] = useState<number>(-1);
 
-  // refs for tab strip
-  const tabsContainerRef = useRef<HTMLDivElement | null>(null);
-  const tabItemRefs = useRef<(HTMLAnchorElement | null)[]>([]);
-
   useEffect(() => {
     const timer = setTimeout(() => setActiveIndex(0), 2000);
     return () => clearTimeout(timer);
@@ -106,22 +102,7 @@ export default function PopularRoutesShowcase() {
     return () => clearInterval(interval);
   }, [activeIndex]);
 
-  // auto-center active tab
-  useEffect(() => {
-    if (activeIndex < 0) return;
-    const el = tabItemRefs.current[activeIndex];
-    if (!el) return;
-
-    el.scrollIntoView({
-      behavior: "smooth",
-      inline: "center",
-      block: "nearest",
-    });
-  }, [activeIndex]);
-
   const active = activeIndex >= 0 ? POPULAR_ROUTES[activeIndex] : null;
-
-  
 
   return (
     <section className="relative py-16 px-4 sm:px-6 lg:px-8 bg-white">
@@ -382,7 +363,7 @@ export default function PopularRoutesShowcase() {
           </div>
         </div>
 
-        {/* Tabs: compact, auto-scrolling strip with arrows, only locations */}
+        {/* Tabs: compact strip, only locations */}
         <div className="mt-7 sm:mt-8">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-3">
             <p className="text-xs sm:text-sm text-slate-600">
@@ -398,7 +379,6 @@ export default function PopularRoutesShowcase() {
           </div>
 
           <div className="relative">
-
             {/* Soft gradient edges on mobile */}
             <div className="absolute inset-y-0 left-0 flex items-center sm:hidden pointer-events-none">
               <div className="w-6 h-10 bg-linear-to-r from-white via-white/80 to-transparent" />
@@ -407,10 +387,7 @@ export default function PopularRoutesShowcase() {
               <div className="w-6 h-10 bg-linear-to-l from-white via-white/80 to-transparent" />
             </div>
 
-            <div
-              ref={tabsContainerRef}
-              className="flex gap-2 sm:gap-3 overflow-x-auto sm:overflow-x-hidden pb-1.5 -mx-1 px-1 sm:px-7"
-            >
+            <div className="flex gap-2 sm:gap-3 overflow-x-auto pb-1.5 -mx-1 px-1 sm:px-7">
               {POPULAR_ROUTES.map((route, idx) => {
                 const isActive = idx === activeIndex;
                 return (
@@ -419,9 +396,6 @@ export default function PopularRoutesShowcase() {
                     href={route.href}
                     onMouseEnter={() => setActiveIndex(idx)}
                     onFocus={() => setActiveIndex(idx)}
-                    ref={(el) => {
-                      tabItemRefs.current[idx] = el;
-                    }}
                     className="relative min-w-[130px] sm:min-w-[150px] rounded-2xl px-3 py-2 text-left transition-all focus:outline-none no-underline"
                     style={{
                       background: isActive

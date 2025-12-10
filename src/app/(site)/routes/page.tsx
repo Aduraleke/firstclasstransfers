@@ -118,20 +118,32 @@ function RouteCard({ route }: RouteCardProps) {
           {description}
         </p>
 
-        {/* PRICES */}
-        <div className="mt-4 flex items-center justify-between text-[12px] text-slate-800">
-          <div className="flex flex-col">
-            <span className="text-[11px] uppercase tracking-[0.12em] text-slate-500">
-              Sedan
+        {/* PRICES – emphasised */}
+        <div className="mt-4 rounded-2xl border border-slate-200 bg-slate-50/90 px-3 py-3">
+          <div className="mb-1 flex items-center justify-between text-[11px] uppercase tracking-[0.14em] text-slate-500">
+            <span>Per vehicle · fixed fare</span>
+            <span className="rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] font-semibold text-emerald-700">
+              No meter
             </span>
-            <span className="font-semibold">{route.sedanPrice}</span>
           </div>
-          <div className="h-9 w-px bg-slate-200" />
-          <div className="flex flex-col items-end">
-            <span className="text-[11px] uppercase tracking-[0.12em] text-slate-500">
-              Mercedes V-Class
-            </span>
-            <span className="font-semibold">{route.vanPrice}</span>
+          <div className="flex items-center justify-between gap-4 text-slate-900">
+            <div className="flex flex-col">
+              <span className="text-[11px] uppercase tracking-[0.12em] text-slate-500">
+                Sedan
+              </span>
+              <span className="mt-0.5 text-[16px] sm:text-[18px] font-extrabold text-[#b07208]">
+                {route.sedanPrice}
+              </span>
+            </div>
+            <div className="h-10 w-px bg-slate-200/80" />
+            <div className="flex flex-col items-end">
+              <span className="text-[11px] uppercase tracking-[0.12em] text-slate-500">
+                Mercedes V-Class
+              </span>
+              <span className="mt-0.5 text-[16px] sm:text-[18px] font-extrabold text-[#b07208]">
+                {route.vanPrice}
+              </span>
+            </div>
           </div>
         </div>
 
