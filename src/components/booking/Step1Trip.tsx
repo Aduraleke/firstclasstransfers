@@ -1,5 +1,3 @@
-// components/booking/Step1Trip.tsx
-
 "use client";
 
 import React from "react";
@@ -41,18 +39,24 @@ export default function Step1Trip({ data, onChange, onNext }: Props) {
     onChange("timePeriod", id);
   };
 
+  const handleTripTypeChange = (tripType: "one-way" | "return") => {
+    onChange("tripType", tripType);
+    // If switching back to one-way, we can safely clear return fields
+    if (tripType === "one-way") {
+      onChange("returnDate", "");
+      onChange("returnTime", "");
+      onChange("returnTimePeriod", "day");
+    }
+  };
+
   const handleTimeChange = (value: string) => {
-    // Always update the raw time field
     onChange("time", value);
 
     if (!value) return;
-
     const [hourStr] = value.split(":");
     const hour = Number(hourStr);
-
     if (Number.isNaN(hour)) return;
 
-    // 06:00–21:59 => day, 22:00–05:59 => night
     const nextPeriod: "day" | "night" =
       hour >= 6 && hour < 22 ? "day" : "night";
 
@@ -61,12 +65,30 @@ export default function Step1Trip({ data, onChange, onNext }: Props) {
     }
   };
 
-  const canContinue =
-    !!data.routeId &&
-    !!data.vehicleTypeId &&
-    !!data.date &&
-    !!data.time &&
-    !!data.timePeriod;
+  const handleReturnTimeChange = (value: string) => {
+    onChange("returnTime", value);
+
+    if (!value) return;
+    const [hourStr] = value.split(":");
+    const hour = Number(hourStr);
+    if (Number.isNaN(hour)) return;
+
+    const nextPeriod: "day" | "night" =
+      hour >= 6 && hour < 22 ? "day" : "night";
+
+    if (nextPeriod !== data.returnTimePeriod) {
+      onChange("returnTimePeriod", nextPeriod);
+    }
+  };
+
+  const hasMainTrip =
+    data.routeId && data.vehicleTypeId && data.date && data.time && data.timePeriod;
+
+  const hasReturnTrip =
+    data.tripType === "one-way" ||
+    (data.returnDate && data.returnTime && data.returnTimePeriod);
+
+  const canContinue = !!(hasMainTrip && hasReturnTrip);
 
   return (
     <div className="bg-white rounded-3xl border border-gray-100 shadow-lg shadow-gray-100/70 p-5 sm:p-6 lg:p-7 space-y-6">
@@ -76,9 +98,49 @@ export default function Step1Trip({ data, onChange, onNext }: Props) {
         </h1>
         <p className="text-sm text-gray-600">
           Choose your route, vehicle and pickup time. You&apos;ll add passenger
-          details and confirm in the next step.
+          details, payment method and confirm in the next step.
         </p>
       </div>
+
+      {/* Trip type */}
+      <section className="space-y-2">
+        <h2 className="text-sm font-semibold text-gray-800">
+          Trip type <span className="text-red-500">*</span>
+        </h2>
+        <div className="inline-flex gap-2 rounded-2xl bg-gray-50 p-1 border border-gray-200">
+          {[
+            { id: "one-way" as const, label: "One-way" },
+            {
+              id: "return" as const,
+              label: "Return · Save 10%",
+            },
+          ].map((tp) => {
+            const active = data.tripType === tp.id;
+            return (
+              <button
+                key={tp.id}
+                type="button"
+                onClick={() => handleTripTypeChange(tp.id)}
+                className={`px-3 py-1.5 rounded-2xl text-xs sm:text-sm font-medium transition-all ${
+                  active ? "shadow-sm" : "hover:bg-white hover:shadow-sm"
+                }`}
+                style={{
+                  backgroundColor: active ? BRAND_PRIMARY : "transparent",
+                  color: active ? "#ffffff" : "#111827",
+                }}
+              >
+                {tp.label}
+              </button>
+            );
+          })}
+        </div>
+        {data.tripType === "return" && (
+          <p className="text-[11px] text-emerald-700">
+            Book your return with us now and get{" "}
+            <span className="font-semibold">10% discount</span> on the total.
+          </p>
+        )}
+      </section>
 
       {/* Route selection */}
       <section className="space-y-2">
@@ -180,7 +242,6 @@ export default function Step1Trip({ data, onChange, onNext }: Props) {
                   color: active ? "#ffffff" : "#111827",
                 }}
               >
-                {/* IMAGE FULL WIDTH */}
                 <div className="relative w-full h-36 sm:h-60 bg-gray-100 overflow-hidden">
                   {imgSrc ? (
                     <Image
@@ -197,7 +258,6 @@ export default function Step1Trip({ data, onChange, onNext }: Props) {
                   )}
                 </div>
 
-                {/* CONTENT */}
                 <div className="flex flex-col items-start p-4 gap-1.5 text-left">
                   <p className="text-sm font-semibold">{vehicle.name}</p>
                   <p
@@ -253,10 +313,15 @@ export default function Step1Trip({ data, onChange, onNext }: Props) {
             </label>
             <input
               type="time"
+              step={900} // 15-minute steps for nicer input
               value={data.time}
               onChange={(e) => handleTimeChange(e.target.value)}
               className="mt-1 block w-full rounded-2xl border border-gray-300 bg-white px-3 py-2.5 text-sm shadow-sm focus:border-[#b07208] focus:ring-[#b07208]"
             />
+            <p className="mt-1 text-[11px] text-gray-500">
+              We&apos;ll plan around your flight and traffic – don&apos;t worry
+              if you&apos;re not sure about the exact minute.
+            </p>
           </div>
         </div>
 
@@ -294,6 +359,81 @@ export default function Step1Trip({ data, onChange, onNext }: Props) {
           </div>
         </div>
       </section>
+
+      {/* Return trip fields */}
+      {data.tripType === "return" && (
+        <section className="space-y-3 rounded-2xl border border-dashed border-emerald-200 bg-emerald-50/60 p-4">
+          <h2 className="text-sm font-semibold text-emerald-900">
+            Return trip details
+          </h2>
+          <p className="text-[11px] text-emerald-800">
+            Book your return now and we&apos;ll apply a{" "}
+            <span className="font-semibold">10% discount</span> on the round
+            trip fare.
+          </p>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-medium text-emerald-900">
+                Return date
+              </label>
+              <input
+                type="date"
+                value={data.returnDate}
+                onChange={(e) => onChange("returnDate", e.target.value)}
+                className="mt-1 block w-full rounded-2xl border border-emerald-200 bg-white px-3 py-2.5 text-sm shadow-sm focus:border-emerald-500 focus:ring-emerald-500"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-medium text-emerald-900">
+                Return pickup time
+              </label>
+              <input
+                type="time"
+                step={900}
+                value={data.returnTime}
+                onChange={(e) => handleReturnTimeChange(e.target.value)}
+                className="mt-1 block w-full rounded-2xl border border-emerald-200 bg-white px-3 py-2.5 text-sm shadow-sm focus:border-emerald-500 focus:ring-emerald-500"
+              />
+            </div>
+          </div>
+
+          <div>
+            <p className="block text-xs font-medium text-emerald-900 mb-1">
+              Return time period (for pricing)
+            </p>
+            <div className="inline-flex gap-2 rounded-2xl bg-emerald-100/80 p-1 border border-emerald-200">
+              {TIME_PERIODS.map((tp) => {
+                const active = data.returnTimePeriod === tp.id;
+                return (
+                  <button
+                    key={tp.id}
+                    type="button"
+                    onClick={() => onChange("returnTimePeriod", tp.id)}
+                    className={`flex flex-col px-3 py-1.5 rounded-2xl text-left transition-all ${
+                      active ? "shadow-sm" : "hover:bg-white hover:shadow-sm"
+                    }`}
+                    style={{
+                      backgroundColor: active ? BRAND_ACCENT : "transparent",
+                      color: active ? "#ffffff" : "#064e3b",
+                    }}
+                  >
+                    <span className="text-xs font-semibold">{tp.label}</span>
+                    <span
+                      className={`text-[10px] ${
+                        active ? "text-white/80" : "text-emerald-700"
+                      }`}
+                    >
+                      {tp.range}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+      )}
 
       <div className="pt-2 flex justify-end">
         <button

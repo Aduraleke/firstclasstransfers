@@ -1,5 +1,4 @@
 // app/(site)/booking/page.tsx
-
 import type { Metadata } from "next";
 import Booking from "./Booking";
 
@@ -12,14 +11,16 @@ export const metadata: Metadata = {
   },
 };
 
-type BookingPageProps = {
-  searchParams?: {
-    routeId?: string | string[];
-  };
-};
+type RawSearchParams = Record<string, string | string[] | undefined>;
 
-export default function BookingPage({ searchParams }: BookingPageProps) {
-  const rawRoute = searchParams?.routeId;
+export default async function BookingPage({
+  searchParams,
+}: {
+  // searchParams may be passed as a Promise by Next — await it.
+  searchParams?: RawSearchParams | Promise<RawSearchParams>;
+}) {
+  const sp = (await searchParams) ?? ({} as RawSearchParams);
+  const rawRoute = sp.routeId;
 
   const initialRouteId =
     typeof rawRoute === "string"
