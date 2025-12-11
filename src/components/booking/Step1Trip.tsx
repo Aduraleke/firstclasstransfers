@@ -62,11 +62,11 @@ export default function Step1Trip({ data, onChange, onNext }: Props) {
   };
 
   const canContinue =
-    data.routeId &&
-    data.vehicleTypeId &&
-    data.date &&
-    data.time &&
-    data.timePeriod;
+    !!data.routeId &&
+    !!data.vehicleTypeId &&
+    !!data.date &&
+    !!data.time &&
+    !!data.timePeriod;
 
   return (
     <div className="bg-white rounded-3xl border border-gray-100 shadow-lg shadow-gray-100/70 p-5 sm:p-6 lg:p-7 space-y-6">

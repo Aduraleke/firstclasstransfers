@@ -2,59 +2,93 @@
 
 "use client";
 
-import React, { useRef, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import BookingStepper from "@/components/booking/BookingStepper";
 import Step1Trip from "@/components/booking/Step1Trip";
 import Step2Details from "@/components/booking/Step2Details";
 import type { BookingDraft } from "@/lib/booking/types";
 import Link from "next/link";
 
-const initialDraft: BookingDraft = {
-  routeId: "",
-  vehicleTypeId: "",
-  timePeriod: "day",
-  date: "",
-  time: "",
-  flightNumber: "",
-  adults: 1,
-  children: 0,
-  baggageType: "hand",
-  name: "",
-  phone: "",
-  email: "",
-  notes: "",
-};
-
 type BookingProps = {
   initialRouteId?: string;
 };
 
-export default function Booking({ initialRouteId }: BookingProps) {
+const BRAND = {
+  primary: "#162c4b",
+  accent: "#b07208",
+};
+
+function createInitialDraft(initialRouteId?: string): BookingDraft {
+  return {
+    // main route
+    routeId: initialRouteId ?? "",
+    vehicleTypeId: "",
+    timePeriod: "day",
+    date: "",
+    time: "",
+
+    // return trip
+    tripType: "one-way",
+    returnDate: "",
+    returnTime: "",
+    returnTimePeriod: "day",
+
+    // flight / pax / baggage
+    flightNumber: "",
+    adults: 1,
+    children: 0,
+    baggageType: "hand",
+
+    // contact
+    name: "",
+    phone: "",
+    email: "",
+    notes: "",
+
+    // payment
+    paymentMethod: "cash",
+  };
+}
+
+export default function Booking({ initialRouteId = "" }: BookingProps) {
   const [step, setStep] = useState<1 | 2>(1);
-
-  const [draft, setDraft] = useState<BookingDraft>(() => ({
-    ...initialDraft,
-    routeId: initialRouteId || "",
-  }));
-
   const [submitted, setSubmitted] = useState(false);
 
-  const topRef = useRef<HTMLDivElement | null>(null);
+  // initialize draft using incoming initialRouteId
+  const [draft, setDraft] = useState<BookingDraft>(() =>
+    createInitialDraft(initialRouteId)
+  );
+
+  // Ensure that if initialRouteId changes (client navigation / hydration) we sync it into state.
+  useEffect(() => {
+    if (initialRouteId && initialRouteId !== draft.routeId) {
+      // Debug log - remove later if you want
+      // eslint-disable-next-line no-console
+      console.log("Booking: applying initialRouteId ->", initialRouteId);
+      setDraft((prev) => ({ ...prev, routeId: initialRouteId }));
+    }
+    // If incoming initialRouteId is empty string and draft.routeId is set,
+    // we intentionally do nothing to avoid overwriting user selection.
+    // Depend on initialRouteId only.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialRouteId]);
+
+  const topRef = React.useRef<HTMLDivElement | null>(null);
 
   const scrollToTop = () => {
     if (topRef.current) {
       topRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
-    } else {
+    } else if (typeof window !== "undefined") {
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
   };
 
-  const updateDraft = <K extends keyof BookingDraft>(
-    key: K,
-    value: BookingDraft[K]
-  ) => {
-    setDraft((prev) => ({ ...prev, [key]: value }));
-  };
+  const updateDraft = useCallback(
+    <K extends keyof BookingDraft>(key: K, value: BookingDraft[K]) => {
+      setDraft((prev) => ({ ...prev, [key]: value }));
+    },
+    []
+  );
 
   const goToStep2 = () => {
     setStep(2);
@@ -67,6 +101,9 @@ export default function Booking({ initialRouteId }: BookingProps) {
   };
 
   const handleConfirm = () => {
+    // TODO: call your bookings API here (card charging, invoice creation, etc.)
+    // For now we just log and show the thank-you view.
+    // eslint-disable-next-line no-console
     console.log("Booking draft submitted:", draft);
     setSubmitted(true);
     scrollToTop();

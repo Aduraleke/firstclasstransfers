@@ -1,5 +1,3 @@
-// components/booking/Step2Details.tsx
-
 "use client";
 
 import React, { useMemo } from "react";
@@ -24,6 +22,18 @@ type Props = {
 const BRAND_PRIMARY = "#162c4b";
 const BRAND_ACCENT = "#b07208";
 
+function parsePriceToNumber(price?: string): number | null {
+  if (!price) return null;
+  const match = price.replace(",", ".").match(/(\d+(\.\d+)?)/);
+  if (!match) return null;
+  return Number(match[1]);
+}
+
+function formatEuro(n: number | null): string {
+  if (n == null || Number.isNaN(n)) return "—";
+  return `€${n.toFixed(0)}`;
+}
+
 export default function Step2Details({
   data,
   onChange,
@@ -33,6 +43,14 @@ export default function Step2Details({
   const route = useMemo(
     () => TRANSFER_ROUTES.find((r) => r.id === data.routeId),
     [data.routeId]
+  );
+
+  const routeDetail = useMemo(
+    () =>
+      // We only know about RouteDetail via TRANSFER_ROUTES (there's no direct link here),
+      // so this summary will just use TRANSFER_ROUTES origin/destination.
+      route,
+    [route]
   );
 
   const vehicle = useMemo(
@@ -45,16 +63,35 @@ export default function Step2Details({
     [data.timePeriod]
   );
 
+  const returnTimePeriod = useMemo(
+    () => TIME_PERIODS.find((tp) => tp.id === data.returnTimePeriod),
+    [data.returnTimePeriod]
+  );
+
   const totalPassengers = (data.adults || 0) + (data.children || 0);
 
   const emailValid = data.email.includes("@");
+
+  const hasReturnDetails =
+    data.tripType === "one-way" ||
+    (data.returnDate && data.returnTime && data.returnTimePeriod);
+
   const canConfirm =
-    data.name &&
-    data.phone &&
-    data.email &&
+    !!data.name &&
+    !!data.phone &&
+    !!data.email &&
     emailValid &&
     data.adults > 0 &&
-    data.baggageType;
+    !!data.baggageType &&
+    !!data.paymentMethod &&
+    hasReturnDetails;
+
+  // --- fare estimate with 10% discount for returns ---
+
+  const isReturn = data.tripType === "return";
+  const discountText = isReturn
+    ? "10% discount will be applied to your round-trip fare in our confirmation."
+    : "Return trips booked together receive a 10% discount.";
 
   return (
     <div className="bg-white rounded-3xl border border-gray-100 shadow-lg shadow-gray-100/70 p-5 sm:p-6 lg:p-7 space-y-6">
@@ -66,19 +103,24 @@ export default function Step2Details({
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-gray-50 rounded-2xl border border-gray-200 p-4">
           <div className="space-y-1.5">
-            <p className="text-xs font-medium text-gray-600">Route</p>
-            <p className="text-sm text-gray-900">
-              {route ? route.label : "Route not selected"}
+            <p className="text-xs font-medium text-gray-600">Trip type</p>
+            <p className="text-sm text-gray-900 capitalize">
+              {data.tripType === "return" ? "Return (round trip)" : "One-way"}
             </p>
-            {route && (
-              <p className="text-[11px] text-gray-500">
-                From {route.origin} to {route.destination}
-              </p>
-            )}
+            <p className="text-[11px] text-emerald-700">{discountText}</p>
           </div>
 
           <div className="space-y-1.5">
-            <p className="text-xs font-medium text-gray-600">Date & time</p>
+            <p className="text-xs font-medium text-gray-600">Route</p>
+            <p className="text-sm text-gray-900">
+              {routeDetail
+                ? `${routeDetail.origin} → ${routeDetail.destination}`
+                : "Route not selected"}
+            </p>
+          </div>
+
+          <div className="space-y-1.5">
+            <p className="text-xs font-medium text-gray-600">Outbound</p>
             <p className="text-sm text-gray-900">
               {data.date || "—"} · {data.time || "—"}
             </p>
@@ -89,6 +131,21 @@ export default function Step2Details({
                 : data.timePeriod || "—"}
             </p>
           </div>
+
+          {data.tripType === "return" && (
+            <div className="space-y-1.5">
+              <p className="text-xs font-medium text-gray-600">Return</p>
+              <p className="text-sm text-gray-900">
+                {data.returnDate || "—"} · {data.returnTime || "—"}
+              </p>
+              <p className="text-[11px] text-gray-500">
+                Tariff:{" "}
+                {returnTimePeriod
+                  ? `${returnTimePeriod.label} (${returnTimePeriod.range})`
+                  : data.returnTimePeriod || "—"}
+              </p>
+            </div>
+          )}
 
           <div className="space-y-1.5">
             <p className="text-xs font-medium text-gray-600">Vehicle</p>
@@ -205,7 +262,7 @@ export default function Step2Details({
         </div>
       </section>
 
-      {/* Personal info */}
+      {/* Passenger details */}
       <section className="space-y-3">
         <h2 className="text-sm font-semibold text-gray-800">
           Passenger details
@@ -271,6 +328,52 @@ export default function Step2Details({
         </div>
       </section>
 
+      {/* Payment method */}
+      <section className="space-y-3">
+        <h2 className="text-sm font-semibold text-gray-800">
+          Payment method
+        </h2>
+        <p className="text-xs text-gray-500 mb-1">
+          Choose how you&apos;d like to pay for your transfer.
+        </p>
+
+        <div className="inline-flex gap-2 rounded-2xl bg-gray-50 p-1 border border-gray-200">
+          {[
+            { id: "cash" as const, label: "Pay cash to driver" },
+            { id: "card" as const, label: "Pay now by card" },
+          ].map((method) => {
+            const active = data.paymentMethod === method.id;
+            return (
+              <button
+                key={method.id}
+                type="button"
+                onClick={() => onChange("paymentMethod", method.id)}
+                className={`flex flex-col px-3 py-1.5 rounded-2xl text-left text-xs sm:text-sm transition-all ${
+                  active ? "shadow-sm" : "hover:bg-white hover:shadow-sm"
+                }`}
+                style={{
+                  backgroundColor: active ? BRAND_PRIMARY : "transparent",
+                  color: active ? "#ffffff" : "#111827",
+                }}
+              >
+                <span className="font-semibold">
+                  {method.id === "cash" ? "Cash" : "Card"}
+                </span>
+                <span
+                  className={`text-[10px] ${
+                    active ? "text-white/85" : "text-gray-500"
+                  }`}
+                >
+                  {method.id === "cash"
+                    ? "Pay the driver in EUR at the end of the trip."
+                    : "We’ll send a secure payment link to confirm your booking."}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      </section>
+
       {/* Actions */}
       <div className="pt-2 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <button
@@ -283,7 +386,8 @@ export default function Step2Details({
 
         <div className="flex flex-col items-end gap-1">
           <p className="text-xs text-gray-500 mb-1">
-            You&apos;ll see the final confirmation on the next screen.
+            You&apos;ll see the final confirmation on the next screen. For card
+            payments, we&apos;ll charge you now to secure your booking.
           </p>
           <button
             type="button"

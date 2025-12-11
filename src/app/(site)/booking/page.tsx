@@ -14,11 +14,19 @@ export const metadata: Metadata = {
 
 type BookingPageProps = {
   searchParams?: {
-    routeId?: string;
+    routeId?: string | string[];
   };
 };
 
 export default function BookingPage({ searchParams }: BookingPageProps) {
-  const initialRouteId = searchParams?.routeId ?? "";
+  const rawRoute = searchParams?.routeId;
+
+  const initialRouteId =
+    typeof rawRoute === "string"
+      ? decodeURIComponent(rawRoute)
+      : Array.isArray(rawRoute)
+      ? decodeURIComponent(rawRoute[0] ?? "")
+      : "";
+
   return <Booking initialRouteId={initialRouteId} />;
 }
