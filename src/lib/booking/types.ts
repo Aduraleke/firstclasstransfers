@@ -3,6 +3,7 @@
 export type TimePeriod = "day" | "night";
 export type TripType = "one-way" | "return";
 export type PaymentMethod = "cash" | "card";
+export type BaggageType = "hand" | "medium" | "large" | "extra_large";
 
 export type BookingDraft = {
   // main route
@@ -22,7 +23,7 @@ export type BookingDraft = {
   flightNumber: string;
   adults: number;
   children: number;
-  baggageType: string; // id from BAGGAGE_OPTIONS
+  baggageType: BaggageType; // id from BAGGAGE_OPTIONS
 
   // contact
   name: string;
