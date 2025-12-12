@@ -82,15 +82,15 @@ export const ROUTE_DETAILS: RouteDetail[] = [
     metaTitle:
       "Taxi from Nicosia to Larnaca Airport (LCA) | Fixed-Price Private Transfer",
     metaDescription:
-      "Private taxi from Nicosia to Larnaca Airport at a fixed price: €65 for up to 4 passengers or €85 for up to 6. No hidden surcharges. 24/7 service, flight-safe timing, Wi-Fi and bottled water. Ideal for early and late departures.",
+      "Private taxi from Nicosia to Larnaca Airport at a fixed price: €55 for up to 4 passengers or €80 for up to 6. No hidden surcharges. 24/7 service, flight-safe timing, Wi-Fi and bottled water. Ideal for early and late departures.",
 
     heroTitle: "Taxi Transfer from Nicosia to Larnaca Airport (LCA)",
     subheadline:
-      "Fixed Prices: €55 (up to 4 passengers) · €85 (up to 6 passengers)\nDistance: ~52–60 km · Average Journey: 40–50 minutes",
+      "Fixed Prices: €55 (up to 4 passengers) · €80 (up to 6 passengers)\nDistance: ~52–60 km · Average Journey: 40–50 minutes",
 
     body: `Need to catch a flight from Larnaca Airport (LCA) while you’re staying in Nicosia? Our private taxi transfer from Nicosia to Larnaca Airport offers a safe, punctual and stress-free solution with a clear, fixed price.
 
-For a fixed fare of €55 per car (up to 4 passengers) or €85 per minivan (up to 6 passengers), your driver will collect you from any address in Nicosia – home, hotel, office, embassy, university – help with your luggage and drive you directly to the departures terminal at Larnaca Airport.
+For a fixed fare of €55 per car (up to 4 passengers) or €80 per minivan (up to 6 passengers), your driver will collect you from any address in Nicosia – home, hotel, office, embassy, university – help with your luggage and drive you directly to the departures terminal at Larnaca Airport.
 
 We plan pickup times around your flight, taking into account traffic, check-in and airline recommendations, so you arrive on time without rushing. All vehicles are modern, air-conditioned and equipped with free Wi-Fi and bottled water, so you can relax or finish last-minute work on the way.`,
 

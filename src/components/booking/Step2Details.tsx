@@ -8,8 +8,6 @@ import {
   VEHICLE_TYPES,
   TIME_PERIODS,
 } from "@/lib/booking/options";
-
-// NEW: read route detail (with prices)
 import { getRouteDetailBySlug, RouteDetail } from "@/lib/routes";
 
 type Props = {
@@ -39,8 +37,8 @@ function formatEuro(n: number | null): string {
 
 // Map vehicle ids to route.vehicleOptions index (adjust if your order changes)
 const VEHICLE_TO_ROUTE_INDEX: Record<string, number> = {
-  sedan: 0, // Standard Car (per your routes.ts)
-  vclass: 1, // Minivan
+  sedan: 0,
+  vclass: 1,
 };
 
 export default function Step2Details({
@@ -81,20 +79,21 @@ export default function Step2Details({
 
   const hasReturnDetails =
     data.tripType === "one-way" ||
-    (data.returnDate && data.returnTime && data.returnTimePeriod);
+    (Boolean(data.returnDate) &&
+      Boolean(data.returnTime) &&
+      Boolean(data.returnTimePeriod));
 
   const canConfirm =
-    !!data.name &&
-    !!data.phone &&
-    !!data.email &&
+    Boolean(data.name) &&
+    Boolean(data.phone) &&
+    Boolean(data.email) &&
     emailValid &&
     data.adults > 0 &&
-    !!data.baggageType &&
-    !!data.paymentMethod &&
+    Boolean(data.baggageType) &&
+    Boolean(data.paymentMethod) &&
     hasReturnDetails;
 
   // --- fare computation ---
-  // per-leg price (from routeDetail.vehicleOptions[ VEHICLE_TO_ROUTE_INDEX[vehicleId] ])
   const perLegPriceNumber = useMemo(() => {
     if (!routeDetail || !data.vehicleTypeId) return null;
     const idx = VEHICLE_TO_ROUTE_INDEX[data.vehicleTypeId] ?? 0;
@@ -102,7 +101,6 @@ export default function Step2Details({
     return parsePriceToNumber(priceStr ?? undefined);
   }, [routeDetail, data.vehicleTypeId]);
 
-  // totals
   const isReturn = data.tripType === "return";
   const legs = isReturn ? 2 : 1;
   const subtotal = perLegPriceNumber != null ? perLegPriceNumber * legs : null;
@@ -110,7 +108,7 @@ export default function Step2Details({
     isReturn && subtotal != null ? Math.round(subtotal * 0.1) : 0;
   const total = subtotal != null ? Math.round(subtotal - discount) : null;
 
-  // nice display strings
+  // formatted strings
   const perLegDisplay = formatEuro(perLegPriceNumber);
   const subtotalDisplay = formatEuro(subtotal);
   const discountDisplay = discount ? formatEuro(discount) : null;
@@ -129,14 +127,13 @@ export default function Step2Details({
             <h2 className="text-lg font-semibold text-[#111827]">
               Review your trip
             </h2>
-
             <p className="text-sm text-gray-600 mt-1">
               Confirm passenger details, pricing and payment before sending your
               booking request.
             </p>
           </div>
 
-          {/* PRICE CARD (prominent) */}
+          {/* PRICE CARD */}
           <div className="w-44 sm:w-56">
             <div
               className="rounded-2xl p-4 shadow-lg text-center"
@@ -152,7 +149,6 @@ export default function Step2Details({
               <div className="text-[11px] opacity-85 mt-1">
                 {perLegDisplay} {isReturn ? "· per leg" : "· per vehicle"}
               </div>
-
               {isReturn && discount > 0 && (
                 <div className="mt-2 text-[11px] text-emerald-100/90">
                   −{discountDisplay} discount
@@ -235,7 +231,7 @@ export default function Step2Details({
         </div>
       </section>
 
-      {/* Small fare breakdown */}
+      {/* Fare breakdown */}
       <section className="space-y-2">
         <h3 className="text-sm font-semibold text-gray-800">Fare summary</h3>
 
@@ -474,9 +470,8 @@ export default function Step2Details({
         </div>
       </section>
 
-      {/* Actions (improved) */}
+      {/* Actions */}
       <div className="pt-4 flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between gap-4">
-        {/* Left: back / secondary actions */}
         <div className="flex items-center gap-3">
           <button
             type="button"
@@ -488,12 +483,8 @@ export default function Step2Details({
             </span>
             <span>Back to trip details</span>
           </button>
-
-          {/* Optional small secondary action — remains inert if not provided */}
-          {/* <button className="text-sm text-slate-600 hover:text-slate-800">Edit passengers</button> */}
         </div>
 
-        {/* Right: confirmation + explanatory text */}
         <div className="flex w-full sm:w-auto flex-col items-stretch sm:items-end gap-2">
           <p className="text-xs text-slate-500 max-w-xl text-left sm:text-right">
             You&apos;ll see the final confirmation on the next screen. For card
@@ -501,7 +492,6 @@ export default function Step2Details({
           </p>
 
           <div className="flex items-center gap-3">
-            {/* secure-payment badge */}
             <div
               role="status"
               aria-hidden={!canConfirm}
@@ -523,34 +513,26 @@ export default function Step2Details({
               <span>Secure payment</span>
             </div>
 
-            {/* primary confirm button */}
             <button
               type="button"
               disabled={!canConfirm}
               onClick={onConfirm}
               aria-disabled={!canConfirm}
-              className={`inline-flex items-center justify-center px-6 py-2.5 rounded-full text-sm font-semibold shadow-md transition transform
-          focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:opacity-60 disabled:cursor-not-allowed
-          ${
-            canConfirm
-              ? "bg-linear-to-r from-(--brand-accent) to-(--brand-primary) text-white hover:brightness-105 active:scale-[0.995]"
-              : "bg-slate-200 text-slate-700"
-          }`}
+              className={`inline-flex items-center justify-center px-6 py-2.5 rounded-full text-sm font-semibold shadow-md transition transform focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:opacity-60 disabled:cursor-not-allowed ${
+                canConfirm ? "text-white" : "bg-slate-200 text-slate-700"
+              }`}
               style={
                 canConfirm
-                  ? {background: `linear-gradient(135deg, ${BRAND_ACCENT}, ${BRAND_PRIMARY})`,
-            color: "#ffffff",
+                  ? {
+                      background: `linear-gradient(135deg, ${BRAND_ACCENT}, ${BRAND_PRIMARY})`,
                     }
                   : undefined
               }
             >
-              {/* optional small loading spinner (if you manage a submitting state, toggle its visibility) */}
-              {/* <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" .../> */}
               Confirm booking request
             </button>
           </div>
 
-          {/* ARIA live region for feedback (update text externally when needed) */}
           <div
             aria-live="polite"
             className="mt-2 text-[12px] text-slate-500"

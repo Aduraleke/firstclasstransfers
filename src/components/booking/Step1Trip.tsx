@@ -8,8 +8,6 @@ import {
   TIME_PERIODS,
 } from "@/lib/booking/options";
 import type { BookingDraft } from "@/lib/booking/types";
-
-// NEW: read fixed prices for selected route
 import { getRouteDetailBySlug } from "@/lib/routes";
 
 type Props = {
@@ -19,18 +17,25 @@ type Props = {
     value: BookingDraft[K]
   ) => void;
   onNext: () => void;
+  routeList: Array<{ id: string; title: string }>;
 };
+
 
 const BRAND_PRIMARY = "#162c4b";
 const BRAND_ACCENT = "#b07208";
 
-const VEHICLE_IMAGE_MAP: Record<string, string> = {
+/** only expected vehicle ids */
+type VehicleId = "sedan" | "vclass";
+
+
+
+const VEHICLE_IMAGE_MAP: Record<VehicleId, string> = {
   sedan: "/ford-carpri.jpg",
   vclass: "/mercedesVclass.jpg",
 };
 
 // Map vehicle ids to route.vehicleOptions index (adjust if your order changes)
-const VEHICLE_TO_ROUTE_INDEX: Record<string, number> = {
+const VEHICLE_TO_ROUTE_INDEX: Record<VehicleId, number> = {
   sedan: 0,
   vclass: 1,
 };
@@ -40,7 +45,7 @@ export default function Step1Trip({ data, onChange, onNext }: Props) {
     onChange("routeId", e.target.value);
   };
 
-  const handleVehicleChange = (id: string) => {
+  const handleVehicleChange = (id: VehicleId) => {
     onChange("vehicleTypeId", id as BookingDraft["vehicleTypeId"]);
   };
 
@@ -50,8 +55,8 @@ export default function Step1Trip({ data, onChange, onNext }: Props) {
 
   const handleTripTypeChange = (tripType: "one-way" | "return") => {
     onChange("tripType", tripType);
-    // If switching back to one-way, we can safely clear return fields
     if (tripType === "one-way") {
+      // Clear return fields when switching back to one-way
       onChange("returnDate", "");
       onChange("returnTime", "");
       onChange("returnTimePeriod", "day");
@@ -68,7 +73,6 @@ export default function Step1Trip({ data, onChange, onNext }: Props) {
 
     const nextPeriod: "day" | "night" =
       hour >= 6 && hour < 22 ? "day" : "night";
-
     if (nextPeriod !== data.timePeriod) {
       onChange("timePeriod", nextPeriod);
     }
@@ -84,27 +88,31 @@ export default function Step1Trip({ data, onChange, onNext }: Props) {
 
     const nextPeriod: "day" | "night" =
       hour >= 6 && hour < 22 ? "day" : "night";
-
     if (nextPeriod !== data.returnTimePeriod) {
       onChange("returnTimePeriod", nextPeriod);
     }
   };
 
+  // minimal required checks for progressing to next step
   const hasMainTrip =
-    data.routeId &&
-    data.vehicleTypeId &&
-    data.date &&
-    data.time &&
-    data.timePeriod;
+    Boolean(data.routeId) &&
+    Boolean(data.vehicleTypeId) &&
+    Boolean(data.date) &&
+    Boolean(data.time) &&
+    Boolean(data.timePeriod);
 
   const hasReturnTrip =
     data.tripType === "one-way" ||
-    (data.returnDate && data.returnTime && data.returnTimePeriod);
+    (Boolean(data.returnDate) &&
+      Boolean(data.returnTime) &&
+      Boolean(data.returnTimePeriod));
 
-  const canContinue = !!(hasMainTrip && hasReturnTrip);
+  const canContinue = hasMainTrip && hasReturnTrip;
 
   // lookup route detail once per render
-  const route = data.routeId ? getRouteDetailBySlug(data.routeId) : undefined;
+  const routeDetail = data.routeId
+    ? getRouteDetailBySlug(data.routeId)
+    : undefined;
 
   return (
     <div className="bg-white rounded-3xl border border-gray-100 shadow-lg shadow-gray-100/70 p-5 sm:p-6 lg:p-7 space-y-6">
@@ -123,13 +131,11 @@ export default function Step1Trip({ data, onChange, onNext }: Props) {
         <h2 className="text-sm font-semibold text-gray-800">
           Trip type <span className="text-red-500">*</span>
         </h2>
+
         <div className="inline-flex gap-2 rounded-2xl bg-gray-50 p-1 border border-gray-200">
           {[
             { id: "one-way" as const, label: "One-way" },
-            {
-              id: "return" as const,
-              label: "Return · Save 10%",
-            },
+            { id: "return" as const, label: "Return · Save 10%" },
           ].map((tp) => {
             const active = data.tripType === tp.id;
             return (
@@ -150,6 +156,7 @@ export default function Step1Trip({ data, onChange, onNext }: Props) {
             );
           })}
         </div>
+
         {data.tripType === "return" && (
           <p className="text-[11px] text-emerald-700">
             Book your return with us now and get{" "}
@@ -238,18 +245,22 @@ export default function Step1Trip({ data, onChange, onNext }: Props) {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {VEHICLE_TYPES.map((vehicle) => {
             const active = data.vehicleTypeId === vehicle.id;
-            const imgSrc = VEHICLE_IMAGE_MAP[vehicle.id] ?? null;
+            const imgSrc =
+              (VEHICLE_IMAGE_MAP as Record<string, string>)[vehicle.id] ?? null;
 
             // find price for this vehicle for the selected route (if any)
-            const routeIndex = VEHICLE_TO_ROUTE_INDEX[vehicle.id] ?? 0;
+            const routeIndex =
+              (VEHICLE_TO_ROUTE_INDEX as Record<string, number>)[vehicle.id] ??
+              0;
             const price =
-              route?.vehicleOptions?.[routeIndex]?.fixedPrice ?? undefined;
+              routeDetail?.vehicleOptions?.[routeIndex]?.fixedPrice ??
+              undefined;
 
             return (
               <button
                 key={vehicle.id}
                 type="button"
-                onClick={() => handleVehicleChange(vehicle.id)}
+                onClick={() => handleVehicleChange(vehicle.id as VehicleId)}
                 className={[
                   "group relative overflow-hidden rounded-2xl border shadow-sm transition-all",
                   active
@@ -298,13 +309,9 @@ export default function Step1Trip({ data, onChange, onNext }: Props) {
                           Selected
                         </div>
                       )}
-
-                      {/* BIG PRICE */}
                       <div className="text-xl sm:text-2xl font-extrabold leading-none drop-shadow-[0_2px_3px_rgba(0,0,0,0.45)]">
                         {price}
                       </div>
-
-                      {/* Optional small label */}
                       <div className="text-[10px] opacity-80 leading-none mt-1">
                         per vehicle
                       </div>
@@ -367,7 +374,7 @@ export default function Step1Trip({ data, onChange, onNext }: Props) {
             </label>
             <input
               type="time"
-              step={900} // 15-minute steps for nicer input
+              step={900}
               value={data.time}
               onChange={(e) => handleTimeChange(e.target.value)}
               className="mt-1 block w-full rounded-2xl border border-gray-300 bg-white px-3 py-2.5 text-sm shadow-sm focus:border-[#b07208] focus:ring-[#b07208]"
@@ -489,19 +496,27 @@ export default function Step1Trip({ data, onChange, onNext }: Props) {
         </section>
       )}
 
-      <div className="pt-2 flex justify-end">
-        <button
-          type="button"
-          disabled={!canContinue}
-          onClick={onNext}
-          className="inline-flex items-center justify-center px-5 py-2.5 rounded-full text-sm font-semibold shadow-md transition disabled:opacity-50 disabled:cursor-not-allowed"
-          style={{
-            background: `linear-gradient(135deg, ${BRAND_ACCENT}, ${BRAND_PRIMARY})`,
-            color: "#ffffff",
-          }}
-        >
-          Continue to passengers & confirmation →
-        </button>
+      <div className="pt-2 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div />
+        <div className="text-right w-full sm:w-auto">
+          {!canContinue && (
+            <p className="text-sm text-gray-500 mb-2">
+              Please select route, vehicle, date and time to continue.
+            </p>
+          )}
+          <button
+            type="button"
+            disabled={!canContinue}
+            onClick={onNext}
+            className="inline-flex items-center justify-center px-5 py-2.5 rounded-full text-sm font-semibold shadow-md transition disabled:opacity-50 disabled:cursor-not-allowed"
+            style={{
+              background: `linear-gradient(135deg, ${BRAND_ACCENT}, ${BRAND_PRIMARY})`,
+              color: "#ffffff",
+            }}
+          >
+            Continue to passengers & confirmation →
+          </button>
+        </div>
       </div>
     </div>
   );
