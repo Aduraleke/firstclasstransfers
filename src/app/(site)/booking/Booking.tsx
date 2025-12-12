@@ -10,7 +10,9 @@ import Link from "next/link";
 
 type BookingProps = {
   initialRouteId?: string;
+  initialVehicleTypeId?: string;
 };
+
 type ApiRoute = { id: string; title: string };
 
 function createInitialDraft(initialRouteId?: string): BookingDraft {
@@ -45,11 +47,19 @@ function createInitialDraft(initialRouteId?: string): BookingDraft {
   };
 }
 
-export default function Booking({ initialRouteId = "" }: BookingProps) {
+export default function Booking({
+  initialRouteId = "",
+  initialVehicleTypeId = "",
+}: BookingProps) {
+
   const [step, setStep] = useState<1 | 2>(1);
   const [submitted, setSubmitted] = useState(false);
   const [draft, setDraft] = useState<BookingDraft>(() =>
-    createInitialDraft(initialRouteId)
+        ({
+      ...createInitialDraft(initialRouteId),
+      vehicleTypeId: initialVehicleTypeId || "",
+    }) as BookingDraft
+
   );
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -70,6 +80,15 @@ export default function Booking({ initialRouteId = "" }: BookingProps) {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialRouteId]);
+
+
+  useEffect(() => {
+  if (initialVehicleTypeId && initialVehicleTypeId !== draft.vehicleTypeId) {
+    setDraft((prev) => ({ ...prev, vehicleTypeId: initialVehicleTypeId }));
+  }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+}, [initialVehicleTypeId]);
+
 
   // Fetch canonical routes from server so client & server share IDs
   useEffect(() => {

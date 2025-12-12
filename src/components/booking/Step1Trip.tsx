@@ -20,14 +20,10 @@ type Props = {
   routeList: Array<{ id: string; title: string }>;
 };
 
-
 const BRAND_PRIMARY = "#162c4b";
 const BRAND_ACCENT = "#b07208";
 
-/** only expected vehicle ids */
 type VehicleId = "sedan" | "vclass";
-
-
 
 const VEHICLE_IMAGE_MAP: Record<VehicleId, string> = {
   sedan: "/ford-carpri.jpg",
@@ -41,12 +37,23 @@ const VEHICLE_TO_ROUTE_INDEX: Record<VehicleId, number> = {
 };
 
 export default function Step1Trip({ data, onChange, onNext }: Props) {
+
+  // ✅ Ensure passed vehicleTypeId highlights correctly on load
+  React.useEffect(() => {
+    if (
+      data.vehicleTypeId &&
+      VEHICLE_TYPES.some(v => v.id === data.vehicleTypeId)
+    ) {
+      onChange("vehicleTypeId", data.vehicleTypeId);
+    }
+  }, [data.vehicleTypeId, onChange]);
+
   const handleRouteChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     onChange("routeId", e.target.value);
   };
 
   const handleVehicleChange = (id: VehicleId) => {
-    onChange("vehicleTypeId", id as BookingDraft["vehicleTypeId"]);
+    onChange("vehicleTypeId", id);
   };
 
   const handleTimePeriodChange = (id: "day" | "night") => {
@@ -56,7 +63,6 @@ export default function Step1Trip({ data, onChange, onNext }: Props) {
   const handleTripTypeChange = (tripType: "one-way" | "return") => {
     onChange("tripType", tripType);
     if (tripType === "one-way") {
-      // Clear return fields when switching back to one-way
       onChange("returnDate", "");
       onChange("returnTime", "");
       onChange("returnTimePeriod", "day");
@@ -65,35 +71,22 @@ export default function Step1Trip({ data, onChange, onNext }: Props) {
 
   const handleTimeChange = (value: string) => {
     onChange("time", value);
-
     if (!value) return;
-    const [hourStr] = value.split(":");
-    const hour = Number(hourStr);
-    if (Number.isNaN(hour)) return;
 
-    const nextPeriod: "day" | "night" =
-      hour >= 6 && hour < 22 ? "day" : "night";
-    if (nextPeriod !== data.timePeriod) {
-      onChange("timePeriod", nextPeriod);
-    }
+    const hour = Number(value.split(":")[0]);
+    if (hour >= 6 && hour < 22) onChange("timePeriod", "day");
+    else onChange("timePeriod", "night");
   };
 
   const handleReturnTimeChange = (value: string) => {
     onChange("returnTime", value);
-
     if (!value) return;
-    const [hourStr] = value.split(":");
-    const hour = Number(hourStr);
-    if (Number.isNaN(hour)) return;
 
-    const nextPeriod: "day" | "night" =
-      hour >= 6 && hour < 22 ? "day" : "night";
-    if (nextPeriod !== data.returnTimePeriod) {
-      onChange("returnTimePeriod", nextPeriod);
-    }
+    const hour = Number(value.split(":")[0]);
+    if (hour >= 6 && hour < 22) onChange("returnTimePeriod", "day");
+    else onChange("returnTimePeriod", "night");
   };
 
-  // minimal required checks for progressing to next step
   const hasMainTrip =
     Boolean(data.routeId) &&
     Boolean(data.vehicleTypeId) &&
@@ -109,7 +102,6 @@ export default function Step1Trip({ data, onChange, onNext }: Props) {
 
   const canContinue = hasMainTrip && hasReturnTrip;
 
-  // lookup route detail once per render
   const routeDetail = data.routeId
     ? getRouteDetailBySlug(data.routeId)
     : undefined;
@@ -248,13 +240,12 @@ export default function Step1Trip({ data, onChange, onNext }: Props) {
             const imgSrc =
               (VEHICLE_IMAGE_MAP as Record<string, string>)[vehicle.id] ?? null;
 
-            // find price for this vehicle for the selected route (if any)
             const routeIndex =
               (VEHICLE_TO_ROUTE_INDEX as Record<string, number>)[vehicle.id] ??
               0;
+
             const price =
-              routeDetail?.vehicleOptions?.[routeIndex]?.fixedPrice ??
-              undefined;
+              routeDetail?.vehicleOptions?.[routeIndex]?.fixedPrice ?? undefined;
 
             return (
               <button
@@ -289,7 +280,6 @@ export default function Step1Trip({ data, onChange, onNext }: Props) {
                     </div>
                   )}
 
-                  {/* INLINE PRICE RIBBON */}
                   {price && (
                     <div
                       aria-hidden
@@ -349,7 +339,7 @@ export default function Step1Trip({ data, onChange, onNext }: Props) {
         </div>
       </section>
 
-      {/* Date / time / time period */}
+      {/* Date / time */}
       <section className="space-y-3">
         <h2 className="text-sm font-semibold text-gray-800">
           Date and time <span className="text-red-500">*</span>
@@ -504,6 +494,7 @@ export default function Step1Trip({ data, onChange, onNext }: Props) {
               Please select route, vehicle, date and time to continue.
             </p>
           )}
+
           <button
             type="button"
             disabled={!canContinue}

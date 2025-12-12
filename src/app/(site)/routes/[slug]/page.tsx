@@ -457,18 +457,35 @@ export default async function RouteDetailsPage({
               const imgSrc = getVehicleImage(vehicle.type);
               const isPrimary = idx === 0;
 
+              // --- NEW: map displayed type → booking vehicleTypeId
+              function mapVehicleTypeToId(type: string): "sedan" | "vclass" {
+                const t = type.toLowerCase();
+                if (t.includes("sedan") || t.includes("car")) return "sedan";
+                if (
+                  t.includes("v-class") ||
+                  t.includes("van") ||
+                  t.includes("minivan")
+                )
+                  return "vclass";
+                return "sedan";
+              }
+
+              const vehicleTypeId = mapVehicleTypeToId(vehicle.type);
+              const bookingHref = `/booking?routeId=${route.slug}&vehicleTypeId=${vehicleTypeId}`;
+
               return (
-                <article
+                <Link
                   key={vehicle.type}
+                  href={bookingHref}
                   className={[
-                    "group flex flex-col overflow-hidden rounded-2xl border backdrop-blur-sm transition",
+                    "group flex flex-col overflow-hidden rounded-2xl border backdrop-blur-sm transition cursor-pointer",
                     "bg-slate-900/70 hover:-translate-y-1 hover:shadow-2xl hover:border-[#b07208]/40 hover:bg-slate-900/90",
                     isPrimary
                       ? "border-[#b07208]/60 shadow-[0_18px_45px_rgba(15,23,42,0.7)]"
                       : "border-slate-800/80 shadow-[0_14px_35px_rgba(15,23,42,0.7)]",
                   ].join(" ")}
                 >
-                  {/* IMAGE FULL-WIDTH */}
+                  {/* IMAGE */}
                   <div className="relative h-40 w-full overflow-hidden sm:h-54 md:h-68">
                     <div className="absolute inset-0 bg-linear-to-tr from-slate-950 via-slate-900/90 to-slate-800" />
                     <div className="absolute -left-16 top-0 h-40 w-40 rounded-full bg-[#b07208]/25 blur-3xl" />
@@ -494,7 +511,6 @@ export default async function RouteDetailsPage({
                       </span>
                     )}
 
-                    {/* emphasised fixed price per vehicle */}
                     <div className="absolute bottom-3 right-3 z-20 rounded-full bg-slate-950/90 px-4 py-1.5 text-[11px] text-slate-50 shadow-md backdrop-blur-sm ring-1 ring-slate-800">
                       <span className="mr-2 text-[9px] uppercase tracking-[0.16em] text-slate-300">
                         Fixed fare
@@ -506,7 +522,7 @@ export default async function RouteDetailsPage({
                   </div>
 
                   {/* CONTENT */}
-                  <div className="flex flex-1 flex-col px-3.5 pb-3.5 pt-3 space-y-3">
+                  <div className="flex flex-col flex-1 px-3.5 pb-3.5 pt-3 space-y-3">
                     <div className="flex items-center justify-between gap-2">
                       <p className="line-clamp-1 text-[14px] font-semibold text-slate-50">
                         {vehicle.type}
@@ -530,27 +546,19 @@ export default async function RouteDetailsPage({
                       )}
                     </div>
 
-                    <div className="mt-1 space-y-2 text-[11px] text-slate-300">
-                      <ul className="space-y-1">
-                        <li>• Fixed fare</li>
-                        <li>• Meet &amp; greet at arrivals</li>
-                        <li>• Luggage assistance included</li>
-                      </ul>
+                    <ul className="space-y-1 text-[11px] text-slate-300">
+                      <li>• Fixed fare</li>
+                      <li>• Meet &amp; greet at arrivals</li>
+                      <li>• Luggage assistance included</li>
+                    </ul>
 
-                      <div className="mt-2 flex items-center justify-between border-t border-slate-800 pt-2 text-[11px]">
-                        <span className="text-slate-400">
-                          Ideal for {" "}
-                          <span className="font-medium text-slate-100">
-                            {isPrimary ? "most travellers" : "specific needs"}
-                          </span>
-                        </span>
-                        <span className="text-[11px] font-semibold text-[#b07208]">
-                          Instant confirmation
-                        </span>
-                      </div>
+                    <div className="pt-2 flex justify-end">
+                      <span className="rounded-full bg-[#b07208] px-4 py-1.5 text-[12px] font-semibold text-slate-950 shadow-md">
+                        Select &amp; Book →
+                      </span>
                     </div>
                   </div>
-                </article>
+                </Link>
               );
             })}
           </div>
@@ -564,7 +572,7 @@ export default async function RouteDetailsPage({
             <h2 className="text-base font-semibold text-slate-900">
               Frequently asked questions
             </h2>
-          <div className="inline-flex items-center gap-1 rounded-full bg-slate-50 px-2.5 py-1 text-[11px] text-slate-600 ring-1 ring-slate-200">
+            <div className="inline-flex items-center gap-1 rounded-full bg-slate-50 px-2.5 py-1 text-[11px] text-slate-600 ring-1 ring-slate-200">
               <span className="h-1.5 w-1.5 rounded-full bg-[#b07208]" />
               <span>Most asked for this route</span>
             </div>
@@ -576,9 +584,7 @@ export default async function RouteDetailsPage({
                 key={item.question}
                 className="rounded-2xl bg-slate-50 px-3 py-3 text-sm ring-1 ring-slate-200"
               >
-                <p className="font-semibold text-slate-900">
-                  {item.question}
-                </p>
+                <p className="font-semibold text-slate-900">{item.question}</p>
                 <p className="mt-1 text-slate-700">{item.answer}</p>
               </div>
             ))}
@@ -624,7 +630,7 @@ export default async function RouteDetailsPage({
                     {r.heroTitle}
                   </p>
                   <p className="text-[12px] text-slate-600">
-                    From {" "}
+                    From{" "}
                     <span className="text-[13px] font-extrabold text-[#b07208]">
                       {r.sedanPrice}
                     </span>

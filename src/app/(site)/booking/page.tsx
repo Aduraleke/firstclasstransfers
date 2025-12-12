@@ -1,11 +1,10 @@
-// app/(site)/booking/page.tsx
 import type { Metadata } from "next";
 import Booking from "./Booking";
 
 export const metadata: Metadata = {
   title: "Book Your Cyprus Airport Transfer",
   description:
-    "Get an instant quote and book your Cyprus airport transfer in seconds. Fixed prices from Larnaca and Paphos Airports with sedans and Mercedes V-Class minivans.",
+    "Get an instant quote and book your Cyprus airport transfer in seconds.",
   alternates: {
     canonical: "https://firstclasstransfers.eu/booking",
   },
@@ -13,14 +12,10 @@ export const metadata: Metadata = {
 
 type RawSearchParams = Record<string, string | string[] | undefined>;
 
-export default async function BookingPage({
-  searchParams,
-}: {
-  // searchParams may be passed as a Promise by Next — await it.
-  searchParams?: RawSearchParams | Promise<RawSearchParams>;
-}) {
-  const sp = (await searchParams) ?? ({} as RawSearchParams);
+export default async function BookingPage({ searchParams }: { searchParams?: RawSearchParams | Promise<RawSearchParams>; }) {
+  const sp = (await searchParams) ?? {};
   const rawRoute = sp.routeId;
+  const rawVehicle = sp.vehicleTypeId;
 
   const initialRouteId =
     typeof rawRoute === "string"
@@ -29,5 +24,17 @@ export default async function BookingPage({
       ? decodeURIComponent(rawRoute[0] ?? "")
       : "";
 
-  return <Booking initialRouteId={initialRouteId} />;
+  const initialVehicleTypeId =
+    typeof rawVehicle === "string"
+      ? decodeURIComponent(rawVehicle)
+      : Array.isArray(rawVehicle)
+      ? decodeURIComponent(rawVehicle[0] ?? "")
+      : "";
+
+  return (
+    <Booking
+      initialRouteId={initialRouteId}
+      initialVehicleTypeId={initialVehicleTypeId}
+    />
+  );
 }

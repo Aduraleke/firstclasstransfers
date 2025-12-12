@@ -205,8 +205,8 @@ You’ll be collected from any address in Nicosia and dropped at any Limassol lo
     vanPrice: "€100",
 
     whatsIncluded: [
-      "€80 per standard car (up to 4 passengers)",
-      "€105 per minivan (up to 6 passengers)",
+      "€75 per standard car (up to 4 passengers)",
+      "€100 per minivan (up to 6 passengers)",
       "Pickup from any address in Nicosia (home, hotel, office, embassy, university)",
       "Drop-off at any address in Limassol (Marina, seafront, business area, suburbs)",
       "Free Wi-Fi & bottled water on board",
@@ -422,7 +422,7 @@ Our drivers are experienced on cross-border routes and can help you plan enough 
       "All local taxes and normal road tolls included",
       "Fixed price for normal border waiting time",
       "All prices are per vehicle, not per person.",
-      "🛂 You must carry valid travel documents (ID or passport) and comply with all entry/exit rules.",
+      "You must carry valid travel documents (ID or passport) and comply with all entry/exit rules.",
     ],
 
     vehicleOptions: [
@@ -918,7 +918,7 @@ Because this route involves a long drive and a border crossing, we strongly reco
       "Licensed, insured, English-speaking driver",
       "All local taxes, road tolls and normal border waiting time included",
       "All prices are per vehicle, not per person.",
-      "🛂 Important: You must carry valid travel documents (ID or passport) and comply with all entry/exit rules.",
+      "Important: You must carry valid travel documents (ID or passport) and comply with all entry/exit rules.",
     ],
 
     vehicleOptions: [
@@ -1027,7 +1027,7 @@ There is no per-kilometre charging and no hidden extras under normal conditions,
       "Licensed, insured, English-speaking driver",
       "All local taxes, road tolls and normal border waiting time included",
       "All prices are per vehicle, not per person.",
-      "🛂 Reminder: A valid ID/passport is required for crossing and border waiting time may vary depending on traffic and time of day.",
+      "Reminder: A valid ID/passport is required for crossing and border waiting time may vary depending on traffic and time of day.",
     ],
 
     vehicleOptions: [
@@ -1135,7 +1135,7 @@ There is no per-kilometre charge and no hidden extras under normal conditions, a
       "Licensed, insured, English-speaking driver",
       "All local taxes, road tolls and normal border waiting time included",
       "All prices are per vehicle, not per person.",
-      "🛂 Important: You must carry a valid passport or ID suitable for crossing – please check entry rules in advance.",
+      "Important: You must carry a valid passport or ID suitable for crossing – please check entry rules in advance.",
     ],
 
     vehicleOptions: [
@@ -1563,7 +1563,7 @@ Because this route involves a border crossing, we strongly recommend allowing ex
       "Licensed, insured, English-speaking driver",
       "VAT, road tolls and normal border waiting time included",
       "All prices are per vehicle, not per person.",
-      "🛂 Important: A valid passport or ID is required for Green Line crossings. Border waiting times can vary; in the case of exceptional, extended delays, any extra waiting charge will be discussed with you in advance.",
+      "Important: A valid passport or ID is required for Green Line crossings. Border waiting times can vary; in the case of exceptional, extended delays, any extra waiting charge will be discussed with you in advance.",
     ],
 
     vehicleOptions: [

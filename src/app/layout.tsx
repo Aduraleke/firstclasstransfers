@@ -96,10 +96,10 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         </noscript>
 
         {/* Anti-copy client (JS deterrents + watermark overlay) */}
-        {/* <AntiCopyClient
+        <AntiCopyClient
           enableOverlay={true}
           watermarkText="© First Class Transfers Cyprus"
-        /> */}
+        />
 
         {/* Push pageview events for client navigation */}
        <Suspense fallback={null}>
