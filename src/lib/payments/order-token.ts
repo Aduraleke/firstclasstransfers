@@ -16,7 +16,12 @@ export function signOrder(payload: OrderPayload): string {
   return Buffer.from(`${json}.${sig}`).toString("base64url");
 }
 
-export function verifyOrder(token: string): OrderPayload | null {
+export function verifyOrder(token: string) {
+  if (!process.env.ORDER_TOKEN_SECRET) {
+    console.warn("ORDER_TOKEN_SECRET missing — skipping verification");
+    return null;
+  }
+
   try {
     const decoded = Buffer.from(token, "base64url").toString();
     const [json, sig] = decoded.split(".");
