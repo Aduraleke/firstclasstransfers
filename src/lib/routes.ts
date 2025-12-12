@@ -992,25 +992,25 @@ Because this route involves a long drive and a border crossing, we strongly reco
     metaTitle:
       "Taxi from Larnaca Airport to Famagusta | Cross-Border Transfers at Fixed Price",
     metaDescription:
-      "Private taxi from Larnaca Airport to Famagusta (North Cyprus) at a fixed price: €95 for up to 4 passengers or €125 for up to 6. Legal cross-border transfer with experienced drivers, checkpoint assistance, Wi-Fi and bottled water included.",
+      "Private taxi from Larnaca Airport to Famagusta (North Cyprus) at a fixed price: €90 for up to 4 passengers or €110 for up to 6. Legal cross-border transfer with experienced drivers, checkpoint assistance, Wi-Fi and bottled water included.",
 
     heroTitle: "Taxi Transfer from Larnaca Airport to Famagusta (North Cyprus)",
     subheadline:
-      "Fixed Prices: €95 (up to 4 passengers) · €125 (up to 6 passengers)\nDistance: ~60–70 km · Average Journey: 60–80 minutes (incl. border)",
+      "Fixed Prices: €90 (up to 4 passengers) · €110 (up to 6 passengers)\nDistance: ~60–70 km · Average Journey: 60–80 minutes (incl. border)",
 
     body: `Famagusta (Mağusa) in Northern Cyprus is known for its historic city walls, sandy beaches and seafront resorts. Our fixed-price Larnaca Airport to Famagusta taxi provides a safe, legal and comfortable cross-border transfer from the moment you land.
 
-For €95 per car (up to 4 passengers) or €125 per minivan (up to 6 passengers), your driver will meet you at Larnaca Airport (LCA) arrivals with a name sign, help with your luggage, guide you through the checkpoint procedures and drive you directly to your hotel or address in Famagusta.
+For €90 per car (up to 4 passengers) or €110 per minivan (up to 6 passengers), your driver will meet you at Larnaca Airport (LCA) arrivals with a name sign, help with your luggage, guide you through the checkpoint procedures and drive you directly to your hotel or address in Famagusta.
 
 There is no per-kilometre charging and no hidden extras under normal conditions, and the price is the same day and night. You travel in a modern, air-conditioned vehicle with Wi-Fi and bottled water, with a professional driver who knows both the route and the border process.`,
 
     distance: "60–70 km",
     time: "60–80 minutes (incl. border)",
-    sedanPrice: "€95",
-    vanPrice: "€125",
+    sedanPrice: "€90",
+    vanPrice: "€110",
 
     whatMakesBetter: [
-      "Fixed cross-border prices: €95 (1–4 passengers) · €125 (up to 6 passengers)",
+      "Fixed cross-border prices: €90 (1–4 passengers) · €110 (up to 6 passengers)",
       "Legal, professional cross-border taxi service",
       "Drivers familiar with checkpoints and Famagusta hotels & resorts",
       "Assistance and guidance during checkpoint procedures (where regulations allow)",
@@ -1019,8 +1019,8 @@ There is no per-kilometre charging and no hidden extras under normal conditions,
     ],
 
     whatsIncluded: [
-      "€95 per standard car (up to 4 passengers)",
-      "€125 per minivan (up to 6 passengers)",
+      "€90 per standard car (up to 4 passengers)",
+      "€110 per minivan (up to 6 passengers)",
       "Meet & greet at Larnaca Airport arrivals",
       "Cross-border transfer via checkpoint with driver support and instructions",
       "Wi-Fi, bottled water and air-conditioning in every vehicle",
@@ -1035,13 +1035,13 @@ There is no per-kilometre charging and no hidden extras under normal conditions,
         type: "Standard Car",
         maxPassengers: "up to 4",
         idealFor: "Couples, solo travellers, small families",
-        fixedPrice: "€95",
+        fixedPrice: "€90",
       },
       {
         type: "Minivan",
         maxPassengers: "up to 6",
         idealFor: "Families, small groups, extra luggage",
-        fixedPrice: "€125",
+        fixedPrice: "€110",
       },
     ],
 
@@ -1098,15 +1098,15 @@ There is no per-kilometre charging and no hidden extras under normal conditions,
     metaTitle:
       "Taxi from Larnaca Airport to Kyrenia | Secure Cross-Border Transfers",
     metaDescription:
-      "Private taxi from Larnaca Airport to Kyrenia (Girne) at a fixed price: €110 for up to 4 passengers or €140 for up to 6. Legal cross-border transfer with licensed drivers, assistance at checkpoints, Wi-Fi and bottled water included.",
+      "Private taxi from Larnaca Airport to Kyrenia (Girne) at a fixed price: €120 for up to 4 passengers or €160 for up to 6. Legal cross-border transfer with licensed drivers, assistance at checkpoints, Wi-Fi and bottled water included.",
 
     heroTitle: "Taxi Transfer from Larnaca Airport to Kyrenia (Girne)",
     subheadline:
-      "Fixed Prices: €110 (up to 4 passengers) · €140 (up to 6 passengers)\nDistance: ~85–95 km · Average Journey: 80–100 minutes (incl. border)",
+      "Fixed Prices: €120 (up to 4 passengers) · €160 (up to 6 passengers)\nDistance: ~85–95 km · Average Journey: 80–100 minutes (incl. border)",
 
     body: `Kyrenia (Girne) in Northern Cyprus is a popular destination for holidays, casino resorts and seafront hotels. Our fixed-price cross-border transfer from Larnaca Airport to Kyrenia provides a safe, legal and comfortable way to reach your hotel after your flight.
 
-For €110 per car (up to 4 passengers) or €140 per minivan (up to 6 passengers), your driver will meet you at Larnaca Airport (LCA) arrivals with a name sign, assist with your luggage and drive you to Kyrenia via the appropriate checkpoint.
+For €120 per car (up to 4 passengers) or €160 per minivan (up to 6 passengers), your driver will meet you at Larnaca Airport (LCA) arrivals with a name sign, assist with your luggage and drive you to Kyrenia via the appropriate checkpoint.
 
 Crossing between the Republic of Cyprus and Northern Cyprus requires passing through a border point. Our drivers are experienced with these procedures and will guide you through each step, helping you plan enough time for both the drive and possible border queues.
 
@@ -1114,12 +1114,12 @@ There is no per-kilometre charge and no hidden extras under normal conditions, a
 
     distance: "85–95 km",
     time: "80–100 minutes (incl. border)",
-    sedanPrice: "€110",
-    vanPrice: "€140",
+    sedanPrice: "€120",
+    vanPrice: "€160",
 
     whatMakesBetter: [
       "Legal, professional cross-border taxi service",
-      "Fixed prices: €110 (1–4 passengers) · €140 (up to 6 passengers)",
+      "Fixed prices: €120 (1–4 passengers) · €160 (up to 6 passengers)",
       "Fixed fare includes standard border waiting time – no surprises",
       "Drivers familiar with checkpoints and Kyrenia hotels & casinos",
       "Safe and discreet transfers for families, couples and individuals",
@@ -1127,8 +1127,8 @@ There is no per-kilometre charge and no hidden extras under normal conditions, a
     ],
 
     whatsIncluded: [
-      "€110 per standard car (up to 4 passengers)",
-      "€140 per minivan (up to 6 passengers)",
+      "€120 per standard car (up to 4 passengers)",
+      "€160 per minivan (up to 6 passengers)",
       "Meet & greet at Larnaca Airport arrivals",
       "Transfer via checkpoint with assistance and guidance (where regulations allow)",
       "Wi-Fi, bottled water and air-conditioning in every vehicle",
@@ -1143,13 +1143,13 @@ There is no per-kilometre charge and no hidden extras under normal conditions, a
         type: "Standard Car",
         maxPassengers: "up to 4",
         idealFor: "Couples, solo travellers, small families",
-        fixedPrice: "€110",
+        fixedPrice: "€120",
       },
       {
         type: "Minivan",
         maxPassengers: "up to 6",
         idealFor: "Families, casino groups, more luggage",
-        fixedPrice: "€140",
+        fixedPrice: "€160",
       },
     ],
 
@@ -1206,11 +1206,11 @@ There is no per-kilometre charge and no hidden extras under normal conditions, a
     metaTitle:
       "Taxi from Larnaca Airport to Limassol | Fixed-Price City & Marina Transfers",
     metaDescription:
-      "Book your private taxi from Larnaca Airport to Limassol for a fixed price: €64 for up to 4 passengers or €84 for up to 6. 24/7 service, modern vehicles, meet-and-greet at arrivals. Ideal for Limassol Marina, seafront hotels and business trips.",
+      "Book your private taxi from Larnaca Airport to Limassol for a fixed price: €70 for up to 4 passengers or €95 for up to 6. 24/7 service, modern vehicles, meet-and-greet at arrivals. Ideal for Limassol Marina, seafront hotels and business trips.",
 
     heroTitle: "Taxi Transfer from Larnaca Airport to Limassol",
     subheadline:
-      "Fixed Prices: €64 (up to 4 passengers) · €84 (up to 6 passengers)\nDistance: ~67–72 km · Average Journey: 50–60 minutes",
+      "Fixed Prices: €70 (up to 4 passengers) · €95 (up to 6 passengers)\nDistance: ~67–72 km · Average Journey: 50–60 minutes",
 
     body: `Heading to Limassol for business, a cruise or a beach holiday? Our fixed-price taxi from Larnaca Airport to Limassol gives you a comfortable, reliable and stress-free start to your trip.
 
@@ -1220,11 +1220,11 @@ All vehicles are modern, fully air-conditioned and equipped with free Wi-Fi and 
 
     distance: "67–72 km",
     time: "50–60 minutes",
-    sedanPrice: "€64",
-    vanPrice: "€84",
+    sedanPrice: "€70",
+    vanPrice: "€95",
 
     whatMakesBetter: [
-      "Fixed prices: €64 (1–4 passengers) · €84 (up to 6 passengers)",
+      "Fixed prices: €70 (1–4 passengers) · €95 (up to 6 passengers)",
       "24/7 availability with advance booking",
       "No hidden extras – same price day and night",
       "Drivers experienced with Limassol Marina, seafront hotels and business districts",
@@ -1234,8 +1234,8 @@ All vehicles are modern, fully air-conditioned and equipped with free Wi-Fi and 
     ],
 
     whatsIncluded: [
-      "€64 per standard car (up to 4 passengers)",
-      "€84 per minivan (up to 6 passengers)",
+      "€70 per standard car (up to 4 passengers)",
+      "€95 per minivan (up to 6 passengers)",
       "Airport meet & greet service at Larnaca arrivals",
       "Free Wi-Fi & bottled water in every vehicle",
       "Child / baby seats on request (no extra charge)",
@@ -1250,13 +1250,13 @@ All vehicles are modern, fully air-conditioned and equipped with free Wi-Fi and 
         type: "Standard Car",
         maxPassengers: "up to 4",
         idealFor: "Couples, small families, business travellers",
-        fixedPrice: "€64",
+        fixedPrice: "€70",
       },
       {
         type: "Minivan",
         maxPassengers: "up to 6",
         idealFor: "Larger families, groups, extra luggage",
-        fixedPrice: "€84",
+        fixedPrice: "€95",
       },
     ],
 
@@ -1276,14 +1276,14 @@ All vehicles are modern, fully air-conditioned and equipped with free Wi-Fi and 
 
     faq: [
       {
-        question: "Is €64 a fixed price?",
+        question: "Is €70 a fixed price?",
         answer:
-          "Yes. €64 is the fixed fare for a standard car (1–4 passengers) on this route. There are no night, weekend or luggage surcharges.",
+          "Yes. €70 is the fixed fare for a standard car (1–4 passengers) on this route. There are no night, weekend or luggage surcharges.",
       },
       {
         question: "We are 5 or 6 passengers – how much is the transfer?",
         answer:
-          "For groups of up to 6 passengers, we offer a minivan at a fixed price of €84 for this route. You can select the minivan option in the booking form.",
+          "For groups of up to 6 passengers, we offer a minivan at a fixed price of €95 for this route. You can select the minivan option in the booking form.",
       },
       {
         question: "Do you cover Limassol Marina and Old Port hotels?",
@@ -1313,15 +1313,15 @@ All vehicles are modern, fully air-conditioned and equipped with free Wi-Fi and 
     metaTitle:
       "Taxi from Larnaca Airport to Nicosia | Executive-Style Fixed-Price Transfer",
     metaDescription:
-      "Private taxi from Larnaca Airport to Nicosia at a fixed price: €65 for up to 4 passengers or €80 for up to 6. No hidden extras, same price day & night. Ideal for business travellers, embassies, students and city breaks.",
+      "Private taxi from Larnaca Airport to Nicosia at a fixed price: €55 for up to 4 passengers or €80 for up to 6. No hidden extras, same price day & night. Ideal for business travellers, embassies, students and city breaks.",
 
     heroTitle: "Taxi Transfer from Larnaca Airport to Nicosia",
     subheadline:
-      "Fixed Prices: €65 (up to 4 passengers) · €80 (up to 6 passengers)\nDistance: ~52–60 km · Average Journey: 40–50 minutes",
+      "Fixed Prices: €55 (up to 4 passengers) · €80 (up to 6 passengers)\nDistance: ~52–60 km · Average Journey: 40–50 minutes",
 
     body: `Travel from Larnaca Airport to Nicosia – the capital of Cyprus – with a professional, executive-style transfer. Perfect for business travellers, embassy staff, students and tourists staying in the historic centre or modern districts like Engomi and Strovolos.
 
-For a fixed price of €65 per car (up to 4 passengers) or €80 per minivan (up to 6 passengers), you get a fare that does not change with traffic, time of day or normal flight delays. There is nd no hidden extras – what you see when you book is what you pay.
+For a fixed price of €55 per car (up to 4 passengers) or €80 per minivan (up to 6 passengers), you get a fare that does not change with traffic, time of day or normal flight delays. There is nd no hidden extras – what you see when you book is what you pay.
 
 Your driver will wait inside arrivals with a name sign, assist with your luggage and drive you directly to your hotel, office, university or residence in Nicosia.
 
@@ -1329,12 +1329,12 @@ All vehicles offer air-conditioning, Wi-Fi and bottled water, and child seats ar
 
     distance: "52–60 km",
     time: "40–50 minutes",
-    sedanPrice: "€65",
+    sedanPrice: "€55",
     vanPrice: "€80",
 
     whatMakesBetter: [
       "Executive-style service for business & embassy travellers",
-      "Fixed €65 (1–4 passengers) · €85 (up to 6 passengers)",
+      "Fixed €55 (1–4 passengers) · €80 (up to 6 passengers)",
       "No hidden extras – same price day and night",
       "Drivers familiar with ministries, embassies and universities",
       "Invoices and receipts available for corporate clients",
@@ -1342,8 +1342,8 @@ All vehicles offer air-conditioning, Wi-Fi and bottled water, and child seats ar
     ],
 
     whatsIncluded: [
-      "€65 per standard car (up to 4 passengers)",
-      "€85 per minivan (up to 6 passengers)",
+      "€55 per standard car (up to 4 passengers)",
+      "€80 per minivan (up to 6 passengers)",
       "Meet & greet at Larnaca Airport arrivals",
       "Wi-Fi, bottled water and air-conditioning in every vehicle",
       "Child / baby seats on request (free of charge)",
@@ -1358,13 +1358,13 @@ All vehicles offer air-conditioning, Wi-Fi and bottled water, and child seats ar
         type: "Standard Car",
         maxPassengers: "up to 4",
         idealFor: "Business travellers, solo travellers, small teams",
-        fixedPrice: "€65",
+        fixedPrice: "€55",
       },
       {
         type: "Minivan",
         maxPassengers: "up to 6",
         idealFor: "Larger families, embassy groups, extra luggage",
-        fixedPrice: "€85",
+        fixedPrice: "€80",
       },
     ],
 
@@ -1384,9 +1384,9 @@ All vehicles offer air-conditioning, Wi-Fi and bottled water, and child seats ar
 
     faq: [
       {
-        question: "Is €65 per person or per car?",
+        question: "Is €55 per person or per car?",
         answer:
-          "€65 is per car, for up to 4 passengers. For up to 6 passengers, the fixed minivan price is €85, also per vehicle.",
+          "€55 is per car, for up to 4 passengers. For up to 6 passengers, the fixed minivan price is €80, also per vehicle.",
       },
       {
         question: "Do you use  add extras later?",
@@ -1421,26 +1421,26 @@ All vehicles offer air-conditioning, Wi-Fi and bottled water, and child seats ar
     metaTitle:
       "Taxi from Larnaca Airport to Paphos | Comfortable Long-Distance Transfers",
     metaDescription:
-      "Private taxi from Larnaca Airport to Paphos at a fixed price: €110 for up to 4 passengers or €140 for up to 6. No hidden extras, same price day & night. 24/7 service, comfort stops, Wi-Fi and bottled water. Ideal for Kato Paphos and seafront resorts.",
+      "Private taxi from Larnaca Airport to Paphos at a fixed price: €130 for up to 4 passengers or €175 for up to 6. No hidden extras, same price day & night. 24/7 service, comfort stops, Wi-Fi and bottled water. Ideal for Kato Paphos and seafront resorts.",
 
     heroTitle: "Taxi Transfer from Larnaca Airport to Paphos",
     subheadline:
-      "Fixed Prices: €110 (up to 4 passengers) · €140 (up to 6 passengers)\nDistance: ~130–140 km · Average Journey: 90–100 minutes",
+      "Fixed Prices: €130 (up to 4 passengers) · €175 (up to 6 passengers)\nDistance: ~130–140 km · Average Journey: 90–100 minutes",
 
     body: `The journey from Larnaca Airport to Paphos is one of the longest on the island. Our fixed-price private transfer ensures you travel in comfort, without worrying about thraffic or hidden surcharges.
 
-For €110 per car (up to 4 passengers) or €140 per minivan (up to 6 passengers), your price is fully fixed – day and night. There is nd no extra per kilometre charges. What you book is exactly what you pay.
+For €130 per car (up to 4 passengers) or €175 per minivan (up to 6 passengers), your price is fully fixed – day and night. There is nd no extra per kilometre charges. What you book is exactly what you pay.
 
 Your driver will greet you at arrivals with a name sign, help with luggage and drive you along the highway directly to your hotel or apartment in Paphos, Kato Paphos or nearby resort areas. Short comfort or coffee stops can be arranged on the way if needed, especially for families with children or older travellers.`,
 
     distance: "130–140 km",
     time: "90–100 minutes",
-    sedanPrice: "€110",
-    vanPrice: "€140",
+    sedanPrice: "€130",
+    vanPrice: "€175",
 
     whatMakesBetter: [
       "Long-distance specialists with comfortable, well-maintained vehicles",
-      "Fixed prices: €110 (1–4 passengers) · €140 (up to 6 passengers)",
+      "Fixed prices: €130 (1–4 passengers) · €175 (up to 6 passengers)",
       "No hidden extras – same price day and night",
       "Ideal for families, couples and older travellers",
       "Optional rest / coffee stop during the journey",
@@ -1448,8 +1448,8 @@ Your driver will greet you at arrivals with a name sign, help with luggage and d
     ],
 
     whatsIncluded: [
-      "€110 per standard car (up to 4 passengers)",
-      "€140 per minivan (up to 6 passengers)",
+      "€130 per standard car (up to 4 passengers)",
+      "€175 per minivan (up to 6 passengers)",
       "Meet & greet at Larnaca Airport arrivals",
       "Free Wi-Fi, bottled water & air-conditioning in every vehicle",
       "Child / baby seats on request (no extra charge)",
@@ -1464,13 +1464,13 @@ Your driver will greet you at arrivals with a name sign, help with luggage and d
         type: "Standard Car",
         maxPassengers: "up to 4",
         idealFor: "Couples, small families, business travellers",
-        fixedPrice: "€110",
+        fixedPrice: "€130",
       },
       {
         type: "Minivan",
         maxPassengers: "up to 6",
         idealFor: "Larger families, groups, extra luggage",
-        fixedPrice: "€140",
+        fixedPrice: "€175",
       },
     ],
 
@@ -1490,9 +1490,9 @@ Your driver will greet you at arrivals with a name sign, help with luggage and d
 
     faq: [
       {
-        question: "Is €110 per car or per person?",
+        question: "Is €130 per car or per person?",
         answer:
-          "€110 is per car, for up to 4 passengers. For up to 6 passengers, the fixed minivan price is €140, also per vehicle.",
+          "€130 is per car, for up to 4 passengers. For up to 6 passengers, the fixed minivan price is €175, also per vehicle.",
       },
       {
         question: "Do you use  charge extra per kilometre?",
@@ -1527,25 +1527,25 @@ Your driver will greet you at arrivals with a name sign, help with luggage and d
     metaTitle:
       "Taxi from Limassol to Ercan Airport | Cross-Border Private Transfer",
     metaDescription:
-      "Private taxi from Limassol to Ercan Airport (ECN) at a fixed price: €110 for up to 4 passengers or €145 for up to 6. Experienced cross-border drivers, Wi-Fi on board, assistance at Green Line checkpoints. Advance booking recommended.",
+      "Private taxi from Limassol to Ercan Airport (ECN) at a fixed price: €130 for up to 4 passengers or €170 for up to 6. Experienced cross-border drivers, Wi-Fi on board, assistance at Green Line checkpoints. Advance booking recommended.",
 
     heroTitle: "Taxi Transfer from Limassol to Ercan Airport",
     subheadline:
-      "Fixed Prices: €110 (up to 4 passengers) · €145 (up to 6 passengers)\nDistance: ~110–125 km · Average Journey: 1h 45–2h 10 (including border crossing)",
+      "Fixed Prices: €130 (up to 4 passengers) · €170 (up to 6 passengers)\nDistance: ~110–125 km · Average Journey: 1h 45–2h 10 (including border crossing)",
 
     body: `Need to travel from Limassol to Ercan Airport (ECN) in North Cyprus? Our cross-border taxi service offers a safe, comfortable and legal way to reach your flight with fixed, pre-agreed prices and experienced drivers who regularly cross the Green Line.
 
-For €110 per car (up to 4 passengers) or €145 per minivan (up to 6 passengers), you travel with no per-kilometre charges and no hidden extras under normal conditions. Your driver will pick you up anywhere in Limassol, drive to the appropriate checkpoint, guide you through the border procedure and continue to Ercan Airport departures.
+For €130 per car (up to 4 passengers) or €170 per minivan (up to 6 passengers), you travel with no per-kilometre charges and no hidden extras under normal conditions. Your driver will pick you up anywhere in Limassol, drive to the appropriate checkpoint, guide you through the border procedure and continue to Ercan Airport departures.
 
 Because this route involves a border crossing, we strongly recommend allowing extra time for formalities, especially during busy periods.`,
 
     distance: "110–125 km",
     time: "1h 45–2h 10 + border checks",
-    sedanPrice: "€110",
-    vanPrice: "€145",
+    sedanPrice: "€130",
+    vanPrice: "€170",
 
     whatMakesBetter: [
-      "Fixed cross-border prices: €110 (1–4 passengers) · €145 (up to 6 passengers)",
+      "Fixed cross-border prices: €130 (1–4 passengers) · €170 (up to 6 passengers)",
       "No hidden extras – fixed fare including normal border waiting time",
       "Drivers experienced with Green Line crossings and procedures",
       "Assistance and guidance at the checkpoint",
@@ -1554,8 +1554,8 @@ Because this route involves a border crossing, we strongly recommend allowing ex
     ],
 
     whatsIncluded: [
-      "€110 per standard car (up to 4 passengers)",
-      "€145 per minivan (up to 6 passengers)",
+      "€130 per standard car (up to 4 passengers)",
+      "€170 per minivan (up to 6 passengers)",
       "Pickup anywhere in Limassol (hotel, apartment, office)",
       "Drop-off at Ercan Airport (ECN) departures",
       "Free Wi-Fi & bottled water on board",
@@ -1571,13 +1571,13 @@ Because this route involves a border crossing, we strongly recommend allowing ex
         type: "Standard Car",
         maxPassengers: "up to 4",
         idealFor: "Solo travellers, couples, small groups",
-        fixedPrice: "€110",
+        fixedPrice: "€130",
       },
       {
         type: "Minivan",
         maxPassengers: "up to 6",
         idealFor: "Families, small groups, extra luggage",
-        fixedPrice: "€145",
+        fixedPrice: "€170",
       },
     ],
 
@@ -1606,7 +1606,7 @@ Because this route involves a border crossing, we strongly recommend allowing ex
       {
         question: "Is the price per person or per vehicle?",
         answer:
-          "The price is per vehicle. €110 for a standard car (up to 4 passengers) and €145 for a minivan (up to 6 passengers).",
+          "The price is per vehicle. €130 for a standard car (up to 4 passengers) and €170 for a minivan (up to 6 passengers).",
       },
       {
         question: "Do I need a passport or ID to cross?",
@@ -1636,25 +1636,25 @@ Because this route involves a border crossing, we strongly recommend allowing ex
     metaTitle:
       "Taxi from Limassol to Nicosia | Capital City Private Transfer",
     metaDescription:
-      "Private taxi from Limassol to Nicosia at a fixed price: €80 for up to 4 passengers or €105 for up to 6. No hidden extras, same price day and night. 24/7 availability, ideal for business, embassies, universities and city breaks.",
+      "Private taxi from Limassol to Nicosia at a fixed price: €75 for up to 4 passengers or €100 for up to 6. No hidden extras, same price day and night. 24/7 availability, ideal for business, embassies, universities and city breaks.",
 
     heroTitle: "Taxi Transfer from Limassol to Nicosia",
     subheadline:
-      "Fixed Prices: €80 (up to 4 passengers) · €105 (up to 6 passengers)\nDistance: ~85–95 km · Average Journey: 1h 10–1h 25",
+      "Fixed Prices: €75 (up to 4 passengers) · €100 (up to 6 passengers)\nDistance: ~85–95 km · Average Journey: 1h 10–1h 25",
 
     body: `Whether you’re travelling for business, studies or a city visit, our Limassol to Nicosia taxi transfer makes the journey between Cyprus’s two main cities fast, comfortable and predictable.
 
-For a fixed price of €80 per car (up to 4 passengers) or €105 per minivan (up to 6 passengers), we pick you up at any address in Limassol and take you directly to any address in Nicosia. There is no per-kilometre charging and no hidden extras under normal conditions.
+For a fixed price of €75 per car (up to 4 passengers) or €100 per minivan (up to 6 passengers), we pick you up at any address in Limassol and take you directly to any address in Nicosia. There is no per-kilometre charging and no hidden extras under normal conditions.
 
 No timetables, no bus changes, no dragging luggage – just a direct city-to-city ride in a modern, air-conditioned vehicle with Wi-Fi and bottled water on board.`,
 
     distance: "85–95 km",
     time: "1h 10–1h 25",
-    sedanPrice: "€80",
-    vanPrice: "€105",
+    sedanPrice: "€75",
+    vanPrice: "€100",
 
     whatMakesBetter: [
-      "Fixed prices: €80 (1–4 passengers) · €105 (up to 6 passengers)",
+      "Fixed prices: €75 (1–4 passengers) · €100 (up to 6 passengers)",
       "No hidden extras – same price day & night",
       "Door-to-door service between Limassol and the capital",
       "Drivers familiar with embassies, ministries, universities and business areas",
@@ -1662,8 +1662,8 @@ No timetables, no bus changes, no dragging luggage – just a direct city-to-cit
     ],
 
     whatsIncluded: [
-      "€80 per standard car (up to 4 passengers)",
-      "€105 per minivan (up to 6 passengers)",
+      "€75 per standard car (up to 4 passengers)",
+      "€100 per minivan (up to 6 passengers)",
       "Pickup at any Limassol hotel, apartment or office",
       "Drop-off at any Nicosia address (Old Town, Engomi, Strovolos, etc.)",
       "Free Wi-Fi & bottled water in every vehicle",
@@ -1679,13 +1679,13 @@ No timetables, no bus changes, no dragging luggage – just a direct city-to-cit
         type: "Standard Car",
         maxPassengers: "up to 4",
         idealFor: "Solo travellers, couples, small teams",
-        fixedPrice: "€80",
+        fixedPrice: "€75",
       },
       {
         type: "Minivan",
         maxPassengers: "up to 6",
         idealFor: "Families, small groups, extra luggage",
-        fixedPrice: "€105",
+        fixedPrice: "€100",
       },
     ],
 
@@ -1707,7 +1707,7 @@ No timetables, no bus changes, no dragging luggage – just a direct city-to-cit
       {
         question: "Is the fare per person?",
         answer:
-          "No. The fare is per vehicle. €80 for a standard car (up to 4 passengers) and €105 for a minivan (up to 6 passengers).",
+          "No. The fare is per vehicle. €75 for a standard car (up to 4 passengers) and €100 for a minivan (up to 6 passengers).",
       },
       {
         question: "Do you use  add extras later?",
@@ -1742,25 +1742,25 @@ No timetables, no bus changes, no dragging luggage – just a direct city-to-cit
     metaTitle:
       "Taxi from Limassol to Paphos Airport (PFO) | Fixed-Price Airport Transfer",
     metaDescription:
-      "Private taxi from Limassol to Paphos Airport (PFO) at a fixed price: €60 for up to 4 passengers or €80 for up to 6. No hidden extras, no night surcharge. 24/7 service, door-to-door pickup, perfect for departures and arrivals.",
+      "Private taxi from Limassol to Paphos Airport (PFO) at a fixed price: €70 for up to 4 passengers or €95 for up to 6. No hidden extras, no night surcharge. 24/7 service, door-to-door pickup, perfect for departures and arrivals.",
 
     heroTitle: "Taxi Transfer from Limassol to Paphos Airport",
     subheadline:
-      "Fixed Prices: €60 (up to 4 passengers) · €80 (up to 6 passengers)\nDistance: ~60–65 km · Average Journey: 45–55 minutes",
+      "Fixed Prices: €70 (up to 4 passengers) · €95 (up to 6 passengers)\nDistance: ~60–65 km · Average Journey: 45–55 minutes",
 
     body: `Flying from Paphos Airport (PFO) but staying in Limassol? Our private taxi from Limassol to Paphos Airport is the easiest way to reach your flight on time – without parking stress, rental car returns orprises.
 
-For a fixed price of €60 per car (up to 4 passengers) or €80 per minivan (up to 6 passengers), your driver will pick you up from any address in Limassol and drive you directly to the departures terminal at Paphos Airport. There is no per-kilometre charge and no hidden extras under normal conditions.
+For a fixed price of €70 per car (up to 4 passengers) or €95 per minivan (up to 6 passengers), your driver will pick you up from any address in Limassol and drive you directly to the departures terminal at Paphos Airport. There is no per-kilometre charge and no hidden extras under normal conditions.
 
 You just choose your pickup time, meet your driver at the door and enjoy a smooth, direct ride to the airport.`,
 
     distance: "60–65 km",
     time: "45–55 minutes",
-    sedanPrice: "€60",
-    vanPrice: "€80",
+    sedanPrice: "€70",
+    vanPrice: "€95",
 
     whatMakesBetter: [
-      "Fixed prices: €60 (1–4 passengers) · €80 (up to 6 passengers)",
+      "Fixed prices: €70 (1–4 passengers) · €95 (up to 6 passengers)",
       "No hidden extras – no night surcharge",
       "Pickup from hotel, marina, apartment or office in Limassol",
       "Route planned to ensure on-time arrival for check-in",
@@ -1768,8 +1768,8 @@ You just choose your pickup time, meet your driver at the door and enjoy a smoot
     ],
 
     whatsIncluded: [
-      "€60 per standard car (up to 4 passengers)",
-      "€80 per minivan (up to 6 passengers)",
+      "€70 per standard car (up to 4 passengers)",
+      "€95 per minivan (up to 6 passengers)",
       "Door-to-door pickup anywhere in Limassol",
       "Drop-off at Paphos Airport (PFO) departures",
       "Free Wi-Fi and bottled water in every vehicle",
@@ -1785,13 +1785,13 @@ You just choose your pickup time, meet your driver at the door and enjoy a smoot
         type: "Standard Car",
         maxPassengers: "up to 4",
         idealFor: "Solo travellers, couples, small families",
-        fixedPrice: "€60",
+        fixedPrice: "€70",
       },
       {
         type: "Minivan",
         maxPassengers: "up to 6",
         idealFor: "Larger families, small groups, extra bags",
-        fixedPrice: "€80",
+        fixedPrice: "€95",
       },
     ],
 
@@ -1819,7 +1819,7 @@ You just choose your pickup time, meet your driver at the door and enjoy a smoot
       {
         question: "Is the fare per person or per car?",
         answer:
-          "The fare is per vehicle. €60 for a standard car (up to 4 passengers) and €80 for a minivan (up to 6 passengers).",
+          "The fare is per vehicle. €70 for a standard car (up to 4 passengers) and €95 for a minivan (up to 6 passengers).",
       },
       {
         question: "Do you charge extra at night or early in the morning?",
@@ -1844,23 +1844,23 @@ You just choose your pickup time, meet your driver at the door and enjoy a smoot
     metaTitle:
       "Taxi from Limassol to Paphos | Coastal City Transfer",
     metaDescription:
-      "Private taxi from Limassol to Paphos at a fixed price: €65 for up to 4 passengers or €80 for up to 6. No hidden extras, 24/7 service. Door-to-door transfers to Paphos and Kato Paphos seafront hotels with Wi-Fi and bottled water included.",
+      "Private taxi from Limassol to Paphos at a fixed price: €85 for up to 4 passengers or €100 for up to 6. No hidden extras, 24/7 service. Door-to-door transfers to Paphos and Kato Paphos seafront hotels with Wi-Fi and bottled water included.",
 
     heroTitle: "Taxi Transfer from Limassol to Paphos",
     subheadline:
-      "Fixed Prices: €65 (up to 4 passengers) · €80 (up to 6 passengers)\nDistance: ~65–70 km · Average Journey: 50–60 minutes",
+      "Fixed Prices: €85 (up to 4 passengers) · €100 (up to 6 passengers)\nDistance: ~65–70 km · Average Journey: 50–60 minutes",
 
     body: `Heading west along the coast? Our Limassol to Paphos private taxi takes you directly from your hotel or home in Limassol to any address in Paphos or Kato Paphos, with a clear, fixed price.
 
-For €65 per car (up to 4 passengers) or €80 per minivan (up to 6 passengers), you avoid bus connections, parking and luggage hassle – just sit back and enjoy a comfortable transfer between two of Cyprus’s most popular coastal cities. There is no per-kilometre charging and no hidden extras under normal conditions, and the price is the same day and night.`,
+For €85 per car (up to 4 passengers) or €100 per minivan (up to 6 passengers), you avoid bus connections, parking and luggage hassle – just sit back and enjoy a comfortable transfer between two of Cyprus’s most popular coastal cities. There is no per-kilometre charging and no hidden extras under normal conditions, and the price is the same day and night.`,
 
     distance: "65–70 km",
     time: "50–60 minutes",
-    sedanPrice: "€65",
-    vanPrice: "€80",
+    sedanPrice: "€85",
+    vanPrice: "€100",
 
     whatMakesBetter: [
-      "Fixed prices: €65 (1–4 passengers) · €80 (up to 6 passengers)",
+      "Fixed prices: €85 (1–4 passengers) · €100 (up to 6 passengers)",
       "No hidden extras – same fare 24/7",
       "Door-to-door service from Limassol to Paphos / Kato Paphos",
       "Drivers familiar with hotels and apartments around Kato Paphos and the seafront",
@@ -1868,8 +1868,8 @@ For €65 per car (up to 4 passengers) or €80 per minivan (up to 6 passengers)
     ],
 
     whatsIncluded: [
-      "€65 per standard car (up to 4 passengers)",
-      "€80 per minivan (up to 6 passengers)",
+      "€85 per standard car (up to 4 passengers)",
+      "€100 per minivan (up to 6 passengers)",
       "Pickup from any address in Limassol (hotel, apartment, office, marina)",
       "Drop-off at any address in Paphos or Kato Paphos",
       "Free Wi-Fi & bottled water on board",
@@ -1885,13 +1885,13 @@ For €65 per car (up to 4 passengers) or €80 per minivan (up to 6 passengers)
         type: "Standard Car",
         maxPassengers: "up to 4",
         idealFor: "Couples, small families, business travellers",
-        fixedPrice: "€65",
+        fixedPrice: "€85",
       },
       {
         type: "Minivan",
         maxPassengers: "up to 6",
         idealFor: "Larger families, small groups, extra luggage",
-        fixedPrice: "€80",
+        fixedPrice: "€100",
       },
     ],
 
@@ -1917,7 +1917,7 @@ For €65 per car (up to 4 passengers) or €80 per minivan (up to 6 passengers)
       {
         question: "Is the price per car or per person?",
         answer:
-          "The price is per car, not per person. €65 for a standard car (up to 4 passengers) and €80 for a minivan (up to 6 passengers).",
+          "The price is per car, not per person. €85 for a standard car (up to 4 passengers) and €100 for a minivan (up to 6 passengers).",
       },
       {
         question: "Can I book last-minute?",
@@ -1947,25 +1947,25 @@ For €65 per car (up to 4 passengers) or €80 per minivan (up to 6 passengers)
     metaTitle:
       "Taxi from Limassol to Troodos | Private Transfer to the Mountains",
     metaDescription:
-      "Private taxi from Limassol to Troodos at a fixed price: €70 for up to 4 passengers or €95 for up to 6. No hidden extras. Scenic mountain drive with experienced drivers and door-to-door service.",
+      "Private taxi from Limassol to Troodos at a fixed price: €45 for up to 4 passengers or €95 for up to 6. No hidden extras. Scenic mountain drive with experienced drivers and door-to-door service.",
 
     heroTitle: "Taxi Transfer from Limassol to Troodos",
     subheadline:
-      "Fixed Prices: €70 (up to 4 passengers) · €95 (up to 6 passengers)\nDistance: ~45–55 km · Average Journey: 50–70 minutes",
+      "Fixed Prices: €45 (up to 4 passengers) · €95 (up to 6 passengers)\nDistance: ~45–55 km · Average Journey: 50–70 minutes",
 
     body: `Looking for a cool escape from the coast? Our Limassol to Troodos taxi transfer takes you from the seafront straight into the heart of the mountains with a clear, fixed price.
 
-For €70 per car (up to 4 passengers) or €95 per minivan (up to 6 passengers), you travel comfortably from any address in Limassol to Troodos Square or directly to your chosen hotel or guesthouse. There is no per-kilometre charging and no hidden extras under normal conditions – the price is the same day and night.
+For €45 per car (up to 4 passengers) or €95 per minivan (up to 6 passengers), you travel comfortably from any address in Limassol to Troodos Square or directly to your chosen hotel or guesthouse. There is no per-kilometre charging and no hidden extras under normal conditions – the price is the same day and night.
 
 Our drivers are used to winding mountain roads and changing weather, including winter conditions. You can relax and enjoy the scenery, forests and villages along the way, without worrying about driving, parking or road familiarity.`,
 
     distance: "45–55 km",
     time: "50–70 minutes",
-    sedanPrice: "€70",
+    sedanPrice: "€45",
     vanPrice: "€95",
 
     whatMakesBetter: [
-      "Fixed prices: €70 (1–4 passengers) · €95 (up to 6 passengers)",
+      "Fixed prices: €45 (1–4 passengers) · €95 (up to 6 passengers)",
       "No hidden extras – same fare 24/7",
       "Drivers experienced with mountain routes and winter conditions",
       "Drop-off at Troodos Square, hotels, guesthouses or hiking starting points",
@@ -1973,7 +1973,7 @@ Our drivers are used to winding mountain roads and changing weather, including w
     ],
 
     whatsIncluded: [
-      "€70 per standard car (up to 4 passengers)",
+      "€45 per standard car (up to 4 passengers)",
       "€95 per minivan (up to 6 passengers)",
       "Pickup anywhere in Limassol (hotel, apartment, marina, office)",
       "Drop-off in Troodos village / square / chosen hotel or lodge",
@@ -1991,7 +1991,7 @@ Our drivers are used to winding mountain roads and changing weather, including w
         type: "Standard Car",
         maxPassengers: "up to 4",
         idealFor: "Couples, small families, solo travellers",
-        fixedPrice: "€70",
+        fixedPrice: "€45",
       },
       {
         type: "Minivan",
@@ -2017,9 +2017,9 @@ Our drivers are used to winding mountain roads and changing weather, including w
 
     faq: [
       {
-        question: "Is €70 per vehicle?",
+        question: "Is €45 per vehicle?",
         answer:
-          "Yes. €70 is the fixed price for a standard car (up to 4 passengers). For up to 6 passengers, the fixed minivan price is €95 per vehicle.",
+          "Yes. €45 is the fixed price for a standard car (up to 4 passengers). For up to 6 passengers, the fixed minivan price is €95 per vehicle.",
       },
       {
         question: "Do you operate this route in winter?",
