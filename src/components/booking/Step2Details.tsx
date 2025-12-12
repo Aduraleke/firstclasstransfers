@@ -9,6 +9,9 @@ import {
   TIME_PERIODS,
 } from "@/lib/booking/options";
 
+// NEW: read route detail (with prices)
+import { getRouteDetailBySlug, RouteDetail } from "@/lib/routes";
+
 type Props = {
   data: BookingDraft;
   onChange: <K extends keyof BookingDraft>(
@@ -34,6 +37,12 @@ function formatEuro(n: number | null): string {
   return `€${n.toFixed(0)}`;
 }
 
+// Map vehicle ids to route.vehicleOptions index (adjust if your order changes)
+const VEHICLE_TO_ROUTE_INDEX: Record<string, number> = {
+  sedan: 0, // Standard Car (per your routes.ts)
+  vclass: 1, // Minivan
+};
+
 export default function Step2Details({
   data,
   onChange,
@@ -45,12 +54,10 @@ export default function Step2Details({
     [data.routeId]
   );
 
-  const routeDetail = useMemo(
-    () =>
-      // We only know about RouteDetail via TRANSFER_ROUTES (there's no direct link here),
-      // so this summary will just use TRANSFER_ROUTES origin/destination.
-      route,
-    [route]
+  // Prefer the detailed route with prices from lib/routes.ts if available
+  const routeDetail: RouteDetail | undefined = useMemo(
+    () => (data.routeId ? getRouteDetailBySlug(data.routeId) : undefined),
+    [data.routeId]
   );
 
   const vehicle = useMemo(
@@ -86,20 +93,74 @@ export default function Step2Details({
     !!data.paymentMethod &&
     hasReturnDetails;
 
-  // --- fare estimate with 10% discount for returns ---
+  // --- fare computation ---
+  // per-leg price (from routeDetail.vehicleOptions[ VEHICLE_TO_ROUTE_INDEX[vehicleId] ])
+  const perLegPriceNumber = useMemo(() => {
+    if (!routeDetail || !data.vehicleTypeId) return null;
+    const idx = VEHICLE_TO_ROUTE_INDEX[data.vehicleTypeId] ?? 0;
+    const priceStr = routeDetail.vehicleOptions?.[idx]?.fixedPrice;
+    return parsePriceToNumber(priceStr ?? undefined);
+  }, [routeDetail, data.vehicleTypeId]);
 
+  // totals
   const isReturn = data.tripType === "return";
+  const legs = isReturn ? 2 : 1;
+  const subtotal = perLegPriceNumber != null ? perLegPriceNumber * legs : null;
+  const discount =
+    isReturn && subtotal != null ? Math.round(subtotal * 0.1) : 0;
+  const total = subtotal != null ? Math.round(subtotal - discount) : null;
+
+  // nice display strings
+  const perLegDisplay = formatEuro(perLegPriceNumber);
+  const subtotalDisplay = formatEuro(subtotal);
+  const discountDisplay = discount ? formatEuro(discount) : null;
+  const totalDisplay = formatEuro(total);
+
   const discountText = isReturn
-    ? "10% discount will be applied to your round-trip fare in our confirmation."
+    ? "10% discount applied for booking return together."
     : "Return trips booked together receive a 10% discount.";
 
   return (
     <div className="bg-white rounded-3xl border border-gray-100 shadow-lg shadow-gray-100/70 p-5 sm:p-6 lg:p-7 space-y-6">
       {/* Summary */}
       <section className="space-y-3">
-        <h2 className="text-lg font-semibold text-[#111827]">
-          Review your trip
-        </h2>
+        <div className="flex items-start justify-between gap-6">
+          <div className="flex-1">
+            <h2 className="text-lg font-semibold text-[#111827]">
+              Review your trip
+            </h2>
+
+            <p className="text-sm text-gray-600 mt-1">
+              Confirm passenger details, pricing and payment before sending your
+              booking request.
+            </p>
+          </div>
+
+          {/* PRICE CARD (prominent) */}
+          <div className="w-44 sm:w-56">
+            <div
+              className="rounded-2xl p-4 shadow-lg text-center"
+              style={{
+                background: `linear-gradient(135deg, ${BRAND_ACCENT}, ${BRAND_PRIMARY})`,
+                color: "#fff",
+              }}
+            >
+              <div className="text-xs opacity-90">Price</div>
+              <div className="mt-2 text-2xl sm:text-3xl font-extrabold leading-none drop-shadow-[0_2px_6px_rgba(0,0,0,0.45)]">
+                {totalDisplay}
+              </div>
+              <div className="text-[11px] opacity-85 mt-1">
+                {perLegDisplay} {isReturn ? "· per leg" : "· per vehicle"}
+              </div>
+
+              {isReturn && discount > 0 && (
+                <div className="mt-2 text-[11px] text-emerald-100/90">
+                  −{discountDisplay} discount
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-gray-50 rounded-2xl border border-gray-200 p-4">
           <div className="space-y-1.5">
@@ -114,7 +175,9 @@ export default function Step2Details({
             <p className="text-xs font-medium text-gray-600">Route</p>
             <p className="text-sm text-gray-900">
               {routeDetail
-                ? `${routeDetail.origin} → ${routeDetail.destination}`
+                ? `${routeDetail.from} → ${routeDetail.to}`
+                : route
+                ? `${route.origin} → ${route.destination}`
                 : "Route not selected"}
             </p>
           </div>
@@ -169,6 +232,45 @@ export default function Step2Details({
               Adults: {data.adults || 0}, Children: {data.children || 0}
             </p>
           </div>
+        </div>
+      </section>
+
+      {/* Small fare breakdown */}
+      <section className="space-y-2">
+        <h3 className="text-sm font-semibold text-gray-800">Fare summary</h3>
+
+        <div className="rounded-lg border bg-white p-3 text-sm text-gray-700">
+          <div className="flex items-center justify-between">
+            <div>Price per vehicle / leg</div>
+            <div className="font-medium">{perLegDisplay}</div>
+          </div>
+
+          <div className="flex items-center justify-between mt-2">
+            <div>Legs</div>
+            <div>{legs}</div>
+          </div>
+
+          <div className="flex items-center justify-between mt-2 border-t pt-2">
+            <div>Subtotal</div>
+            <div className="font-medium">{subtotalDisplay}</div>
+          </div>
+
+          {isReturn && discount > 0 && (
+            <div className="flex items-center justify-between mt-2 text-emerald-700">
+              <div>Return discount (10%)</div>
+              <div>-{discountDisplay}</div>
+            </div>
+          )}
+
+          <div className="flex items-center justify-between mt-3 border-t pt-3">
+            <div className="font-semibold">Total</div>
+            <div className="text-lg font-extrabold">{totalDisplay}</div>
+          </div>
+
+          <p className="mt-2 text-[11px] text-gray-500">
+            All prices are per vehicle. Taxes and tolls included where
+            applicable. Final confirmation will show full invoice details.
+          </p>
         </div>
       </section>
 
@@ -330,9 +432,7 @@ export default function Step2Details({
 
       {/* Payment method */}
       <section className="space-y-3">
-        <h2 className="text-sm font-semibold text-gray-800">
-          Payment method
-        </h2>
+        <h2 className="text-sm font-semibold text-gray-800">Payment method</h2>
         <p className="text-xs text-gray-500 mb-1">
           Choose how you&apos;d like to pay for your transfer.
         </p>
@@ -374,33 +474,93 @@ export default function Step2Details({
         </div>
       </section>
 
-      {/* Actions */}
-      <div className="pt-2 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-        <button
-          type="button"
-          onClick={onBack}
-          className="inline-flex items-center justify-center px-4 py-2.5 rounded-full text-sm font-medium bg-gray-100 hover:bg-gray-200 text-gray-800 transition"
-        >
-          ← Back to trip details
-        </button>
+      {/* Actions (improved) */}
+      <div className="pt-4 flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between gap-4">
+        {/* Left: back / secondary actions */}
+        <div className="flex items-center gap-3">
+          <button
+            type="button"
+            onClick={onBack}
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-medium bg-white border border-slate-200 text-slate-800 shadow-sm hover:shadow-md hover:bg-slate-50 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-slate-300"
+          >
+            <span aria-hidden className="text-lg">
+              ←
+            </span>
+            <span>Back to trip details</span>
+          </button>
 
-        <div className="flex flex-col items-end gap-1">
-          <p className="text-xs text-gray-500 mb-1">
+          {/* Optional small secondary action — remains inert if not provided */}
+          {/* <button className="text-sm text-slate-600 hover:text-slate-800">Edit passengers</button> */}
+        </div>
+
+        {/* Right: confirmation + explanatory text */}
+        <div className="flex w-full sm:w-auto flex-col items-stretch sm:items-end gap-2">
+          <p className="text-xs text-slate-500 max-w-xl text-left sm:text-right">
             You&apos;ll see the final confirmation on the next screen. For card
             payments, we&apos;ll charge you now to secure your booking.
           </p>
-          <button
-            type="button"
-            disabled={!canConfirm}
-            onClick={onConfirm}
-            className="inline-flex items-center justify-center px-6 py-2.5 rounded-full text-sm font-semibold shadow-md transition disabled:opacity-50 disabled:cursor-not-allowed"
-            style={{
-              background: `linear-gradient(135deg, ${BRAND_ACCENT}, ${BRAND_PRIMARY})`,
-              color: "#ffffff",
-            }}
+
+          <div className="flex items-center gap-3">
+            {/* secure-payment badge */}
+            <div
+              role="status"
+              aria-hidden={!canConfirm}
+              className="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1 text-[12px] font-medium text-emerald-800 border border-emerald-100"
+            >
+              <svg
+                className="h-4 w-4"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden
+              >
+                <rect x="2" y="7" width="20" height="14" rx="2" />
+                <path d="M16 7V5a4 4 0 10-8 0v2" />
+              </svg>
+              <span>Secure payment</span>
+            </div>
+
+            {/* primary confirm button */}
+            <button
+              type="button"
+              disabled={!canConfirm}
+              onClick={onConfirm}
+              aria-disabled={!canConfirm}
+              className={`inline-flex items-center justify-center px-6 py-2.5 rounded-full text-sm font-semibold shadow-md transition transform
+          focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:opacity-60 disabled:cursor-not-allowed
+          ${
+            canConfirm
+              ? "bg-linear-to-r from-(--brand-accent) to-(--brand-primary) text-white hover:brightness-105 active:scale-[0.995]"
+              : "bg-slate-200 text-slate-700"
+          }`}
+              style={
+                canConfirm
+                  ? {background: `linear-gradient(135deg, ${BRAND_ACCENT}, ${BRAND_PRIMARY})`,
+            color: "#ffffff",
+                    }
+                  : undefined
+              }
+            >
+              {/* optional small loading spinner (if you manage a submitting state, toggle its visibility) */}
+              {/* <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" .../> */}
+              Confirm booking request
+            </button>
+          </div>
+
+          {/* ARIA live region for feedback (update text externally when needed) */}
+          <div
+            aria-live="polite"
+            className="mt-2 text-[12px] text-slate-500"
+            id="booking-action-feedback"
           >
-            Confirm booking request
-          </button>
+            <span>
+              Card will be charged to hold the vehicle. Receipt and details sent
+              by email.
+            </span>
+          </div>
         </div>
       </div>
     </div>

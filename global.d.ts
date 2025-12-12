@@ -16,3 +16,6 @@ declare module "*.module.scss" {
   const classes: { [key: string]: string };
   export default classes;
 }
+
+// types/global.d.ts
+declare module "@mypos-ltd/mypos";

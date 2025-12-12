@@ -13,10 +13,6 @@ type BookingProps = {
   initialRouteId?: string;
 };
 
-const BRAND = {
-  primary: "#162c4b",
-  accent: "#b07208",
-};
 
 function createInitialDraft(initialRouteId?: string): BookingDraft {
   return {
@@ -52,7 +48,7 @@ function createInitialDraft(initialRouteId?: string): BookingDraft {
 
 export default function Booking({ initialRouteId = "" }: BookingProps) {
   const [step, setStep] = useState<1 | 2>(1);
-  const [submitted, setSubmitted] = useState(false);
+  const [submitted] = useState(false);
 
   // initialize draft using incoming initialRouteId
   const [draft, setDraft] = useState<BookingDraft>(() =>
@@ -63,7 +59,7 @@ export default function Booking({ initialRouteId = "" }: BookingProps) {
   useEffect(() => {
     if (initialRouteId && initialRouteId !== draft.routeId) {
       // Debug log - remove later if you want
-      // eslint-disable-next-line no-console
+       
       console.log("Booking: applying initialRouteId ->", initialRouteId);
       setDraft((prev) => ({ ...prev, routeId: initialRouteId }));
     }
@@ -100,14 +96,29 @@ export default function Booking({ initialRouteId = "" }: BookingProps) {
     scrollToTop();
   };
 
-  const handleConfirm = () => {
-    // TODO: call your bookings API here (card charging, invoice creation, etc.)
-    // For now we just log and show the thank-you view.
-    // eslint-disable-next-line no-console
-    console.log("Booking draft submitted:", draft);
-    setSubmitted(true);
-    scrollToTop();
-  };
+// client-side in Booking component (use client)
+const handleConfirm = () => {
+  // Build a native POST form so server returns the myPOS HTML page (auto-submits)
+  const form = document.createElement("form");
+  form.method = "POST";
+  form.action = "/api/bookings?pay=true";
+  form.style.display = "none";
+
+  // Use the same fields validated by server — do not include client-side amount
+  const payload = { ...draft };
+
+  Object.entries(payload).forEach(([k, v]) => {
+    const input = document.createElement("input");
+    input.type = "hidden";
+    input.name = k;
+    input.value = v == null ? "" : String(v);
+    form.appendChild(input);
+  });
+
+  document.body.appendChild(form);
+  form.submit();
+};
+
 
   // After confirm – thank you state
   if (submitted) {

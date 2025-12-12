@@ -9,6 +9,9 @@ import {
 } from "@/lib/booking/options";
 import type { BookingDraft } from "@/lib/booking/types";
 
+// NEW: read fixed prices for selected route
+import { getRouteDetailBySlug } from "@/lib/routes";
+
 type Props = {
   data: BookingDraft;
   onChange: <K extends keyof BookingDraft>(
@@ -24,6 +27,12 @@ const BRAND_ACCENT = "#b07208";
 const VEHICLE_IMAGE_MAP: Record<string, string> = {
   sedan: "/ford-carpri.jpg",
   vclass: "/mercedesVclass.jpg",
+};
+
+// Map vehicle ids to route.vehicleOptions index (adjust if your order changes)
+const VEHICLE_TO_ROUTE_INDEX: Record<string, number> = {
+  sedan: 0,
+  vclass: 1,
 };
 
 export default function Step1Trip({ data, onChange, onNext }: Props) {
@@ -82,13 +91,20 @@ export default function Step1Trip({ data, onChange, onNext }: Props) {
   };
 
   const hasMainTrip =
-    data.routeId && data.vehicleTypeId && data.date && data.time && data.timePeriod;
+    data.routeId &&
+    data.vehicleTypeId &&
+    data.date &&
+    data.time &&
+    data.timePeriod;
 
   const hasReturnTrip =
     data.tripType === "one-way" ||
     (data.returnDate && data.returnTime && data.returnTimePeriod);
 
   const canContinue = !!(hasMainTrip && hasReturnTrip);
+
+  // lookup route detail once per render
+  const route = data.routeId ? getRouteDetailBySlug(data.routeId) : undefined;
 
   return (
     <div className="bg-white rounded-3xl border border-gray-100 shadow-lg shadow-gray-100/70 p-5 sm:p-6 lg:p-7 space-y-6">
@@ -160,9 +176,9 @@ export default function Step1Trip({ data, onChange, onNext }: Props) {
 
           <optgroup label="Larnaca">
             {TRANSFER_ROUTES.filter((r) => r.category === "Larnaca").map(
-              (route) => (
-                <option key={route.id} value={route.id}>
-                  {route.label}
+              (routeOption) => (
+                <option key={routeOption.id} value={routeOption.id}>
+                  {routeOption.label}
                 </option>
               )
             )}
@@ -170,9 +186,9 @@ export default function Step1Trip({ data, onChange, onNext }: Props) {
 
           <optgroup label="Ayia Napa">
             {TRANSFER_ROUTES.filter((r) => r.category === "Ayia Napa").map(
-              (route) => (
-                <option key={route.id} value={route.id}>
-                  {route.label}
+              (routeOption) => (
+                <option key={routeOption.id} value={routeOption.id}>
+                  {routeOption.label}
                 </option>
               )
             )}
@@ -180,9 +196,9 @@ export default function Step1Trip({ data, onChange, onNext }: Props) {
 
           <optgroup label="Limassol">
             {TRANSFER_ROUTES.filter((r) => r.category === "Limassol").map(
-              (route) => (
-                <option key={route.id} value={route.id}>
-                  {route.label}
+              (routeOption) => (
+                <option key={routeOption.id} value={routeOption.id}>
+                  {routeOption.label}
                 </option>
               )
             )}
@@ -190,9 +206,9 @@ export default function Step1Trip({ data, onChange, onNext }: Props) {
 
           <optgroup label="Paphos">
             {TRANSFER_ROUTES.filter((r) => r.category === "Paphos").map(
-              (route) => (
-                <option key={route.id} value={route.id}>
-                  {route.label}
+              (routeOption) => (
+                <option key={routeOption.id} value={routeOption.id}>
+                  {routeOption.label}
                 </option>
               )
             )}
@@ -200,9 +216,9 @@ export default function Step1Trip({ data, onChange, onNext }: Props) {
 
           <optgroup label="Special services">
             {TRANSFER_ROUTES.filter((r) => r.category === "Special").map(
-              (route) => (
-                <option key={route.id} value={route.id}>
-                  {route.label}
+              (routeOption) => (
+                <option key={routeOption.id} value={routeOption.id}>
+                  {routeOption.label}
                 </option>
               )
             )}
@@ -224,13 +240,18 @@ export default function Step1Trip({ data, onChange, onNext }: Props) {
             const active = data.vehicleTypeId === vehicle.id;
             const imgSrc = VEHICLE_IMAGE_MAP[vehicle.id] ?? null;
 
+            // find price for this vehicle for the selected route (if any)
+            const routeIndex = VEHICLE_TO_ROUTE_INDEX[vehicle.id] ?? 0;
+            const price =
+              route?.vehicleOptions?.[routeIndex]?.fixedPrice ?? undefined;
+
             return (
               <button
                 key={vehicle.id}
                 type="button"
                 onClick={() => handleVehicleChange(vehicle.id)}
                 className={[
-                  "group overflow-hidden rounded-2xl border shadow-sm transition-all",
+                  "group relative overflow-hidden rounded-2xl border shadow-sm transition-all",
                   active
                     ? "border-[#b07208] shadow-[0_12px_30px_rgba(176,114,8,0.35)] scale-[1.01]"
                     : "border-gray-200 hover:border-gray-300 hover:shadow-md",
@@ -254,6 +275,39 @@ export default function Step1Trip({ data, onChange, onNext }: Props) {
                   ) : (
                     <div className="h-full w-full flex items-center justify-center text-3xl">
                       🚘
+                    </div>
+                  )}
+
+                  {/* INLINE PRICE RIBBON */}
+                  {price && (
+                    <div
+                      aria-hidden
+                      className="absolute top-3 right-3 z-30 rounded-xl px-4 py-2 shadow-lg"
+                      style={{
+                        background: active
+                          ? "linear-gradient(135deg, #000000, #333333)"
+                          : "linear-gradient(135deg, #b07208, #d08a10)",
+                        color: "#ffffff",
+                        textAlign: "center",
+                        boxShadow:
+                          "0 4px 12px rgba(0,0,0,0.35), 0 0 12px rgba(176,114,8,0.45)",
+                      }}
+                    >
+                      {active && (
+                        <div className="text-[10px] font-medium uppercase tracking-wide opacity-90 mb-1">
+                          Selected
+                        </div>
+                      )}
+
+                      {/* BIG PRICE */}
+                      <div className="text-xl sm:text-2xl font-extrabold leading-none drop-shadow-[0_2px_3px_rgba(0,0,0,0.45)]">
+                        {price}
+                      </div>
+
+                      {/* Optional small label */}
+                      <div className="text-[10px] opacity-80 leading-none mt-1">
+                        per vehicle
+                      </div>
                     </div>
                   )}
                 </div>
