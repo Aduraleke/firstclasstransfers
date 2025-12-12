@@ -395,7 +395,13 @@ export default function PopularRoutesShowcase() {
             </Link>
           </div>
 
-          <div className="flex flex-wrap gap-3">
+          {/* Equal-width responsive tabs: grid auto-fit gives balanced columns that wrap */}
+          <div
+            className="w-full grid gap-3"
+            style={{
+              gridTemplateColumns: "repeat(auto-fit, minmax(170px, 1fr))",
+            }}
+          >
             {POPULAR_ROUTES.map((route, idx) => {
               const isActive = idx === activeIndex;
               return (
@@ -405,7 +411,10 @@ export default function PopularRoutesShowcase() {
                   onMouseEnter={() => setActiveIndex(idx)}
                   onFocus={() => setActiveIndex(idx)}
                   onClick={() => router.push(route.href)}
-                  className="relative flex-1 min-w-[155px] sm:flex-none sm:min-w-[170px] rounded-2xl px-3 py-2.5 text-left transition-all focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-400"
+                  className={[
+                    // ensure each button fills its grid cell and has consistent height
+                    "relative w-full h-full flex flex-col justify-between rounded-2xl px-3 py-3 text-left transition-all focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-400",
+                  ].join(" ")}
                   style={{
                     background: isActive
                       ? `linear-gradient(135deg, ${BRAND.accent}, ${BRAND.primary})`
@@ -426,7 +435,7 @@ export default function PopularRoutesShowcase() {
                       className={isActive ? "text-slate-50" : "text-slate-500"}
                     />
                     <span
-                      className="text-[11px] font-semibold uppercase tracking-[0.14em]"
+                      className="text-[11px] font-semibold uppercase tracking-[0.14em] truncate"
                       style={{
                         color: isActive ? "#f9fafb" : "#475569",
                       }}
@@ -434,24 +443,24 @@ export default function PopularRoutesShowcase() {
                       {route.from}
                     </span>
                   </div>
+
                   <div
                     className="text-[13px] font-semibold leading-snug wrap-break-word"
                     style={{ color: isActive ? "#f9fafb" : "#0f172a" }}
                   >
                     {route.to}
                   </div>
-                  <div className="mt-1 flex items-center justify-between text-[11px]">
+
+                  <div className="mt-2 flex items-center justify-between text-[11px]">
                     <span
-                      style={{
-                        color: isActive ? "#fefce8" : "#64748b",
-                      }}
+                      className="truncate"
+                      style={{ color: isActive ? "#fefce8" : "#64748b" }}
                     >
                       Sedan {route.sedanPrice}
                     </span>
                     <span
-                      style={{
-                        color: isActive ? "#fefce8" : "#64748b",
-                      }}
+                      className="truncate"
+                      style={{ color: isActive ? "#fefce8" : "#64748b" }}
                     >
                       V-Class {route.vanPrice}
                     </span>

@@ -38,7 +38,7 @@ const FLEET = [
     title: "Ford Capri — All-Electric",
     subtitle: "Eco-friendly · up to 4 passengers",
     desc: "A smooth, all-electric ride for guests who care about quieter, cleaner travel without sacrificing comfort.",
-    img: "/capri-sedan.jpg",
+    img: "/capri-sedan.jpeg",
     icon: leafIcon,
     tag: "Electric",
     highlights: ["Zero local emissions", "Quiet & smooth", "Ideal for city trips"],
