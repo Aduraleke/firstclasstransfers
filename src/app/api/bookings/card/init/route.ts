@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import crypto from "crypto";
 
 import { computePriceOrThrow } from "@/lib/payments/pricing";
-import { signOrder } from "@/lib/payments/order-token";
+
 import { buildMyPOSFormHTML } from "@/lib/payments/mypos-form";
 
 export async function POST(req: Request) {
@@ -19,12 +19,7 @@ export async function POST(req: Request) {
 
     const orderId = crypto.randomUUID();
 
-    signOrder({
-      orderId,
-      amount,
-      currency: "EUR",
-      createdAt: Date.now(),
-    });
+
 
     const html = buildMyPOSFormHTML({
       orderId,
