@@ -1,40 +1,49 @@
+// src/lib/payments/order-token.ts
 import crypto from "crypto";
 
-const SECRET = process.env.ORDER_TOKEN_SECRET!;
-if (!SECRET) throw new Error("Missing ORDER_TOKEN_SECRET");
-
-export type OrderPayload = {
+type OrderPayload = {
   orderId: string;
   amount: number;
-  currency: "EUR";
+  currency: string;
   createdAt: number;
 };
 
-export function signOrder(payload: OrderPayload): string {
-  const json = JSON.stringify(payload);
-  const sig = crypto.createHmac("sha256", SECRET).update(json).digest("hex");
-  return Buffer.from(`${json}.${sig}`).toString("base64url");
+export function signOrder(payload: OrderPayload): string | null {
+  const secret = process.env.ORDER_TOKEN_SECRET;
+  if (!secret) {
+    console.warn("ORDER_TOKEN_SECRET missing — order token disabled");
+    return null;
+  }
+
+  const data = JSON.stringify(payload);
+  const sig = crypto
+    .createHmac("sha256", secret)
+    .update(data)
+    .digest("base64");
+
+  return Buffer.from(`${data}.${sig}`).toString("base64");
 }
 
-export function verifyOrder(token: string) {
-  if (!process.env.ORDER_TOKEN_SECRET) {
+export function verifyOrder(token: string): OrderPayload | null {
+  const secret = process.env.ORDER_TOKEN_SECRET;
+  if (!secret) {
     console.warn("ORDER_TOKEN_SECRET missing — skipping verification");
     return null;
   }
 
   try {
-    const decoded = Buffer.from(token, "base64url").toString();
-    const [json, sig] = decoded.split(".");
+    const decoded = Buffer.from(token, "base64").toString("utf8");
+    const [data, sig] = decoded.split(".");
+    if (!data || !sig) return null;
+
     const expected = crypto
-      .createHmac("sha256", SECRET)
-      .update(json)
-      .digest("hex");
+      .createHmac("sha256", secret)
+      .update(data)
+      .digest("base64");
 
-    if (!crypto.timingSafeEqual(Buffer.from(sig), Buffer.from(expected))) {
-      return null;
-    }
+    if (sig !== expected) return null;
 
-    return JSON.parse(json) as OrderPayload;
+    return JSON.parse(data);
   } catch {
     return null;
   }
