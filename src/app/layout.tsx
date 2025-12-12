@@ -3,7 +3,11 @@ import type { Metadata } from "next";
 import Script from "next/script";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+
+// Components (make sure these exist at these paths)
 import GTMPageView from "@/components/GTMPageView";
+import AntiCopyClient from "@/components/AntiCopyClient";
+import { Suspense } from "react";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -55,7 +59,7 @@ export const metadata: Metadata = {
   },
 };
 
-// Your GTM ID (from uploaded instructions). Confirm this is the ID you want to use.
+// Confirm GTM ID matches what you want to use.
 const GTM_ID = "GTM-5D5XWZG9";
 
 export default function RootLayout({
@@ -66,7 +70,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        {/* Google Tag Manager - insert as high in the head as possible */}
+        {/* Google Tag Manager - load as early as possible */}
         <Script
           id="gtm-script"
           strategy="beforeInteractive"
@@ -78,11 +82,10 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 })(window,document,'script','dataLayer','${GTM_ID}');`,
           }}
         />
-        {/* other head content (metadata is handled by Next's metadata object) */}
       </head>
 
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        {/* Google Tag Manager (noscript) - immediately after opening body */}
+        {/* noscript iframe immediately after body open */}
         <noscript>
           <iframe
             src={`https://www.googletagmanager.com/ns.html?id=${GTM_ID}`}
@@ -91,11 +94,20 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
             style={{ display: "none", visibility: "hidden" }}
           />
         </noscript>
-          <GTMPageView/>
-        {children}
 
-        {/* A small client-side component to push pageviews on route change (see next section).
-            You can import and include it here, e.g. <GTMPageView /> */}
+        {/* Anti-copy client (JS deterrents + watermark overlay) */}
+        <AntiCopyClient
+          enableOverlay={true}
+          watermarkText="© First Class Transfers Cyprus"
+        />
+
+        {/* Push pageview events for client navigation */}
+       <Suspense fallback={null}>
+          <GTMPageView />
+        </Suspense>
+
+        {/* Your app content */}
+        {children}
       </body>
     </html>
   );

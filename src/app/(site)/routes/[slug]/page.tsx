@@ -1,5 +1,3 @@
-// app/(site)/routes/[slug]/page.tsx
-
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -541,7 +539,7 @@ export default async function RouteDetailsPage({
 
                       <div className="mt-2 flex items-center justify-between border-t border-slate-800 pt-2 text-[11px]">
                         <span className="text-slate-400">
-                          Ideal for{" "}
+                          Ideal for {" "}
                           <span className="font-medium text-slate-100">
                             {isPrimary ? "most travellers" : "specific needs"}
                           </span>
@@ -626,7 +624,7 @@ export default async function RouteDetailsPage({
                     {r.heroTitle}
                   </p>
                   <p className="text-[12px] text-slate-600">
-                    From{" "}
+                    From {" "}
                     <span className="text-[13px] font-extrabold text-[#b07208]">
                       {r.sedanPrice}
                     </span>

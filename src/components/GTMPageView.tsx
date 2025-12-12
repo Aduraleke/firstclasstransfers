@@ -1,6 +1,5 @@
+// src/components/GTMPageView.tsx
 "use client";
-
-export {}; // make this file a module so `declare global` augments the global scope
 
 import { useEffect } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
@@ -22,7 +21,6 @@ type DataLayerEvent = {
   page_location?: string;
   page_path?: string;
   page_title?: string;
-  // allow any other custom fields (string|number|boolean|undefined)
   [key: string]: string | number | boolean | undefined;
 };
 
@@ -34,15 +32,17 @@ export default function GTMPageView() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
+  // derive a stable string for the query so the effect does not re-run
+  // due to object identity changes on ReadonlyURLSearchParams
+  const queryString = searchParams ? searchParams.toString() : "";
+
   useEffect(() => {
     if (typeof window === "undefined") return;
 
-    // Initialize dataLayer if missing (typed)
-    if (!window.dataLayer) {
-      window.dataLayer = [];
-    }
+    // Ensure dataLayer exists
+    window.dataLayer = window.dataLayer || [];
 
-    const page = pathname + (searchParams ? `?${searchParams.toString()}` : "");
+    const page = pathname + (queryString ? `?${queryString}` : "");
 
     const payload: DataLayerEvent = {
       event: "pageview",
@@ -53,7 +53,7 @@ export default function GTMPageView() {
     };
 
     window.dataLayer.push(payload);
-  }, [pathname, searchParams]);
+  }, [pathname, queryString]);
 
   return null;
 }
