@@ -23,6 +23,12 @@ type Props = {
 const BRAND_PRIMARY = "#162c4b";
 const BRAND_ACCENT = "#b07208";
 
+// Vehicle capacity rules
+const VEHICLE_CAPACITY: Record<string, number> = {
+  sedan: 4,
+  vclass: 6,
+};
+
 function parsePriceToNumber(price?: string): number | null {
   if (!price) return null;
   const match = price.replace(",", ".").match(/(\d+(\.\d+)?)/);
@@ -35,7 +41,7 @@ function formatEuro(n: number | null): string {
   return `€${n.toFixed(0)}`;
 }
 
-// Map vehicle ids to route.vehicleOptions index (adjust if your order changes)
+// Map vehicle ids to route.vehicleOptions index
 const VEHICLE_TO_ROUTE_INDEX: Record<string, number> = {
   sedan: 0,
   vclass: 1,
@@ -52,7 +58,6 @@ export default function Step2Details({
     [data.routeId]
   );
 
-  // Prefer the detailed route with prices from lib/routes.ts if available
   const routeDetail: RouteDetail | undefined = useMemo(
     () => (data.routeId ? getRouteDetailBySlug(data.routeId) : undefined),
     [data.routeId]
@@ -73,7 +78,12 @@ export default function Step2Details({
     [data.returnTimePeriod]
   );
 
+  // Passenger capacity logic
   const totalPassengers = (data.adults || 0) + (data.children || 0);
+  const maxCapacity =
+    VEHICLE_CAPACITY[data.vehicleTypeId || ""] || 0;
+  const exceedsCapacity =
+    data.vehicleTypeId && totalPassengers > maxCapacity;
 
   const emailValid = data.email.includes("@");
 
@@ -83,6 +93,7 @@ export default function Step2Details({
       Boolean(data.returnTime) &&
       Boolean(data.returnTimePeriod));
 
+  // Updated canConfirm (capacity added)
   const canConfirm =
     Boolean(data.name) &&
     Boolean(data.phone) &&
@@ -91,7 +102,8 @@ export default function Step2Details({
     data.adults > 0 &&
     Boolean(data.baggageType) &&
     Boolean(data.paymentMethod) &&
-    hasReturnDetails;
+    hasReturnDetails &&
+    !exceedsCapacity;
 
   // --- fare computation ---
   const perLegPriceNumber = useMemo(() => {
@@ -103,12 +115,13 @@ export default function Step2Details({
 
   const isReturn = data.tripType === "return";
   const legs = isReturn ? 2 : 1;
-  const subtotal = perLegPriceNumber != null ? perLegPriceNumber * legs : null;
+  const subtotal =
+    perLegPriceNumber != null ? perLegPriceNumber * legs : null;
   const discount =
     isReturn && subtotal != null ? Math.round(subtotal * 0.1) : 0;
-  const total = subtotal != null ? Math.round(subtotal - discount) : null;
+  const total =
+    subtotal != null ? Math.round(subtotal - discount) : null;
 
-  // formatted strings
   const perLegDisplay = formatEuro(perLegPriceNumber);
   const subtotalDisplay = formatEuro(subtotal);
   const discountDisplay = discount ? formatEuro(discount) : null;
@@ -302,6 +315,14 @@ export default function Step2Details({
               onChange={(e) => onChange("adults", Number(e.target.value))}
               className="mt-1 block w-full rounded-2xl border border-gray-300 bg-white px-3 py-2.5 text-sm shadow-sm focus:border-[#b07208] focus:ring-[#b07208]"
             />
+
+            {/* Passenger capacity error (below adults/children) */}
+            {exceedsCapacity && (
+              <p className="mt-1 text-[11px] text-red-600">
+                {vehicle?.name} can take max {maxCapacity} passengers.  
+                You currently selected {totalPassengers}.
+              </p>
+            )}
           </div>
 
           <div>
@@ -470,7 +491,9 @@ export default function Step2Details({
         </div>
       </section>
 
-      {/* Actions */}
+      {/* -------------------------------- */}
+      {/* Actions + capacity error banner */}
+      {/* -------------------------------- */}
       <div className="pt-4 flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between gap-4">
         <div className="flex items-center gap-3">
           <button
@@ -478,14 +501,21 @@ export default function Step2Details({
             onClick={onBack}
             className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-medium bg-white border border-slate-200 text-slate-800 shadow-sm hover:shadow-md hover:bg-slate-50 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-slate-300"
           >
-            <span aria-hidden className="text-lg">
-              ←
-            </span>
+            <span aria-hidden className="text-lg">←</span>
             <span>Back to trip details</span>
           </button>
         </div>
 
         <div className="flex w-full sm:w-auto flex-col items-stretch sm:items-end gap-2">
+
+          {/* RED ERROR BANNER (above confirm button) */}
+          {exceedsCapacity && (
+            <div className="rounded-md bg-red-50 border border-red-200 text-red-700 text-sm p-3 w-full sm:w-auto">
+              Too many passengers for the selected vehicle.  
+              {vehicle?.name} allows max {maxCapacity} passengers.
+            </div>
+          )}
+
           <p className="text-xs text-slate-500 max-w-xl text-left sm:text-right">
             You&apos;ll see the final confirmation on the next screen. For card
             payments, we&apos;ll charge you now to secure your booking.
