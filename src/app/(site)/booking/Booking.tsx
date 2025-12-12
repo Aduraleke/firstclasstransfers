@@ -131,118 +131,82 @@ export default function Booking({ initialRouteId = "" }: BookingProps) {
     if (submitting) return;
     setSubmitError(null);
 
-    // minimal client-side validations
+    // minimal validation
     if (!draft.name || !draft.phone || !draft.email) {
-      setSubmitError(
-        "Please complete name, phone and email before confirming."
-      );
+      setSubmitError("Please complete all required fields.");
       scrollToTop();
       return;
     }
 
-    // Ensure routes are loaded
     if (routesLoading) {
-      setSubmitError(
-        "Route data is still loading — please wait a moment and try again."
-      );
-      scrollToTop();
+      setSubmitError("Routes are still loading. Please wait.");
       return;
     }
 
-    // Validate routeId against server-provided list
-    if (!draft.routeId || !allowedRouteIds.includes(draft.routeId)) {
-      // helpful message showing nearest matches (title list) to help user/admin debug
-      const available = routeList
-        .slice(0, 10)
-        .map((r) => `${r.title} (${r.id})`)
-        .join(", ");
-      setSubmitError(
-        `Invalid route selection. The server doesn't recognise "${draft.routeId}". Available routes: ${available}`
-      );
-      scrollToTop();
+    if (!allowedRouteIds.includes(draft.routeId)) {
+      setSubmitError("Invalid route selected.");
       return;
     }
 
-    // CARD flow -> show modal to confirm redirect (or directly redirect if you prefer)
+    // CARD FLOW
     if (draft.paymentMethod === "card") {
       setShowCardModal(true);
       return;
     }
 
-    // CASH flow -> call the JSON API
+    // CASH FLOW
     setSubmitting(true);
+
     try {
-      const resp = await fetch("/api/bookings", {
+      const res = await fetch("/api/bookings/cash", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(draft),
       });
 
-      const contentType = resp.headers.get("content-type") ?? "";
-
-      // If server returned JSON
-      if (contentType.includes("application/json")) {
-        const json = await resp.json();
-        if (!resp.ok) {
-          const msg =
-            json?.error ??
-            json?.message ??
-            `Booking failed (status ${resp.status})`;
-          setSubmitError(String(msg));
-          setSubmitting(false);
-          scrollToTop();
-          return;
-        }
-        // success
-        setSubmitted(true);
-        setSubmitting(false);
-        scrollToTop();
-        return;
+      const json = await res.json();
+      if (!res.ok || !json.ok) {
+        throw new Error(json?.error || "Booking failed");
       }
 
-      // If server returned HTML (most likely a Next error page or 404)
-      const text = await resp.text();
-      console.error(
-        "Server returned non-JSON response for /api/bookings:",
-        text
-      );
-      setSubmitError(
-        `Unexpected server response. Received HTML instead of JSON. Status ${resp.status}. Check server logs or open network tab for response HTML.`
-      );
+      setSubmitted(true);
       setSubmitting(false);
-      scrollToTop();
-    } catch (err: unknown) {
-      console.error("Booking submission error:", err);
-      setSubmitError(
-        (err as Error)?.message ??
-          "An unexpected error occurred. Please try again."
-      );
+    } catch (err) {
+      setSubmitError(err instanceof Error ? err.message : "Booking failed");
       setSubmitting(false);
-      scrollToTop();
     }
   };
 
   // invoked from the modal: proceed to myPOS by submitting a hidden form (browser navigates)
-  const confirmCardAndRedirect = () => {
-    // build form and submit to endpoint that returns myPOS HTML
-    const form = document.createElement("form");
-    form.method = "POST";
-    form.action = "/api/bookings?pay=true";
-    form.style.display = "none";
+const redirectToCardPayment = async () => {
+  setSubmitting(true);
+  setSubmitError(null);
 
-    const payload = { ...draft };
-    Object.entries(payload).forEach(([k, v]) => {
-      const input = document.createElement("input");
-      input.type = "hidden";
-      input.name = k;
-      input.value = v == null ? "" : String(v);
-      form.appendChild(input);
+  try {
+    const res = await fetch("/api/bookings/card/init", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(draft),
     });
 
-    document.body.appendChild(form);
-    form.submit();
-    // do not set submitting here — navigation will occur
-  };
+    if (!res.ok) {
+      throw new Error("Payment initialization failed");
+    }
+
+    // ✅ Backend returns HTML, not JSON
+    const html = await res.text();
+
+    // ✅ Replace current document with the payment form
+    document.open();
+    document.write(html);
+    document.close();
+  } catch (err) {
+    setSubmitError(
+      err instanceof Error ? err.message : "Payment failed"
+    );
+    setSubmitting(false);
+  }
+};
 
   // After confirm – thank you UI (same as before)
   if (submitted) {
@@ -398,7 +362,7 @@ export default function Booking({ initialRouteId = "" }: BookingProps) {
               </button>
               <button
                 type="button"
-                onClick={confirmCardAndRedirect}
+                onClick={redirectToCardPayment}
                 className="px-4 py-2 rounded-full text-white"
                 style={{
                   background: "linear-gradient(135deg,#b07208,#162c4b)",

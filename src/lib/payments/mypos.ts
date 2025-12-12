@@ -1,54 +1,128 @@
-// lib/payments/mypos.ts
-export type MyPOSCheckoutConfig = {
-  isSandbox: boolean;
-  sid: string;
-  clientNumber: string;
-  keyIndex: number;
-  privateKeyPEM: string;
-  currency?: string;
-  okUrl?: string;
-  cancelUrl?: string;
-  notifyUrl?: string;
+// src/lib/payments/mypos.ts
+
+export type MyPOSCheckoutResult = {
+  redirectUrl: string;
 };
 
-export async function loadMyPOSFactory(): Promise<unknown> {
-  // dynamic import to avoid require() and to keep this server-only
-  const mod = await import("@mypos-ltd/mypos");
-  // the package may export default or named; prefer default if present
-  return (mod && (mod.default ?? mod));
+type PurchaseParams = {
+  orderId: string;
+  amount: number;
+  currency: string;
+  udf1?: string;
+  customer: {
+    email: string;
+    name?: string;
+    phone?: string;
+  };
+};
+// Minimal type definition for the parts of the myPOS SDK we use
+type MyPOSModule = {
+  default?: (config: unknown) => MyPOSClient;
+};
+
+type MyPOSClient = {
+  checkout: {
+    purchase: (args: {
+      orderId: string;
+      amount: number;
+      currency: string;
+      udf1?: string;
+      customer: {
+        email: string;
+        name?: string;
+        phone?: string;
+      };
+      cartItems: Array<{
+        name: string;
+        quantity: number;
+        price: number;
+      }>;
+    }) => Promise<{ redirectUrl?: string; checkoutUrl?: string; url?: string }>;
+  };
+};
+
+
+export async function createMyPOSCheckout(
+  config: unknown,
+  params: PurchaseParams
+): Promise<MyPOSCheckoutResult> {
+  // typed import
+  const mod = (await import("@mypos-ltd/mypos")) as MyPOSModule;
+
+  const createClient = mod.default ?? mod;
+  if (typeof createClient !== "function") {
+    throw new Error("Invalid myPOS SDK: expected factory function");
+  }
+
+  const client = createClient(config);
+
+  if (!client?.checkout?.purchase) {
+    throw new Error("myPOS checkout.purchase() not available");
+  }
+
+  const result = await client.checkout.purchase({
+    orderId: params.orderId,
+    amount: params.amount,
+    currency: params.currency,
+    udf1: params.udf1,
+    customer: {
+      email: params.customer.email,
+      name: params.customer.name,
+      phone: params.customer.phone,
+    },
+    cartItems: [
+      {
+        name: "Airport Transfer",
+        quantity: 1,
+        price: params.amount,
+      },
+    ],
+  });
+
+  const redirectUrl = result.redirectUrl || result.checkoutUrl || result.url;
+
+  if (!redirectUrl) {
+    console.error("Unexpected myPOS response:", result);
+    throw new Error("myPOS did not return redirect URL");
+  }
+
+  return { redirectUrl };
 }
 
-/**
- * Build a configuration object for the myPOS SDK.
- * Throws if required env vars are missing.
- */
-export function buildCheckoutConfig(overrides?: Partial<MyPOSCheckoutConfig>) {
-  const sid = overrides?.sid ?? process.env.MYPOS_SID;
-  const clientNumber = overrides?.clientNumber ?? process.env.MYPOS_CLIENT_NUMBER;
-  const keyIndex = overrides?.keyIndex ?? Number(process.env.MYPOS_KEY_INDEX || 1);
-  const privateKeyPEM = overrides?.privateKeyPEM ?? process.env.MYPOS_PRIVATE_KEY;
+export function buildMyPOSConfig() {
+  const required = [
+    "MYPOS_SID",
+    "MYPOS_CLIENT_NUMBER",
+    "MYPOS_PRIVATE_KEY",
+    "MYPOS_KEY_INDEX",
+    "MYPOS_OK_URL",
+    "MYPOS_CANCEL_URL",
+    "MYPOS_NOTIFY_URL",
+  ] as const;
 
-  const missing: string[] = [];
-  if (!sid) missing.push("MYPOS_SID");
-  if (!clientNumber) missing.push("MYPOS_CLIENT_NUMBER");
-  if (!privateKeyPEM) missing.push("MYPOS_PRIVATE_KEY");
-  if (missing.length) {
-    throw new Error(`Missing myPOS env/config: ${missing.join(", ")}`);
+  for (const key of required) {
+    if (!process.env[key]) {
+      throw new Error(`Missing env: ${key}`);
+    }
   }
 
   return {
-    isSandbox: overrides?.isSandbox ?? ((process.env.MYPOS_IS_SANDBOX || "true") === "true"),
-    logLevel: "error",
+    logLevel: "info",
+    isSandbox: true,
     checkout: {
-      sid,
+      sid: process.env.MYPOS_SID!,
+      clientNumber: process.env.MYPOS_CLIENT_NUMBER!,
+      privateKey: process.env.MYPOS_PRIVATE_KEY!,
+      keyIndex: Number(process.env.MYPOS_KEY_INDEX),
       lang: "EN",
-      currency: overrides?.currency ?? process.env.MYPOS_CURRENCY ?? "EUR",
-      clientNumber,
-      okUrl: overrides?.okUrl ?? process.env.MYPOS_OK_URL ?? "",
-      cancelUrl: overrides?.cancelUrl ?? process.env.MYPOS_CANCEL_URL ?? "",
-      notifyUtr: overrides?.notifyUrl ?? process.env.MYPOS_NOTIFY_URL ?? "",
-      keyIndex: Number(keyIndex),
-      privateKey: privateKeyPEM,
+      currency: "EUR",
+
+      okUrl: process.env.MYPOS_OK_URL!,
+      cancelUrl: process.env.MYPOS_CANCEL_URL!,
+      notifyUtr: process.env.MYPOS_NOTIFY_URL!,
+
+      // 🔥 CRITICAL: prevents HTML streaming
+      paymentParametersRequired: 0,
     },
   };
 }
