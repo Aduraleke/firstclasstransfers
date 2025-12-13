@@ -41,7 +41,12 @@ const POPULAR_ROUTE_SLUGS: RouteDetailSlug[] = [
   "paphos-airport-larnaca",
   "limassol-nicosia",
   "limassol-paphos",
+  "nicosia-larnaca-airport",
+  "nicosia-limassol",
+  "nicosia-paphos-airport",
+  "larnaca-airport-famagusta",
 ];
+
 
 const POPULAR_ROUTE_TAGS: Partial<Record<RouteDetailSlug, string>> = {
   "larnaca-airport-nicosia": "Most booked",
