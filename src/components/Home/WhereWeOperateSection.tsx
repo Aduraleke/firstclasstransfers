@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { motion } from "framer-motion";
 import { Icon } from "@iconify/react";
 import airplaneIcon from "@iconify/icons-mdi/airplane";
@@ -14,28 +15,29 @@ const BRAND = {
 
 type DestLink = {
   label: string;
+  slug: string; // ✅ NEW
 };
 
 const LARNACA_DESTINATIONS: DestLink[] = [
-  { label: "Larnaca City & Mackenzie Beach", },
-  { label: "Ayia Napa, Nissi Beach & Makronissos" },
-  { label: "Protaras, Pernera, Paralimni & Kapparis"},
-  { label: "Nicosia (Lefkosia)" },
-  { label: "Limassol & Limassol Marina", },
-  { label: "Pissouri, Paphos, Coral Bay, Polis & Latchi"},
+  { label: "Larnaca City & Mackenzie Beach", slug: "larnaca-airport-larnaca" },
+  { label: "Ayia Napa, Nissi Beach & Makronissos", slug: "larnaca-airport-ayia-napa" },
+  { label: "Protaras, Pernera, Paralimni & Kapparis", slug: "larnaca-airport-protaras" },
+  { label: "Nicosia (Lefkosia)", slug: "larnaca-airport-nicosia" },
+  { label: "Limassol & Limassol Marina", slug: "larnaca-airport-limassol" },
+  { label: "Pissouri, Paphos, Coral Bay, Polis & Latchi", slug: "larnaca-airport-paphos" },
   {
     label: "Kyrenia & Famagusta (selected cross-border routes)",
-
+    slug: "larnaca-airport-kyrenia",
   },
 ];
 
 const PAPHOS_DESTINATIONS: DestLink[] = [
-  { label: "Limassol & Amathus seafront", },
-  { label: "Nicosia (capital)" },
-  { label: "Larnaca City & Larnaca Airport"},
+  { label: "Limassol & Amathus seafront", slug: "paphos-airport-limassol" },
+  { label: "Nicosia (capital)", slug: "paphos-airport-nicosia" },
+  { label: "Larnaca City & Larnaca Airport", slug: "paphos-airport-larnaca" },
   {
     label: "Ayia Napa, Protaras & Famagusta (long-distance)",
-
+    slug: "paphos-airport-ayia-napa",
   },
 ];
 
@@ -56,7 +58,7 @@ const REGIONS: RegionConfig[] = [
     tag: "Ayia Napa · Protaras",
     description:
       "Lively beach resorts, family hotels and villas in Ayia Napa, Protaras, Pernera, Paralimni and Kapparis.",
-    image: "/east-coast.jpg", // update with your real asset
+    image: "/east-coast.jpg",
   },
   {
     id: "west",
@@ -90,7 +92,7 @@ export default function WhereWeOperateSection() {
 
   return (
     <section className="relative overflow-hidden bg-[#f5f6fb] py-20 text-slate-900 sm:py-24">
-      {/* Background: soft map grid + gradients */}
+      {/* Background */}
       <div
         className="pointer-events-none absolute inset-0 opacity-80"
         aria-hidden
@@ -116,17 +118,13 @@ export default function WhereWeOperateSection() {
           </h2>
           <p className="text-sm leading-relaxed text-slate-600 sm:text-[15px]">
             From Larnaca and Paphos Airports we provide fixed-price taxi
-            transfers to all major cities and resorts across Cyprus. Whether
-            you’re heading east to Ayia Napa and Protaras, west to Limassol and
-            Paphos, inland to Nicosia and the Troodos mountains, or across the
-            Green Line to Kyrenia and Famagusta (where permitted), we’ve got
-            you covered.
+            transfers to all major cities and resorts across Cyprus.
           </p>
         </div>
 
         {/* MAIN LAYOUT */}
         <div className="grid gap-10 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1.3fr)] lg:items-center">
-          {/* LEFT – region images instead of radar circle */}
+          {/* LEFT – region images */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -135,7 +133,6 @@ export default function WhereWeOperateSection() {
             className="w-full"
           >
             <div className="relative overflow-hidden rounded-3xl border border-slate-200 bg-white/90 px-5 py-6 shadow-[0_22px_60px_rgba(15,23,42,0.16)] sm:px-7 sm:py-7">
-              {/* Active region image */}
               <div className="relative mb-5 overflow-hidden rounded-2xl">
                 <div className="relative h-56 w-full sm:h-64">
                   <Image
@@ -170,7 +167,7 @@ export default function WhereWeOperateSection() {
                 {region.description}
               </p>
 
-              {/* Region selector with active ring */}
+              {/* Region selector */}
               <div className="mt-5 grid gap-2 sm:grid-cols-2">
                 {REGIONS.map((r) => {
                   const isActive = r.id === activeRegion;
@@ -191,13 +188,13 @@ export default function WhereWeOperateSection() {
                           className="pointer-events-none absolute -inset-0.5 rounded-3xl border border-[rgba(176,114,8,0.8)]"
                         />
                       )}
+
                       <span
                         className={`mt-1 inline-block h-1.5 w-1.5 rounded-full ${
-                          isActive
-                            ? "bg-[rgba(176,114,8,0.95)]"
-                            : "bg-slate-400"
+                          isActive ? "bg-[rgba(176,114,8,0.95)]" : "bg-slate-400"
                         }`}
                       />
+
                       <div className="relative z-10">
                         <p
                           className={`text-[11px] font-semibold uppercase tracking-[0.16em] ${
@@ -206,9 +203,7 @@ export default function WhereWeOperateSection() {
                         >
                           {r.name}
                         </p>
-                        <p className="text-[11px] text-slate-600">
-                          {r.tag}
-                        </p>
+                        <p className="text-[11px] text-slate-600">{r.tag}</p>
                       </div>
                     </button>
                   );
@@ -216,14 +211,14 @@ export default function WhereWeOperateSection() {
               </div>
 
               <p className="mt-4 text-[11px] text-slate-500">
-                Tap a region to see a typical area we serve. We also cover many
-                smaller villages and resorts nearby.
+                Tap a region to see a typical area we serve.
               </p>
             </div>
           </motion.div>
 
-          {/* RIGHT – intertwined locations: some left, some right (two clean columns) */}
+          {/* RIGHT – destinations with links */}
           <div className="space-y-7">
+
             {/* Larnaca belt */}
             <div className="rounded-3xl border border-slate-200 bg-white/90 px-4 py-5 shadow-[0_14px_40px_rgba(15,23,42,0.08)] sm:px-5 sm:py-6">
               <div className="mb-4 flex items-center gap-2">
@@ -233,6 +228,7 @@ export default function WhereWeOperateSection() {
                 >
                   <Icon icon={airplaneIcon} width={18} height={18} />
                 </div>
+
                 <div className="flex flex-col">
                   <span className="text-[11px] uppercase tracking-[0.18em] text-slate-500">
                     From Larnaca Airport (LCA)
@@ -244,16 +240,15 @@ export default function WhereWeOperateSection() {
               </div>
 
               <div className="grid gap-2 sm:grid-cols-2">
-                {LARNACA_DESTINATIONS.map((d, idx) => (
-                  <div
+                {LARNACA_DESTINATIONS.map((d) => (
+                  <Link
                     key={d.label}
-                    className={`inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-[12px] text-slate-700 transition-colors hover:border-[rgba(176,114,8,0.8)] hover:bg-white hover:text-[rgb(22,44,75)] ${
-                      idx % 2 === 0 ? "justify-start" : "sm:justify-start"
-                    }`}
+                    href={`/routes/${d.slug}`}
+                    className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-[12px] text-slate-700 transition-colors hover:border-[rgba(176,114,8,0.8)] hover:bg-white hover:text-[rgb(22,44,75)]"
                   >
                     <Icon icon={mapMarkerIcon} width={14} height={14} />
                     <span className="line-clamp-1">{d.label}</span>
-                  </div>
+                  </Link>
                 ))}
               </div>
             </div>
@@ -267,6 +262,7 @@ export default function WhereWeOperateSection() {
                 >
                   <Icon icon={airplaneIcon} width={18} height={18} />
                 </div>
+
                 <div className="flex flex-col">
                   <span className="text-[11px] uppercase tracking-[0.18em] text-slate-500">
                     From Paphos Airport (PFO)
@@ -278,24 +274,23 @@ export default function WhereWeOperateSection() {
               </div>
 
               <div className="grid gap-2 sm:grid-cols-2">
-                {PAPHOS_DESTINATIONS.map((d, idx) => (
-                  <div
+                {PAPHOS_DESTINATIONS.map((d) => (
+                  <Link
                     key={d.label}
-                    className={`inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-[12px] text-slate-700 transition-colors hover:border-[rgba(176,114,8,0.8)] hover:bg-white hover:text-[rgb(22,44,75)] ${
-                      idx % 2 === 0 ? "justify-start" : "sm:justify-start"
-                    }`}
+                    href={`/routes/${d.slug}`}
+                    className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-[12px] text-slate-700 transition-colors hover:border-[rgba(176,114,8,0.8)] hover:bg-white hover:text-[rgb(22,44,75)]"
                   >
                     <Icon icon={mapMarkerIcon} width={14} height={14} />
                     <span className="line-clamp-1">{d.label}</span>
-                  </div>
+                  </Link>
                 ))}
               </div>
             </div>
 
             <p className="text-[12px] text-slate-500">
-              Each destination name links to a detailed route page with pricing
-              and typical journey times.
+              Each destination name links to a detailed route page with pricing and typical journey times.
             </p>
+
           </div>
         </div>
       </div>
