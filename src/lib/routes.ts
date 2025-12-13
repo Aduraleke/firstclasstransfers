@@ -6,6 +6,7 @@
 
 export type RouteDetailSlug =
   | "nicosia-larnaca-airport"
+  | "nicosia-troodos"
   | "nicosia-limassol"
   | "nicosia-paphos-airport"
   | "nicosia-ercan-airport"
@@ -23,6 +24,7 @@ export type RouteDetailSlug =
   | "limassol-nicosia"
   | "limassol-paphos-airport"
   | "limassol-paphos"
+
   | "limassol-troodos";
 
 export type RouteFAQ = {
@@ -2045,6 +2047,120 @@ Our drivers are used to winding mountain roads and changing weather, including w
     bookCtaSupport:
       "Book your fixed-price mountain transfer and enjoy a safe, scenic ride from Limassol to Troodos.",
   },
+
+  // 20) Nicosia → Troodos
+{
+  slug: "nicosia-troodos",
+  from: "Nicosia",
+  to: "Troodos Mountains",
+
+  metaTitle:
+    "Taxi from Nicosia to Troodos | Private Mountain Transfer (from €80)",
+  metaDescription:
+    "Private taxi from Nicosia to the Troodos Mountains from €80. Fixed price per vehicle, experienced mountain drivers, flexible stops and door-to-door service. Ideal for day trips, hiking and ski season.",
+
+  heroTitle: "Taxi Transfer from Nicosia to Troodos Mountains",
+  subheadline:
+    "Fixed Prices: €80 (up to 4 passengers) · €110 (up to 6 passengers)\nDistance: 80–85 km · Average Journey: 1h 20–1h 40",
+
+  body: `Escape the city and head into the fresh mountain air of Troodos with a private taxi from Nicosia. Whether you’re planning a hiking day, a cool summer escape, a winter ski trip, or a quiet village stay, our door-to-door transfer is the most comfortable and time-efficient way to travel from the capital to the Troodos Mountains.
+
+Your driver will collect you from your home, hotel, office or university in Nicosia and drive you safely into the mountains, with optional short photo or coffee stops along the way. No need to worry about mountain roads, parking or winter conditions – you simply relax and enjoy the scenery.`,
+
+  distance: "80–85 km",
+  time: "1h 20–1h 40",
+  sedanPrice: "€80",
+  vanPrice: "€110",
+
+  whatMakesBetter: [
+    "Fixed price per vehicle – €80 (1–4 passengers) · €110 (up to 6 passengers)",
+    "No meter, no night surcharge – same price day & night",
+    "Drivers experienced with mountain roads and winter conditions",
+    "Flexible drop-off at Troodos Square, hotels, lodges or trailheads",
+    "Perfect for day trips, hiking weekends or ski season",
+    "Comfortable sedans and V-Class minivans for groups & families"
+  ],
+
+  whatsIncluded: [
+    "€80 per standard car (up to 4 passengers)",
+    "€110 per minivan (up to 6 passengers)",
+    "Door-to-door pickup from any address in Nicosia",
+    "Drop-off at Troodos Square, hotels, lodges or trailheads",
+    "Air-conditioned vehicle suitable for mountain driving",
+    "Free Wi-Fi & bottled water",
+    "Baby/child seats on request (no extra charge)",
+    "Licensed, insured, English-speaking driver",
+    "All tolls, VAT and insurance included",
+    "All prices are per vehicle, not per person."
+  ],
+
+  vehicleOptions: [
+    {
+      type: "Standard Car",
+      maxPassengers: "up to 4",
+      idealFor: "Couples, small families, hikers",
+      fixedPrice: "€80",
+    },
+    {
+      type: "Minivan",
+      maxPassengers: "up to 6",
+      idealFor: "Families, groups, ski or hiking equipment",
+      fixedPrice: "€110",
+    },
+  ],
+
+  destinationHighlights: [
+    "Cooler temperatures in summer – perfect escape from city heat",
+    "Scenic hiking trails, forests and waterfalls",
+    "Ski area in winter (seasonal)",
+    "Nearby traditional villages like Platres, Kakopetria and Pedoulas",
+    "Stone-built guesthouses, cosy hotels and mountain tavernas",
+  ],
+
+  idealFor: [
+    "Day trips from Nicosia",
+    "Hikers, cyclists and nature lovers",
+    "Families seeking cooler weather in summer",
+    "Couples on scenic mountain getaways",
+    "Groups travelling with luggage or ski equipment",
+  ],
+
+  faq: [
+    {
+      question: "Is €80 per person or per car?",
+      answer:
+        "The €80 fare is per car, for up to 4 passengers. For up to 6 passengers, the fixed price is €110 per minivan.",
+    },
+    {
+      question: "Is there any extra charge at night or on weekends?",
+      answer:
+        "No. Prices are fixed 24/7 for pre-booked transfers – no night or weekend surcharge.",
+    },
+    {
+      question: "Can we stop on the way for photos or coffee?",
+      answer:
+        "Yes. Short photo or comfort stops are included – just ask your driver.",
+    },
+    {
+      question: "Do you operate in winter when there is snow?",
+      answer:
+        "Yes, we operate all year. Travel time may be longer during heavy snow, and your driver will advise you if needed.",
+    },
+    {
+      question:
+        "Can we combine Troodos with villages like Platres or Omodos in one trip?",
+      answer:
+        "Yes. We can arrange a customised day trip with multiple stops. Contact us for a tailored quote.",
+    },
+  ],
+
+  image: "/troodos.jpeg",
+  bookHref: "/booking?route=nicosia-troodos",
+  bookCtaLabel: "Book Your Taxi from Nicosia to Troodos",
+  bookCtaSupport:
+    "Reserve your fixed-price mountain transfer and enjoy a comfortable, scenic ride from Nicosia to the Troodos Mountains.",
+},
+
 ];
 
 // helper
