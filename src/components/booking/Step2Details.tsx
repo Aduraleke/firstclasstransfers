@@ -80,10 +80,8 @@ export default function Step2Details({
 
   // Passenger capacity logic
   const totalPassengers = (data.adults || 0) + (data.children || 0);
-  const maxCapacity =
-    VEHICLE_CAPACITY[data.vehicleTypeId || ""] || 0;
-  const exceedsCapacity =
-    data.vehicleTypeId && totalPassengers > maxCapacity;
+  const maxCapacity = VEHICLE_CAPACITY[data.vehicleTypeId || ""] || 0;
+  const exceedsCapacity = data.vehicleTypeId && totalPassengers > maxCapacity;
 
   const emailValid = data.email.includes("@");
 
@@ -115,12 +113,10 @@ export default function Step2Details({
 
   const isReturn = data.tripType === "return";
   const legs = isReturn ? 2 : 1;
-  const subtotal =
-    perLegPriceNumber != null ? perLegPriceNumber * legs : null;
+  const subtotal = perLegPriceNumber != null ? perLegPriceNumber * legs : null;
   const discount =
     isReturn && subtotal != null ? Math.round(subtotal * 0.1) : 0;
-  const total =
-    subtotal != null ? Math.round(subtotal - discount) : null;
+  const total = subtotal != null ? Math.round(subtotal - discount) : null;
 
   const perLegDisplay = formatEuro(perLegPriceNumber);
   const subtotalDisplay = formatEuro(subtotal);
@@ -172,17 +168,41 @@ export default function Step2Details({
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-gray-50 rounded-2xl border border-gray-200 p-4">
+          {/* Trip Type */}
           <div className="space-y-1.5">
-            <p className="text-xs font-medium text-gray-600">Trip type</p>
-            <p className="text-sm text-gray-900 capitalize">
+            <div className="flex items-center gap-1.5">
+              <svg
+                className="w-4 h-4 text-gray-500"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.7"
+                viewBox="0 0 24 24"
+              >
+                <path d="M3 12h18M3 6h12M3 18h12" />
+              </svg>
+              <p className="text-xs font-medium text-gray-600">Trip type</p>
+            </div>
+            <p className="text-sm font-semibold text-gray-900 capitalize">
               {data.tripType === "return" ? "Return (round trip)" : "One-way"}
             </p>
             <p className="text-[11px] text-emerald-700">{discountText}</p>
           </div>
 
+          {/* Route */}
           <div className="space-y-1.5">
-            <p className="text-xs font-medium text-gray-600">Route</p>
-            <p className="text-sm text-gray-900">
+            <div className="flex items-center gap-1.5">
+              <svg
+                className="w-4 h-4 text-gray-500"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.7"
+                viewBox="0 0 24 24"
+              >
+                <path d="M12 2v20M5 9l7-7 7 7" />
+              </svg>
+              <p className="text-xs font-medium text-gray-600">Route</p>
+            </div>
+            <p className="text-sm font-semibold text-gray-900">
               {routeDetail
                 ? `${routeDetail.from} → ${routeDetail.to}`
                 : route
@@ -191,9 +211,22 @@ export default function Step2Details({
             </p>
           </div>
 
+          {/* Outbound */}
           <div className="space-y-1.5">
-            <p className="text-xs font-medium text-gray-600">Outbound</p>
-            <p className="text-sm text-gray-900">
+            <div className="flex items-center gap-1.5">
+              <svg
+                className="w-4 h-4 text-gray-500"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.7"
+                viewBox="0 0 24 24"
+              >
+                <circle cx="12" cy="12" r="9" />
+                <path d="M12 7v5l3 3" />
+              </svg>
+              <p className="text-xs font-medium text-gray-600">Outbound</p>
+            </div>
+            <p className="text-sm font-semibold text-gray-900">
               {data.date || "—"} · {data.time || "—"}
             </p>
             <p className="text-[11px] text-gray-500">
@@ -204,10 +237,23 @@ export default function Step2Details({
             </p>
           </div>
 
+          {/* Return */}
           {data.tripType === "return" && (
             <div className="space-y-1.5">
-              <p className="text-xs font-medium text-gray-600">Return</p>
-              <p className="text-sm text-gray-900">
+              <div className="flex items-center gap-1.5">
+                <svg
+                  className="w-4 h-4 text-gray-500"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.7"
+                  viewBox="0 0 24 24"
+                >
+                  <path d="M4 4l7 7-7 7" />
+                  <path d="M13 4l7 7-7 7" />
+                </svg>
+                <p className="text-xs font-medium text-gray-600">Return</p>
+              </div>
+              <p className="text-sm font-semibold text-gray-900">
                 {data.returnDate || "—"} · {data.returnTime || "—"}
               </p>
               <p className="text-[11px] text-gray-500">
@@ -219,9 +265,23 @@ export default function Step2Details({
             </div>
           )}
 
+          {/* Vehicle */}
           <div className="space-y-1.5">
-            <p className="text-xs font-medium text-gray-600">Vehicle</p>
-            <p className="text-sm text-gray-900">
+            <div className="flex items-center gap-1.5">
+              <svg
+                className="w-4 h-4 text-gray-500"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.7"
+                viewBox="0 0 24 24"
+              >
+                <path d="M3 13l2-5h14l2 5M5 13v6M19 13v6M7 19h10" />
+                <circle cx="7" cy="17" r="2" />
+                <circle cx="17" cy="17" r="2" />
+              </svg>
+              <p className="text-xs font-medium text-gray-600">Vehicle</p>
+            </div>
+            <p className="text-sm font-semibold text-gray-900">
               {vehicle ? vehicle.name : "Not selected"}
             </p>
             {vehicle && (
@@ -231,9 +291,22 @@ export default function Step2Details({
             )}
           </div>
 
+          {/* Passengers */}
           <div className="space-y-1.5">
-            <p className="text-xs font-medium text-gray-600">Passengers</p>
-            <p className="text-sm text-gray-900">
+            <div className="flex items-center gap-1.5">
+              <svg
+                className="w-4 h-4 text-gray-500"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.7"
+                viewBox="0 0 24 24"
+              >
+                <circle cx="12" cy="7" r="3" />
+                <path d="M5 21v-2a7 7 0 0114 0v2" />
+              </svg>
+              <p className="text-xs font-medium text-gray-600">Passengers</p>
+            </div>
+            <p className="text-sm font-semibold text-gray-900">
               {totalPassengers || "—"} passenger
               {totalPassengers === 1 ? "" : "s"}
             </p>
@@ -244,42 +317,154 @@ export default function Step2Details({
         </div>
       </section>
 
-      {/* Fare breakdown */}
-      <section className="space-y-2">
+      <section className="space-y-3">
         <h3 className="text-sm font-semibold text-gray-800">Fare summary</h3>
 
-        <div className="rounded-lg border bg-white p-3 text-sm text-gray-700">
-          <div className="flex items-center justify-between">
-            <div>Price per vehicle / leg</div>
-            <div className="font-medium">{perLegDisplay}</div>
-          </div>
+        {/* ALWAYS VISIBLE CARD */}
+        <div className="rounded-2xl bg-white shadow-md overflow-hidden border border-gray-200">
+          {/* HEADER STRIP */}
+          <div
+            className="p-4 flex items-center justify-between"
+            style={{
+              background: `linear-gradient(135deg, ${BRAND_ACCENT}, ${BRAND_PRIMARY})`,
+              color: "white",
+            }}
+          >
+            <div className="flex items-center gap-2">
+              {/* Price Tag Icon */}
+              <svg
+                className="w-4 h-4 opacity-90"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.7"
+                viewBox="0 0 24 24"
+              >
+                <path d="M7 7h10v10H7z" />
+                <path d="M9 9l6 6M15 9l-6 6" />
+              </svg>
 
-          <div className="flex items-center justify-between mt-2">
-            <div>Legs</div>
-            <div>{legs}</div>
-          </div>
-
-          <div className="flex items-center justify-between mt-2 border-t pt-2">
-            <div>Subtotal</div>
-            <div className="font-medium">{subtotalDisplay}</div>
-          </div>
-
-          {isReturn && discount > 0 && (
-            <div className="flex items-center justify-between mt-2 text-emerald-700">
-              <div>Return discount (10%)</div>
-              <div>-{discountDisplay}</div>
+              <span className="text-sm font-semibold">Trip total</span>
             </div>
-          )}
 
-          <div className="flex items-center justify-between mt-3 border-t pt-3">
-            <div className="font-semibold">Total</div>
-            <div className="text-lg font-extrabold">{totalDisplay}</div>
+            {/* Animated Total */}
+            <span className="text-xl font-extrabold transition-all duration-300">
+              {totalDisplay}
+            </span>
           </div>
 
-          <p className="mt-2 text-[11px] text-gray-500">
-            All prices are per vehicle. Taxes and tolls included where
-            applicable. Final confirmation will show full invoice details.
-          </p>
+          {/* CONTENT */}
+          <div className="p-4 space-y-4">
+            {/* Price per leg */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2 text-gray-700">
+                <svg
+                  className="w-4 h-4 text-gray-500"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.6"
+                  viewBox="0 0 24 24"
+                >
+                  <circle cx="12" cy="12" r="9" />
+                  <path d="M12 7v10M9 9h6" />
+                </svg>
+                <span className="text-[13px]">Price per vehicle / leg</span>
+              </div>
+              <span className="font-medium transition-opacity duration-300">
+                {perLegDisplay}
+              </span>
+            </div>
+
+            {/* Legs */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2 text-gray-700">
+                <svg
+                  className="w-4 h-4 text-gray-500"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.6"
+                  viewBox="0 0 24 24"
+                >
+                  <path d="M5 12h14M5 6h14M5 18h14" />
+                </svg>
+                <span className="text-[13px]">Legs</span>
+              </div>
+              <span className="font-medium">{legs}</span>
+            </div>
+
+            {/* Subtotal */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2 text-gray-700">
+                <svg
+                  className="w-4 h-4 text-gray-500"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.6"
+                  viewBox="0 0 24 24"
+                >
+                  <path d="M4 7h16M4 12h16M4 17h16" />
+                </svg>
+                <span className="text-[13px]">Subtotal</span>
+              </div>
+              <span className="font-semibold">{subtotalDisplay}</span>
+            </div>
+
+            {/* Discount */}
+            {isReturn && discount > 0 && (
+              <div className="flex items-center justify-between text-emerald-700">
+                <div className="flex items-center gap-2">
+                  <svg
+                    className="w-4 h-4 text-emerald-600"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.7"
+                    viewBox="0 0 24 24"
+                  >
+                    <path d="M3 12l5 5L21 4" />
+                  </svg>
+                  <span className="text-[13px] font-medium">
+                    Return discount (10%)
+                  </span>
+                </div>
+                <span className="font-semibold transition-all duration-300 text-emerald-700">
+                  -{discountDisplay}
+                </span>
+              </div>
+            )}
+
+            {/* Total */}
+            <div className="flex items-center justify-between pt-2">
+              <div className="flex items-center gap-2">
+                <svg
+                  className="w-5 h-5 text-gray-800"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.7"
+                  viewBox="0 0 24 24"
+                >
+                  <circle cx="12" cy="12" r="10" />
+                  <path d="M8 12h8M12 8v8" />
+                </svg>
+                <span className="text-[14px] font-semibold text-gray-900">
+                  Total
+                </span>
+              </div>
+
+              <span className="text-xl font-extrabold text-gray-900 tracking-tight">
+                {totalDisplay}
+              </span>
+            </div>
+
+            {/* Notes */}
+            <p className="text-[11px] text-gray-500 leading-relaxed pt-1">
+              All fares are per vehicle. Taxes, airport & road fees included.
+            </p>
+          </div>
+        </div>
+
+        {/* MOBILE FLOATING BAR */}
+        <div className="fixed bottom-0 left-0 right-0 sm:hidden bg-white border-t border-gray-200 shadow-lg p-3 flex items-center justify-between z-50">
+          <span className="text-sm font-medium">Total</span>
+          <span className="text-xl font-extrabold">{totalDisplay}</span>
         </div>
       </section>
 
@@ -319,8 +504,8 @@ export default function Step2Details({
             {/* Passenger capacity error (below adults/children) */}
             {exceedsCapacity && (
               <p className="mt-1 text-[11px] text-red-600">
-                {vehicle?.name} can take max {maxCapacity} passengers.  
-                You currently selected {totalPassengers}.
+                {vehicle?.name} can take max {maxCapacity} passengers. You
+                currently selected {totalPassengers}.
               </p>
             )}
           </div>
@@ -501,17 +686,18 @@ export default function Step2Details({
             onClick={onBack}
             className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-medium bg-white border border-slate-200 text-slate-800 shadow-sm hover:shadow-md hover:bg-slate-50 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-slate-300"
           >
-            <span aria-hidden className="text-lg">←</span>
+            <span aria-hidden className="text-lg">
+              ←
+            </span>
             <span>Back to trip details</span>
           </button>
         </div>
 
         <div className="flex w-full sm:w-auto flex-col items-stretch sm:items-end gap-2">
-
           {/* RED ERROR BANNER (above confirm button) */}
           {exceedsCapacity && (
             <div className="rounded-md bg-red-50 border border-red-200 text-red-700 text-sm p-3 w-full sm:w-auto">
-              Too many passengers for the selected vehicle.  
+              Too many passengers for the selected vehicle.
               {vehicle?.name} allows max {maxCapacity} passengers.
             </div>
           )}
