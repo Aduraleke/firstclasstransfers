@@ -332,6 +332,7 @@ IP: ${ip}
   } catch (err: unknown) {
     // Top-level error handler: log full stack and return 500 with dev-only details
     console.error("booking route error (full):", err);
+    
     if (err instanceof Error) {
       console.error(err.stack);
     }

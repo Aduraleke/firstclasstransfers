@@ -27,7 +27,7 @@ export default function FloatingBookNowButton() {
           backdropFilter: "blur(4px)",
         }}
       >
-        🚖 Book Now
+        Book Now
       </Link>
     </motion.div>
   );
