@@ -106,140 +106,136 @@ export default async function RouteDetailsPage({
       <section className="overflow-hidden rounded-3xl bg-slate-950 text-slate-50 shadow-2xl ring-1 ring-slate-900/70">
         <div className="grid gap-6 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)]">
           {/* LEFT */}
-          <div className="flex flex-col justify-between gap-6 p-5 sm:p-7 lg:p-8">
-            <div className="space-y-5">
-              {/* top labels */}
-              <div className="flex flex-wrap items-center gap-2 text-[10px] sm:text-[11px]">
-                <span className="inline-flex items-center gap-1 rounded-full bg-[#b07208]/15 px-2 py-1 sm:px-2.5 sm:py-1 font-medium uppercase tracking-[0.14em] sm:tracking-[0.16em] text-[#b07208] text-[10px] sm:text-[11px]">
-                  <span className="h-1.5 w-1.5 rounded-full bg-[#b07208]" />
-                  Airport &amp; city transfer
-                </span>
-                <span className="inline-flex items-center gap-1 rounded-full bg-slate-900/80 px-2 py-1 text-slate-200 text-[10px] sm:text-[11px]">
-                  Fixed price · Private
-                </span>
-                <span className="hidden sm:inline-flex items-center gap-1 rounded-full bg-slate-900/80 px-2 py-1 text-slate-200 text-[11px]">
-                  24/7 service
-                </span>
-              </div>
+          <div className="w-full mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 py-6 sm:py-10 flex flex-col justify-between gap-8">
+            {/* TOP LABELS */}
+            <div className="flex flex-wrap items-center gap-2 text-[10px] sm:text-[11px]">
+              <span className="inline-flex items-center gap-1 rounded-full bg-[#b07208]/15 px-2.5 py-1 font-medium uppercase tracking-wider text-[#b07208]">
+                <span className="h-1.5 w-1.5 rounded-full bg-[#b07208]" />
+                Airport &amp; city transfer
+              </span>
 
-              {/* route pill */}
-              <div className="inline-flex items-center gap-2 rounded-full bg-slate-50/10 px-2.5 py-1 text-[10px] sm:text-[11px] font-medium text-slate-100">
-                <span className="inline-flex items-center gap-1">
-                  <span className="h-1.5 w-1.5 rounded-full bg-[#b07208]" />
-                  {route.from}
-                </span>
-                <span className="text-slate-400">→</span>
-                <span className="font-semibold">{route.to}</span>
-              </div>
+              <span className="inline-flex items-center gap-1 rounded-full bg-slate-900/80 px-2.5 py-1 text-slate-200">
+                Fixed price · Private
+              </span>
 
-              {/* title + subheadline */}
-              <div className="space-y-4">
-                <h1 className="text-xl sm:text-3xl lg:text-[32px] font-semibold leading-tight">
-                  {route.heroTitle}
-                </h1>
+              <span className="hidden sm:inline-flex items-center gap-1 rounded-full bg-slate-900/80 px-2.5 py-1 text-slate-200">
+                24/7 service
+              </span>
+            </div>
 
-                {subheadlineLines.length > 0 && (
-                  <div className="space-y-1 text-[12px] sm:text-[13px] text-slate-200/90">
-                    {subheadlineLines.map((line) => (
-                      <p key={line}>{line}</p>
-                    ))}
-                  </div>
-                )}
+            {/* ROUTE PILL */}
+            <div className="inline-flex flex-wrap items-center gap-2 rounded-full bg-slate-50/10 px-3 py-1.5 text-[11px] text-slate-100">
+              <span className="inline-flex items-center gap-1">
+                <span className="h-1.5 w-1.5 rounded-full bg-[#b07208]" />
+                {route.from}
+              </span>
+              <span className="text-slate-400">→</span>
+              <span className="font-semibold">{route.to}</span>
+            </div>
 
-                {bodyParagraphs[0] && (
-                  <p className="text-[12px] sm:text-[14px] leading-relaxed text-slate-200/90">
-                    {bodyParagraphs[0]}
-                  </p>
-                )}
-              </div>
+            {/* TITLE + SUBHEADLINE */}
+            <div className="space-y-4">
+              <h1 className="text-xl sm:text-3xl lg:text-4xl font-semibold leading-tight text-white wrap-break-word">
+                {route.heroTitle}
+              </h1>
 
-              {/* 💰 MAIN PRICE RIBBON (hero) */}
-              <div className="mt-2">
-                <div className="inline-flex flex-col gap-1 rounded-2xl bg-linear-to-r from-[#b07208] via-[#e0b15a] to-[#b07208] px-3 py-2.5 sm:px-4 sm:py-3 shadow-lg shadow-black/25">
-                  <p className="text-[8px] sm:text-[9px] font-semibold uppercase tracking-[0.18em] sm:tracking-[0.22em] text-white/85">
-                    Fixed fare · Per vehicle · Not per person
-                  </p>
-
-                  <div className="flex flex-wrap items-baseline gap-3 sm:gap-4 text-white">
-                    <div className="flex items-baseline gap-1">
-                      <span className="text-[9px] sm:text-[10px] font-medium uppercase tracking-[0.14em] opacity-85">
-                        From · Sedan
-                      </span>
-                      <span className="text-[17px] sm:text-[21px] font-extrabold">
-                        {route.sedanPrice}
-                      </span>
-                    </div>
-
-                    <span className="hidden sm:block h-4 w-px bg-white/40" />
-
-                    <div className="flex items-baseline gap-1">
-                      <span className="text-[9px] sm:text-[10px] font-medium uppercase tracking-[0.14em] opacity-85">
-                        Mercedes V-Class
-                      </span>
-                      <span className="text-[17px] sm:text-[21px] font-extrabold">
-                        {route.vanPrice}
-                      </span>
-                    </div>
-                  </div>
+              {subheadlineLines.length > 0 && (
+                <div className="space-y-1 text-[12px] sm:text-[13px] text-slate-200/90">
+                  {subheadlineLines.map((line) => (
+                    <p key={line} className="wrap-break-word">
+                      {line}
+                    </p>
+                  ))}
                 </div>
-              </div>
+              )}
 
-              {/* stats */}
-              <dl className="mt-3 grid gap-3 sm:grid-cols-3 text-[11px] text-slate-200/90">
-                <div className="rounded-2xl bg-slate-900/60 px-3 py-2 ring-1 ring-slate-800/80">
-                  <dt className="text-slate-400 text-[10px]">Distance</dt>
-                  <dd className="mt-0.5 text-sm font-semibold text-slate-50">
-                    {route.distance}
-                  </dd>
-                </div>
-
-                <div className="rounded-2xl bg-slate-900/60 px-3 py-2 ring-1 ring-slate-800/80">
-                  <dt className="text-slate-400 text-[10px]">
-                    Average journey
-                  </dt>
-                  <dd className="mt-0.5 text-sm font-semibold text-slate-50">
-                    {route.time}
-                  </dd>
-                </div>
-
-                <div className="rounded-2xl bg-slate-900/60 px-3 py-2 ring-1 ring-slate-800/80">
-                  <dt className="text-slate-400 text-[10px]">Best for</dt>
-                  <dd className="mt-0.5 truncate text-sm font-semibold text-slate-50">
-                    {route.idealFor || "Airport to city"}
-                  </dd>
-                </div>
-              </dl>
-
-              {/* chips */}
-              {route.idealFor && route.idealFor.length > 0 && (
-                <div className="space-y-2">
-                  <p className="text-[10px] sm:text-[11px] font-semibold uppercase tracking-[0.14em] sm:tracking-[0.16em] text-slate-400">
-                    Popular with
-                  </p>
-
-                  <div className="flex flex-wrap gap-2">
-                    {route.idealFor.slice(0, 4).map((item) => (
-                      <span
-                        key={item}
-                        className="rounded-full bg-slate-900/75 px-2 py-1 sm:px-2.5 sm:py-1 text-[10px] sm:text-[11px] text-slate-100 ring-1 ring-slate-700/80"
-                      >
-                        {item}
-                      </span>
-                    ))}
-                  </div>
-                </div>
+              {bodyParagraphs[0] && (
+                <p className="text-[13px] sm:text-[14px] leading-relaxed text-slate-200/90 wrap-break-word">
+                  {bodyParagraphs[0]}
+                </p>
               )}
             </div>
 
-            {/* CTA row */}
-            <div className="mt-3 flex flex-wrap items-center gap-2 sm:gap-3 border-t border-slate-800/70 pt-4 text-[11px] sm:text-[12px]">
+            {/* PRICE RIBBON */}
+            <div>
+              <div className="inline-flex w-full sm:w-auto flex-col gap-2 rounded-2xl bg-linear-to-r from-[#b07208] via-[#e0b15a] to-[#b07208] px-4 py-3 shadow-xl shadow-black/30">
+                <p className="text-[9px] sm:text-[10px] font-semibold uppercase tracking-wider text-white/85 text-center sm:text-left">
+                  Fixed fare · Per vehicle · Not per person
+                </p>
+
+                <div className="flex flex-wrap items-baseline gap-3 sm:gap-5 text-white justify-center sm:justify-start">
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-[10px] font-medium uppercase tracking-wider opacity-90">
+                      From · Sedan
+                    </span>
+                    <span className="text-[20px] sm:text-[22px] font-extrabold">
+                      {route.sedanPrice}
+                    </span>
+                  </div>
+
+                  <span className="hidden sm:block h-4 w-px bg-white/40" />
+
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-[10px] font-medium uppercase tracking-wider opacity-90">
+                      Mercedes V-Class
+                    </span>
+                    <span className="text-[20px] sm:text-[22px] font-extrabold">
+                      {route.vanPrice}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* STATS GRID */}
+            <dl className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-[11px] text-slate-200/90 w-full">
+              <div className="rounded-2xl bg-slate-900/60 px-3 py-2 ring-1 ring-slate-800/80">
+                <dt className="text-slate-400 text-[10px]">Distance</dt>
+                <dd className="mt-0.5 text-sm font-semibold text-slate-50 wrap-break-word">
+                  {route.distance}
+                </dd>
+              </div>
+
+              <div className="rounded-2xl bg-slate-900/60 px-3 py-2 ring-1 ring-slate-800/80">
+                <dt className="text-slate-400 text-[10px]">Average journey</dt>
+                <dd className="mt-0.5 text-sm font-semibold text-slate-50 wrap-break-word">
+                  {route.time}
+                </dd>
+              </div>
+
+              
+            </dl>
+
+            {/* POPULAR WITH CHIPS */}
+            {route.idealFor && route.idealFor.length > 0 && (
+              <div className="space-y-2 w-full">
+                <p className="text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+                  Popular with
+                </p>
+
+                <div className="flex flex-wrap gap-2">
+                  {route.idealFor.slice(0, 4).map((item) => (
+                    <span
+                      key={item}
+                      className="rounded-full bg-slate-900/75 px-3 py-1 text-[10px] sm:text-[11px] text-slate-100 ring-1 ring-slate-700/80 wrap-break-word"
+                    >
+                      {item}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* CTA ROW */}
+            <div className="border-t border-slate-800/70 pt-4 flex flex-wrap items-center gap-3 text-[11px] sm:text-[12px]">
               <Link
                 href={bookingHref}
-                className="inline-flex items-center justify-center rounded-full bg-[#b07208] px-4 py-2 sm:px-5 text-[12px] sm:text-sm font-semibold text-slate-950 shadow-lg shadow-[#b07208]/40 hover:bg-[#b07208]"
+                className="inline-flex items-center justify-center rounded-full bg-[#b07208] px-5 py-2.5 text-[12px] sm:text-sm font-semibold text-slate-900 shadow-lg shadow-[#b07208]/40 hover:bg-[#cc8a10] transition"
               >
                 {route.bookCtaLabel || "Book this route"}
               </Link>
-              <p className="text-slate-300 truncate max-w-[200px] sm:max-w-none">
+
+              <p className="text-slate-300 wrap-break-word w-full sm:w-auto">
                 Flight tracking · Meet &amp; greet · Fixed fare
               </p>
             </div>
