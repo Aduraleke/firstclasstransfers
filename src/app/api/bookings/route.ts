@@ -213,24 +213,6 @@ Notes: ${parsed.notes || ""}
 IP: ${ip}
 `;
 
-    // ---- Before sending email: explicit guard for SMTP env presence ----
-    const smtpMissing = !process.env.SMTP_HOST || !process.env.SMTP_USER || !process.env.SMTP_PASS;
-    if (smtpMissing) {
-      console.error("SMTP env missing; cannot send booking email. Env presence:", {
-        SMTP_HOST: !!process.env.SMTP_HOST,
-        SMTP_USER: !!process.env.SMTP_USER,
-        SMTP_PASS: !!process.env.SMTP_PASS,
-      });
-      // Return a 502 and a clear message in development — don't leak secrets
-      return NextResponse.json(
-        {
-          error: "Email delivery unavailable",
-          details: devOnly("Missing SMTP env variables (SMTP_HOST/SMTP_USER/SMTP_PASS)"),
-        },
-        { status: 502 },
-      );
-    }
-
     try {
       const bookingEmail = process.env.BOOKING_EMAIL || "booking@firstclasstransfers.eu";
       const info = await sendBookingEmail({

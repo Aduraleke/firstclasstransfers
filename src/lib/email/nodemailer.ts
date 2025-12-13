@@ -1,5 +1,4 @@
 import nodemailer from "nodemailer";
-import type SMTPTransport from "nodemailer/lib/smtp-transport";
 
 export type SendArgs = { to: string; subject: string; text?: string; html?: string };
 
@@ -9,20 +8,6 @@ export type SendArgs = { to: string; subject: string; text?: string; html?: stri
 let transporter: nodemailer.Transporter | null = null;
 
 function ensureEnv() {
-  const missing: string[] = [];
-  if (!process.env.SMTP_HOST) missing.push("SMTP_HOST");
-  if (!process.env.SMTP_USER) missing.push("SMTP_USER");
-  if (!process.env.SMTP_PASS) missing.push("SMTP_PASS");
-
-  if (missing.length) {
-    // Still throw here — callers (route) will often handle/report this.
-    throw new Error(`Missing SMTP env vars: ${missing.join(", ")}`);
-  }
-
-  if (!process.env.SMTP_PORT) {
-    console.warn("SMTP_PORT not set; defaulting to 587 (STARTTLS).");
-  }
-
   if (!process.env.FROM_EMAIL) {
     console.warn("FROM_EMAIL not set — defaulting to no-reply@firstclasstransfers.eu");
   }
@@ -32,64 +17,32 @@ function ensureEnv() {
 }
 
 /**
- * Create and cache a nodemailer transporter. Verifies the transporter after creation,
- * and logs verification results (does not throw on verification failure to avoid crashing on cold start).
+ * Create and cache a nodemailer transporter using local sendmail.
+ * Logs initialization for debugging purposes.
  */
 function getTransporter(): nodemailer.Transporter {
   if (transporter) return transporter;
 
   ensureEnv();
 
-  const host = process.env.SMTP_HOST!;
-  const port = Number(process.env.SMTP_PORT || 587);
-  const user = process.env.SMTP_USER!;
-  const pass = process.env.SMTP_PASS!;
+  // Use sendmail transport for local mail delivery
+  transporter = nodemailer.createTransport({
+    sendmail: true,
+    newline: "unix",
+    path: "/usr/sbin/sendmail",
+  });
 
-  const opts: SMTPTransport.Options = {
-    host,
-    port,
-    secure: port === 465,
-    auth: {
-      user,
-      pass,
-    },
-    // sensible timeouts
-    connectionTimeout: 10_000,
-    greetingTimeout: 10_000,
-    socketTimeout: 10_000,
-  };
-
-  transporter = nodemailer.createTransport(opts);
-
-  // verify immediately (log result) — do not throw to avoid crashing on cold start
-  transporter
-    .verify()
-    .then(() => {
-      console.info("SMTP transporter verified OK");
-    })
-    .catch((err) => {
-      console.error("SMTP transporter verification failed:", err && err.message ? err.message : err);
-    });
+  console.info("Sendmail transporter initialized");
 
   return transporter;
 }
 
 /**
- * Send an email for bookings. Returns the nodemailer "info" on success or throws.
- *
- * NOTE: this function returns a structured result on failure instead of leaking secrets.
+ * Send an email for bookings using the local sendmail transport.
+ * Returns the nodemailer "info" on success or throws.
  */
 export async function sendBookingEmail({ to, subject, text, html }: SendArgs) {
-  let t: nodemailer.Transporter;
-  try {
-    t = getTransporter();
-  } catch (err) {
-    // Explicit, structured error when env is missing.
-    const message = err instanceof Error ? err.message : String(err);
-    console.error("sendBookingEmail: transporter creation failed:", message);
-    // Re-throw so callers (route) can decide how to respond. Route uses devOnly to add details.
-    throw new Error(`Email configuration error: ${message}`);
-  }
+  const t = getTransporter();
 
   const fromAddress = process.env.FROM_EMAIL || "no-reply@firstclasstransfers.eu";
   const fromLabel = process.env.FROM_LABEL || "First Class Transfers";
