@@ -123,7 +123,7 @@ export default function Footer() {
                   <span>+357 96 565385</span>
                 </a>
                 <a
-                  href="mailto:info@firstclass.cy"
+                  href="mailto:booking@firstclasstransfers.eu"
                   className="flex items-center gap-2 hover:text-white transition-colors"
                 >
                   <Icon icon={emailIcon} width={16} height={16} />
