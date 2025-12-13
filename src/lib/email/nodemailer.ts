@@ -26,13 +26,16 @@ function getTransporter(): nodemailer.Transporter {
   ensureEnv();
 
   // Use sendmail transport for local mail delivery
+  // Allow custom sendmail path via environment variable, default to standard location
+  const sendmailPath = process.env.SENDMAIL_PATH || "/usr/sbin/sendmail";
+  
   transporter = nodemailer.createTransport({
     sendmail: true,
     newline: "unix",
-    path: "/usr/sbin/sendmail",
+    path: sendmailPath,
   });
 
-  console.info("Sendmail transporter initialized");
+  console.info(`Sendmail transporter initialized (path: ${sendmailPath})`);
 
   return transporter;
 }
