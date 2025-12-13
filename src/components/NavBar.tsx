@@ -251,12 +251,12 @@ export default function NavBar() {
                   </span>
                   Live · 24/7 Dispatch
                 </span>
-                <span className="inline-flex items-center gap-1 rounded-full bg-white/5 px-2.5 py-1 text-white/70 border border-white/10 text-[11px]">
+                <span className="inline-flex items-center gap-1 rounded-full bg-white/5 px-2.5 py-1 text-emerald-200 border border-emerald-400/60 text-[11px]">
                   <Icon
                     icon={clockOutlineIcon}
                     width={14}
                     height={14}
-                    className="text-white/70"
+                    className="text-emerald-200"
                   />
                   Fast Pick-Up
                 </span>
