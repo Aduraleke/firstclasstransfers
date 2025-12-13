@@ -109,21 +109,21 @@ export default async function RouteDetailsPage({
           <div className="flex flex-col justify-between gap-6 p-5 sm:p-7 lg:p-8">
             <div className="space-y-5">
               {/* top labels */}
-              <div className="flex flex-wrap items-center gap-2 text-[11px]">
-                <span className="inline-flex items-center gap-1 rounded-full bg-[#b07208]/15 px-2.5 py-1 font-medium uppercase tracking-[0.16em] text-[#b07208]">
+              <div className="flex flex-wrap items-center gap-2 text-[10px] sm:text-[11px]">
+                <span className="inline-flex items-center gap-1 rounded-full bg-[#b07208]/15 px-2 py-1 sm:px-2.5 sm:py-1 font-medium uppercase tracking-[0.14em] sm:tracking-[0.16em] text-[#b07208] text-[10px] sm:text-[11px]">
                   <span className="h-1.5 w-1.5 rounded-full bg-[#b07208]" />
                   Airport &amp; city transfer
                 </span>
-                <span className="inline-flex items-center gap-1 rounded-full bg-slate-900/80 px-2 py-1 text-slate-200">
+                <span className="inline-flex items-center gap-1 rounded-full bg-slate-900/80 px-2 py-1 text-slate-200 text-[10px] sm:text-[11px]">
                   Fixed price · Private
                 </span>
-                <span className="hidden items-center gap-1 rounded-full bg-slate-900/80 px-2 py-1 text-slate-200 sm:inline-flex">
+                <span className="hidden sm:inline-flex items-center gap-1 rounded-full bg-slate-900/80 px-2 py-1 text-slate-200 text-[11px]">
                   24/7 service
                 </span>
               </div>
 
               {/* route pill */}
-              <div className="inline-flex items-center gap-2 rounded-full bg-slate-50/10 px-3 py-1 text-[11px] font-medium text-slate-100">
+              <div className="inline-flex items-center gap-2 rounded-full bg-slate-50/10 px-2.5 py-1 text-[10px] sm:text-[11px] font-medium text-slate-100">
                 <span className="inline-flex items-center gap-1">
                   <span className="h-1.5 w-1.5 rounded-full bg-[#b07208]" />
                   {route.from}
@@ -134,18 +134,20 @@ export default async function RouteDetailsPage({
 
               {/* title + subheadline */}
               <div className="space-y-4">
-                <h1 className="text-2xl font-semibold leading-tight sm:text-3xl lg:text-[32px]">
+                <h1 className="text-xl sm:text-3xl lg:text-[32px] font-semibold leading-tight">
                   {route.heroTitle}
                 </h1>
+
                 {subheadlineLines.length > 0 && (
-                  <div className="space-y-1 text-[13px] text-slate-200/90 sm:text-sm">
+                  <div className="space-y-1 text-[12px] sm:text-[13px] text-slate-200/90">
                     {subheadlineLines.map((line) => (
                       <p key={line}>{line}</p>
                     ))}
                   </div>
                 )}
+
                 {bodyParagraphs[0] && (
-                  <p className="text-[13px] leading-relaxed text-slate-200/90 sm:text-[14px]">
+                  <p className="text-[12px] sm:text-[14px] leading-relaxed text-slate-200/90">
                     {bodyParagraphs[0]}
                   </p>
                 )}
@@ -153,25 +155,28 @@ export default async function RouteDetailsPage({
 
               {/* 💰 MAIN PRICE RIBBON (hero) */}
               <div className="mt-2">
-                <div className="inline-flex flex-col gap-1 rounded-2xl bg-linear-to-r from-[#b07208] via-[#e0b15a] to-[#b07208] px-4 py-3 shadow-lg shadow-black/25">
-                  <p className="text-[9px] font-semibold uppercase tracking-[0.22em] text-white/85">
+                <div className="inline-flex flex-col gap-1 rounded-2xl bg-linear-to-r from-[#b07208] via-[#e0b15a] to-[#b07208] px-3 py-2.5 sm:px-4 sm:py-3 shadow-lg shadow-black/25">
+                  <p className="text-[8px] sm:text-[9px] font-semibold uppercase tracking-[0.18em] sm:tracking-[0.22em] text-white/85">
                     Fixed fare · Per vehicle · Not per person
                   </p>
-                  <div className="flex flex-wrap items-baseline gap-4 text-white">
+
+                  <div className="flex flex-wrap items-baseline gap-3 sm:gap-4 text-white">
                     <div className="flex items-baseline gap-1">
-                      <span className="text-[10px] font-medium uppercase tracking-[0.16em] opacity-85">
+                      <span className="text-[9px] sm:text-[10px] font-medium uppercase tracking-[0.14em] opacity-85">
                         From · Sedan
                       </span>
-                      <span className="text-[19px] font-extrabold sm:text-[21px]">
+                      <span className="text-[17px] sm:text-[21px] font-extrabold">
                         {route.sedanPrice}
                       </span>
                     </div>
-                    <span className="h-4 w-px bg-white/40 hidden sm:block" />
+
+                    <span className="hidden sm:block h-4 w-px bg-white/40" />
+
                     <div className="flex items-baseline gap-1">
-                      <span className="text-[10px] font-medium uppercase tracking-[0.16em] opacity-85">
+                      <span className="text-[9px] sm:text-[10px] font-medium uppercase tracking-[0.14em] opacity-85">
                         Mercedes V-Class
                       </span>
-                      <span className="text-[19px] font-extrabold sm:text-[21px]">
+                      <span className="text-[17px] sm:text-[21px] font-extrabold">
                         {route.vanPrice}
                       </span>
                     </div>
@@ -180,23 +185,27 @@ export default async function RouteDetailsPage({
               </div>
 
               {/* stats */}
-              <dl className="mt-3 grid gap-3 text-[11px] text-slate-200/90 sm:grid-cols-3">
-                <div className="rounded-2xl bg-slate-900/60 px-3 py-2.5 ring-1 ring-slate-800/80">
-                  <dt className="text-slate-400">Distance</dt>
+              <dl className="mt-3 grid gap-3 sm:grid-cols-3 text-[11px] text-slate-200/90">
+                <div className="rounded-2xl bg-slate-900/60 px-3 py-2 ring-1 ring-slate-800/80">
+                  <dt className="text-slate-400 text-[10px]">Distance</dt>
                   <dd className="mt-0.5 text-sm font-semibold text-slate-50">
                     {route.distance}
                   </dd>
                 </div>
-                <div className="rounded-2xl bg-slate-900/60 px-3 py-2.5 ring-1 ring-slate-800/80">
-                  <dt className="text-slate-400">Average journey</dt>
+
+                <div className="rounded-2xl bg-slate-900/60 px-3 py-2 ring-1 ring-slate-800/80">
+                  <dt className="text-slate-400 text-[10px]">
+                    Average journey
+                  </dt>
                   <dd className="mt-0.5 text-sm font-semibold text-slate-50">
                     {route.time}
                   </dd>
                 </div>
-                <div className="rounded-2xl bg-slate-900/60 px-3 py-2.5 ring-1 ring-slate-800/80">
-                  <dt className="text-slate-400">Best for</dt>
+
+                <div className="rounded-2xl bg-slate-900/60 px-3 py-2 ring-1 ring-slate-800/80">
+                  <dt className="text-slate-400 text-[10px]">Best for</dt>
                   <dd className="mt-0.5 truncate text-sm font-semibold text-slate-50">
-                    {route.idealFor?.[0] || "Airport to city"}
+                    {route.idealFor || "Airport to city"}
                   </dd>
                 </div>
               </dl>
@@ -204,14 +213,15 @@ export default async function RouteDetailsPage({
               {/* chips */}
               {route.idealFor && route.idealFor.length > 0 && (
                 <div className="space-y-2">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-400">
+                  <p className="text-[10px] sm:text-[11px] font-semibold uppercase tracking-[0.14em] sm:tracking-[0.16em] text-slate-400">
                     Popular with
                   </p>
+
                   <div className="flex flex-wrap gap-2">
                     {route.idealFor.slice(0, 4).map((item) => (
                       <span
                         key={item}
-                        className="rounded-full bg-slate-900/75 px-2.5 py-1 text-[11px] text-slate-100 ring-1 ring-slate-700/80"
+                        className="rounded-full bg-slate-900/75 px-2 py-1 sm:px-2.5 sm:py-1 text-[10px] sm:text-[11px] text-slate-100 ring-1 ring-slate-700/80"
                       >
                         {item}
                       </span>
@@ -222,14 +232,14 @@ export default async function RouteDetailsPage({
             </div>
 
             {/* CTA row */}
-            <div className="mt-3 flex flex-wrap items-center gap-3 border-t border-slate-800/70 pt-4 text-[12px]">
+            <div className="mt-3 flex flex-wrap items-center gap-2 sm:gap-3 border-t border-slate-800/70 pt-4 text-[11px] sm:text-[12px]">
               <Link
                 href={bookingHref}
-                className="inline-flex items-center justify-center rounded-full bg-[#b07208] px-5 py-2 text-sm font-semibold text-slate-950 shadow-lg shadow-[#b07208]/40 hover:bg-[#b07208]"
+                className="inline-flex items-center justify-center rounded-full bg-[#b07208] px-4 py-2 sm:px-5 text-[12px] sm:text-sm font-semibold text-slate-950 shadow-lg shadow-[#b07208]/40 hover:bg-[#b07208]"
               >
                 {route.bookCtaLabel || "Book this route"}
               </Link>
-              <p className="text-slate-300">
+              <p className="text-slate-300 truncate max-w-[200px] sm:max-w-none">
                 Flight tracking · Meet &amp; greet · Fixed fare
               </p>
             </div>

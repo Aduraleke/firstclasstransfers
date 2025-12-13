@@ -54,14 +54,16 @@ const POPULAR_ROUTE_TAGS: Partial<Record<RouteDetailSlug, string>> = {
   "limassol-paphos": "Coastal favourite",
 };
 
-// Small helper for card text
 function buildDescription(route: RouteDetail): string {
   const base =
     route.metaDescription ||
     route.body.split("\n\n")[0] ||
     `${route.from} to ${route.to} – fixed-price private transfer.`;
 
-  return base.length <= 180 ? base : base.slice(0, 177) + "…";
+  if (base.length <= 180) return base;
+
+  const trimmed = base.slice(0, 180);
+  return trimmed.substring(0, trimmed.lastIndexOf(" "));
 }
 
 // ✅ Build POPULAR_ROUTES without nulls

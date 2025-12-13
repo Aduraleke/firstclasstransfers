@@ -168,7 +168,7 @@ export default function Footer() {
                   <Icon icon={instagramIcon} width={16} height={16} />
                 </Link>
                 <Link
-                  href="#"
+                  href="https://web.facebook.com/profile.php?id=61577611072770"
                   aria-label="Facebook"
                   className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-white/5 border border-white/10 hover:bg-white/15 transition-colors"
                 >

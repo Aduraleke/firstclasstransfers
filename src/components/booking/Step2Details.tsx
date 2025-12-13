@@ -29,6 +29,27 @@ const VEHICLE_CAPACITY: Record<string, number> = {
   vclass: 6,
 };
 
+const VEHICLE_ORDER = ["sedan", "vclass"] as const;
+
+function getUpgradeVehicle(
+  current: string,
+  passengers: number
+): string | null {
+  const currentIndex = VEHICLE_ORDER.indexOf(
+    current as (typeof VEHICLE_ORDER)[number]
+  );
+
+  if (currentIndex === -1) return null;
+
+  for (let i = currentIndex + 1; i < VEHICLE_ORDER.length; i++) {
+    const candidate = VEHICLE_ORDER[i];
+    if (VEHICLE_CAPACITY[candidate] >= passengers) {
+      return candidate;
+    }
+  }
+  return null;
+}
+
 function parsePriceToNumber(price?: string): number | null {
   if (!price) return null;
   const match = price.replace(",", ".").match(/(\d+(\.\d+)?)/);
@@ -41,7 +62,6 @@ function formatEuro(n: number | null): string {
   return `€${n.toFixed(0)}`;
 }
 
-// Map vehicle ids to route.vehicleOptions index
 const VEHICLE_TO_ROUTE_INDEX: Record<string, number> = {
   sedan: 0,
   vclass: 1,
@@ -53,10 +73,36 @@ export default function Step2Details({
   onBack,
   onConfirm,
 }: Props) {
+  // ---------------------------------------
+  // FIXED: These must come BEFORE any usage
+  // ---------------------------------------
+  const totalPassengers = (data.adults || 0) + (data.children || 0);
+  const maxCapacity =
+    data.vehicleTypeId && VEHICLE_CAPACITY[data.vehicleTypeId]
+      ? VEHICLE_CAPACITY[data.vehicleTypeId]
+      : 0;
+
+  const exceedsCapacity =
+    Boolean(data.vehicleTypeId) && totalPassengers > maxCapacity;
+  // ---------------------------------------
+
   const route = useMemo(
     () => TRANSFER_ROUTES.find((r) => r.id === data.routeId),
     [data.routeId]
   );
+
+  const [showUpgradeModal, setShowUpgradeModal] = React.useState(false);
+
+  const upgradeVehicleId = getUpgradeVehicle(
+    data.vehicleTypeId,
+    totalPassengers
+  );
+
+  React.useEffect(() => {
+    if (exceedsCapacity && upgradeVehicleId) {
+      setShowUpgradeModal(true);
+    }
+  }, [exceedsCapacity, upgradeVehicleId]);
 
   const routeDetail: RouteDetail | undefined = useMemo(
     () => (data.routeId ? getRouteDetailBySlug(data.routeId) : undefined),
@@ -78,11 +124,6 @@ export default function Step2Details({
     [data.returnTimePeriod]
   );
 
-  // Passenger capacity logic
-  const totalPassengers = (data.adults || 0) + (data.children || 0);
-  const maxCapacity = VEHICLE_CAPACITY[data.vehicleTypeId || ""] || 0;
-  const exceedsCapacity = data.vehicleTypeId && totalPassengers > maxCapacity;
-
   const emailValid = data.email.includes("@");
 
   const hasReturnDetails =
@@ -91,7 +132,6 @@ export default function Step2Details({
       Boolean(data.returnTime) &&
       Boolean(data.returnTimePeriod));
 
-  // Updated canConfirm (capacity added)
   const canConfirm =
     Boolean(data.name) &&
     Boolean(data.phone) &&
@@ -760,6 +800,56 @@ export default function Step2Details({
           </div>
         </div>
       </div>
+
+      {showUpgradeModal && upgradeVehicleId && (
+        <div className="fixed inset-0 z-60 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+          <div className="w-full max-w-md rounded-3xl bg-white p-6 shadow-2xl">
+            <h3 className="text-lg font-semibold text-gray-900">
+              Upgrade vehicle?
+            </h3>
+
+            <p className="mt-2 text-sm text-gray-600">
+              You selected <strong>{totalPassengers}</strong> passengers, but
+              the <strong>{vehicle?.name}</strong> allows only {maxCapacity}.
+            </p>
+
+            <div className="mt-4 rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
+              <p className="text-sm font-medium text-emerald-900">
+                Recommended upgrade
+              </p>
+              <p className="text-sm text-emerald-800">
+                Switch to{" "}
+                <strong>
+                  {VEHICLE_TYPES.find((v) => v.id === upgradeVehicleId)?.name}
+                </strong>{" "}
+                to fit your group comfortably.
+              </p>
+            </div>
+
+            <div className="mt-6 flex gap-3">
+              <button
+                onClick={() => setShowUpgradeModal(false)}
+                className="flex-1 rounded-full border border-gray-200 px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
+              >
+                Keep current vehicle
+              </button>
+
+              <button
+                onClick={() => {
+                  onChange("vehicleTypeId", upgradeVehicleId);
+                  setShowUpgradeModal(false);
+                }}
+                className="flex-1 rounded-full px-4 py-2.5 text-sm font-semibold text-white shadow-md"
+                style={{
+                  background: `linear-gradient(135deg, ${BRAND_ACCENT}, ${BRAND_PRIMARY})`,
+                }}
+              >
+                Upgrade vehicle
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
