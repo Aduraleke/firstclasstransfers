@@ -728,11 +728,10 @@ export default function Step2Details({
               </svg>
               <span>Secure payment</span>
             </div>
-
             <button
               type="button"
               disabled={!canConfirm}
-              onClick={onConfirm}
+              onClick={canConfirm ? onConfirm : undefined}
               aria-disabled={!canConfirm}
               className={`inline-flex items-center justify-center px-6 py-2.5 rounded-full text-sm font-semibold shadow-md transition transform focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:opacity-60 disabled:cursor-not-allowed ${
                 canConfirm ? "text-white" : "bg-slate-200 text-slate-700"
