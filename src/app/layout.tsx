@@ -7,6 +7,8 @@ import "./globals.css";
 // Components (make sure these exist at these paths)
 import GTMPageView from "@/components/GTMPageView";
 import AntiCopyClient from "@/components/AntiCopyClient";
+import FloatingBookNowButton from "@/components/FloatingBookNowButton";
+
 import { Suspense } from "react";
 
 const geistSans = Geist({
@@ -108,6 +110,8 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 
         {/* Your app content */}
         {children}
+                <FloatingBookNowButton />
+
       </body>
     </html>
   );

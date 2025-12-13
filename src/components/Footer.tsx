@@ -96,7 +96,7 @@ export default function Footer() {
                     height={14}
                     className="text-white/70"
                   />
-                  Fast Pick-Up
+                    Fast Pick-Up
                 </span>
               </div>
 
@@ -137,16 +137,11 @@ export default function Footer() {
                 href="https://wa.me/35796565385"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="
-    inline-flex items-center justify-center gap-2
-    rounded-full px-4 py-2 text-[13px] font-semibold
-    border border-emerald-400/60
-    bg-emerald-500/10
-    text-emerald-200
-    shadow-[0_10px_25px_rgba(0,0,0,0.35)]
-    mt-1 transition-colors
-    hover:bg-emerald-500/20 hover:text-emerald-100
-  "
+                className="inline-flex items-center justify-center gap-2 rounded-full px-4 py-2 text-[13px] font-semibold shadow-[0_10px_25px_rgba(0,0,0,0.6)] mt-1"
+                style={{
+                  background: "linear-gradient(135deg, #25D366, #128C7E)",
+                  color: "#ffffff",
+                }}
               >
                 <Icon icon={whatsappIcon} width={18} height={18} />
                 WhatsApp Dispatch
@@ -268,7 +263,10 @@ export default function Footer() {
             >
               Privacy Policy
             </Link>
-            <Link href="/terms" className="hover:text-white transition-colors">
+            <Link
+              href="/terms"
+              className="hover:text-white transition-colors"
+            >
               Terms of Service
             </Link>
             <Link

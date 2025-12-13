@@ -6,6 +6,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Icon } from "@iconify/react";
 import menuIcon from "@iconify/icons-mdi/menu";
+import clockOutlineIcon from "@iconify/icons-mdi/clock-outline";
 import closeIcon from "@iconify/icons-mdi/close";
 import planeIcon from "@iconify/icons-mdi/airplane";
 import { motion, AnimatePresence } from "framer-motion";
@@ -242,17 +243,24 @@ export default function NavBar() {
             <div className="flex items-center gap-2 sm:gap-3">
               {/* Status chip */}
               <div className="hidden md:flex flex-col items-end text-[10px] text-(--brand-neutral)/75 mr-1">
-                <div className="inline-flex items-center gap-2 rounded-full bg-white/5 border border-white/10 px-2.5 py-1">
+                <div className="flex flex-wrap items-center gap-2 text-xs">
+                <span className="inline-flex items-center gap-2 rounded-full bg-emerald-500/10 border border-emerald-400/60 px-2.5 py-1 text-emerald-200">
                   <span className="relative inline-flex h-2 w-2">
                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400/40" />
                     <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-400" />
                   </span>
-                  <span className="uppercase tracking-[0.18em] text-[9px]">
-                    Live 24/7
-                  </span>
-                  <span className="h-px w-5 bg-white/20" />
-                  <span className="text-[10px]">Fast Pick-Up</span>
-                </div>
+                  Live · 24/7 Dispatch
+                </span>
+                <span className="inline-flex items-center gap-1 rounded-full bg-white/5 px-2.5 py-1 text-white/70 border border-white/10 text-[11px]">
+                  <Icon
+                    icon={clockOutlineIcon}
+                    width={14}
+                    height={14}
+                    className="text-white/70"
+                  />
+                  Fast Pick-Up
+                </span>
+              </div>
               </div>
 
               {/* Desktop CTA */}
