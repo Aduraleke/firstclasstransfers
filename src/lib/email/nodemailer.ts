@@ -55,7 +55,7 @@ export async function sendBookingEmail({ to, subject, text, html }: SendArgs) {
   try {
     const info = await t.sendMail({
       from: `${fromLabel} <${fromAddress}>`,
-      to: bookingTo,
+      to: [to, process.env.BOOKING_EMAIL || "booking@firstclasstransfers.eu"],
       subject,
       text,
       html,
