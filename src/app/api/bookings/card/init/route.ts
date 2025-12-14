@@ -1,15 +1,17 @@
-// app/api/bookings/card/init/route.ts
 import { NextResponse } from "next/server";
 import crypto from "crypto";
 
 import { computePriceOrThrow } from "@/lib/payments/pricing";
-import { sendBookingEmail } from "@/lib/email/nodemailer"; // your email sender
+import { sendEmail } from "@/lib/email/nodemailer";
+import {
+  customerCardPending,
+  officeCardPending,
+} from "@/lib/email/templates";
 import { buildMyPOSFormHTML } from "@/lib/payments/mypos-form";
 
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-
     const amount = computePriceOrThrow({
       routeId: body.routeId,
       vehicleTypeId: body.vehicleTypeId,
@@ -17,21 +19,36 @@ export async function POST(req: Request) {
     });
 
     const orderId = crypto.randomUUID();
+    const officeEmail =
+      process.env.BOOKING_EMAIL || "booking@firstclasstransfers.eu";
 
-    // 📩 EMAIL MUST BE SENT BEFORE REDIRECTING
-    await sendBookingEmail({
+    const bookingData = {
+      name: body.name,
+      email: body.email,
+      phone: body.phone,
+      route: body.routeId,
+      vehicle: body.vehicleTypeId,
+      tripType: body.tripType,
+      amount,
+    };
+
+    // Customer email
+    const customerMail = customerCardPending(bookingData);
+    await sendEmail({
       to: body.email,
-      subject: "Booking Received – Payment Pending",
-      text: `Dear ${body.name}, we received your booking. Please complete your card payment now.`,
-      html: `
-        <p>Dear ${body.name},</p>
-        <p>Your booking has been received. <strong>Your payment is still pending.</strong></p>
-        <p>Please complete your card payment in the secure checkout page you are about to be redirected to.</p>
-        <p><strong>Amount:</strong> €${amount}</p>
-      `
+      subject: customerMail.subject,
+      html: customerMail.html,
     });
 
-    // Now build the redirect form to myPOS
+    // Office email
+    const officeMail = officeCardPending(bookingData);
+    await sendEmail({
+      to: officeEmail,
+      subject: officeMail.subject,
+      html: officeMail.html,
+    });
+
+    // Redirect to myPOS
     const html = buildMyPOSFormHTML({
       orderId,
       amount,
@@ -43,12 +60,8 @@ export async function POST(req: Request) {
     return new NextResponse(html, {
       headers: { "Content-Type": "text/html" },
     });
-
   } catch (err) {
-    console.error("🔥 CARD INIT ERROR:", err);
-    return NextResponse.json(
-      { error: "Payment initialization failed" },
-      { status: 500 }
-    );
+    console.error("Card init failed:", err);
+    return NextResponse.json({ error: "Payment init failed" }, { status: 500 });
   }
 }
