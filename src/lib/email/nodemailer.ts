@@ -1,5 +1,5 @@
 import nodemailer from "nodemailer";
-import type { SendmailTransportOptions } from "nodemailer/lib/sendmail-transport";
+// import type { SendmailTransportOptions } from "nodemailer/lib/sendmail-transport";
 
 export type SendArgs = { to: string; subject: string; text?: string; html?: string };
 
@@ -34,7 +34,7 @@ function getTransporter(): nodemailer.Transporter {
     sendmail: true,
     newline: "unix",
     path: sendmailPath,
-  } as SendmailTransportOptions);
+  } as any);
 
   console.info(`Sendmail transporter initialized (path: ${sendmailPath})`);
 
