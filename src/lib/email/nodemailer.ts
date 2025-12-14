@@ -1,4 +1,5 @@
 import nodemailer from "nodemailer";
+import type { SendmailTransportOptions } from "nodemailer/lib/sendmail-transport";
 
 export type SendArgs = { to: string; subject: string; text?: string; html?: string };
 
@@ -33,7 +34,7 @@ function getTransporter(): nodemailer.Transporter {
     sendmail: true,
     newline: "unix",
     path: sendmailPath,
-  });
+  } as SendmailTransportOptions);
 
   console.info(`Sendmail transporter initialized (path: ${sendmailPath})`);
 
@@ -49,11 +50,12 @@ export async function sendBookingEmail({ to, subject, text, html }: SendArgs) {
 
   const fromAddress = process.env.FROM_EMAIL || "no-reply@firstclasstransfers.eu";
   const fromLabel = process.env.FROM_LABEL || "First Class Transfers";
+  const bookingTo = to || process.env.BOOKING_EMAIL || "booking@firstclasstransfers.eu";
 
   try {
     const info = await t.sendMail({
       from: `${fromLabel} <${fromAddress}>`,
-      to,
+      to: bookingTo,
       subject,
       text,
       html,
