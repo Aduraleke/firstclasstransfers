@@ -1,42 +1,57 @@
-// app/api/bookings/cash/route.ts
 import { NextResponse } from "next/server";
 import { computePriceOrThrow } from "@/lib/payments/pricing";
-import { sendBookingEmail } from "@/lib/email/nodemailer"; // YOUR EMAIL FILE
+import { sendEmail } from "@/lib/email/nodemailer";
+import {
+  customerCashConfirmed,
+  officeCashBooking,
+} from "@/lib/email/templates";
 
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-
     const amount = computePriceOrThrow({
       routeId: body.routeId,
       vehicleTypeId: body.vehicleTypeId,
       tripType: body.tripType,
     });
 
-    // 📩 Send confirmation email immediately
-    await sendBookingEmail({
-      to: body.email,
-      subject: "Your Airport Transfer Booking is Confirmed ✔",
-      text: `Dear ${body.name}, your booking is confirmed.\nRoute: ${body.routeId}\nAmount: €${amount}`,
-      html: `
-        <p>Dear ${body.name},</p>
-        <p>Your booking has been <strong>confirmed</strong>.</p>
-        <p><strong>Route:</strong> ${body.routeId}<br/>
-        <strong>Total Fare:</strong> €${amount}</p>
-      `
-    });
+    const officeEmail =
+      process.env.BOOKING_EMAIL || "booking@firstclasstransfers.eu";
 
-    return NextResponse.json({
-      ok: true,
+    const bookingData = {
+      name: body.name,
+      email: body.email,
+      phone: body.phone,
+      route: body.routeId,
+      vehicle: body.vehicleTypeId,
+      tripType: body.tripType,
+      date: body.date,
+      time: body.time,
+      adults: body.adults,
+      children: body.children,
+      baggage: body.baggageType,
       amount,
-      message: "Cash booking received",
+    };
+
+    // Customer email
+    const customerMail = customerCashConfirmed(bookingData);
+    await sendEmail({
+      to: body.email,
+      subject: customerMail.subject,
+      html: customerMail.html,
     });
 
+    // Office email
+    const officeMail = officeCashBooking(bookingData);
+    await sendEmail({
+      to: officeEmail,
+      subject: officeMail.subject,
+      html: officeMail.html,
+    });
+
+    return NextResponse.json({ ok: true, amount });
   } catch (err) {
     console.error("Cash booking failed:", err);
-    return NextResponse.json(
-      { ok: false, error: "Cash booking failed" },
-      { status: 500 }
-    );
+    return NextResponse.json({ ok: false }, { status: 500 });
   }
 }
