@@ -25,6 +25,22 @@ const BRAND_ACCENT = "#b07208";
 
 type VehicleId = "sedan" | "vclass";
 
+function getTodayISO() {
+  return new Date().toISOString().split("T")[0];
+}
+
+function isTimeInPast(dateISO: string, time: string) {
+  const now = new Date();
+  const selected = new Date(`${dateISO}T${time}`);
+  return selected.getTime() < now.getTime();
+}
+
+function getTomorrowISO() {
+  const d = new Date();
+  d.setDate(d.getDate() + 1);
+  return d.toISOString().split("T")[0];
+}
+
 const VEHICLE_IMAGE_MAP: Record<VehicleId, string> = {
   sedan: "/ford-carpri.jpg",
   vclass: "/mercedesVclass.jpg",
@@ -112,9 +128,22 @@ export default function Step1Trip({ data, onChange, onNext }: Props) {
   };
 
   const handleTimeChange = (value: string) => {
-    onChange("time", value);
-    ensureDate();
     if (!value) return;
+
+    const todayISO = getTodayISO();
+
+    const selectedDate = data.date || todayISO;
+
+    // If user picked a past time for today → move to tomorrow
+    if (selectedDate === todayISO && isTimeInPast(todayISO, value)) {
+      const tomorrow = getTomorrowISO();
+      onChange("date", tomorrow);
+    } else {
+      onChange("date", selectedDate);
+    }
+
+    onChange("time", value);
+
     const hour = Number(value.split(":")[0]);
     onChange("timePeriod", hour >= 6 && hour < 22 ? "day" : "night");
   };
@@ -145,7 +174,6 @@ export default function Step1Trip({ data, onChange, onNext }: Props) {
   const routeDetail = data.routeId
     ? getRouteDetailBySlug(data.routeId)
     : undefined;
-
 
   return (
     <div className="bg-white rounded-3xl border border-gray-100 shadow-lg shadow-gray-100/70 p-5 sm:p-6 lg:p-7 space-y-6">
@@ -234,13 +262,11 @@ export default function Step1Trip({ data, onChange, onNext }: Props) {
           </optgroup>
 
           <optgroup label="Paphos">
-            {TRANSFER_ROUTES.filter((r) => r.category === "Paphos").map(
-              (r) => (
-                <option key={r.id} value={r.id}>
-                  {r.label}
-                </option>
-              )
-            )}
+            {TRANSFER_ROUTES.filter((r) => r.category === "Paphos").map((r) => (
+              <option key={r.id} value={r.id}>
+                {r.label}
+              </option>
+            ))}
           </optgroup>
 
           <optgroup label="Special services">
@@ -358,6 +384,7 @@ export default function Step1Trip({ data, onChange, onNext }: Props) {
             </label>
             <input
               type="date"
+              min={getTodayISO()}
               value={data.date}
               onChange={(e) => onChange("date", e.target.value)}
               className="mt-1 w-full rounded-2xl border border-gray-300 bg-white px-3 py-2.5 shadow-sm text-sm focus:border-[#b07208]"
@@ -387,17 +414,22 @@ export default function Step1Trip({ data, onChange, onNext }: Props) {
                 {Array.from({ length: 24 }, (_, h) =>
                   ["00", "15", "30", "45"].map((m) => {
                     const t = `${String(h).padStart(2, "0")}:${m}`;
+                    const todayISO = getTodayISO();
+                    const isPast =
+                      data.date === todayISO && isTimeInPast(todayISO, t);
                     return (
                       <button
                         key={t}
                         type="button"
+                        disabled={isPast}
                         onClick={() => {
                           handleTimeChange(t);
                           setTimeOpen(false);
                         }}
-                        className={`block w-full px-4 py-2 text-left text-sm hover:bg-gray-50 ${
-                          data.time === t ? "bg-emerald-50 font-semibold" : ""
-                        }`}
+                        className={`block w-full px-4 py-2 text-left text-sm
+    ${isPast ? "text-gray-300 cursor-not-allowed" : "hover:bg-gray-50"}
+    ${data.time === t ? "bg-emerald-50 font-semibold" : ""}
+  `}
                       >
                         {t}
                       </button>
@@ -502,9 +534,9 @@ export default function Step1Trip({ data, onChange, onNext }: Props) {
                       className={`block text-[10px] ${
                         active ? "text-white/80" : "text-emerald-700"
                       }`}
-                  >
-                    {tp.range}
-                  </span>
+                    >
+                      {tp.range}
+                    </span>
                   </button>
                 );
               })}
