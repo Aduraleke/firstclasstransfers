@@ -9,6 +9,7 @@ export type VehicleId = "sedan" | "vclass";
 export type RouteId =
   | "nicosia-larnaca-airport"
   | "nicosia-limassol"
+  |"nicosia-troodos"
   | "nicosia-paphos-airport"
   | "nicosia-ercan-airport"
   | "paphos-airport-nicosia"
@@ -63,6 +64,15 @@ export const ROUTE_PRICING: RoutePricing[] = [
     vehicleOptions: [
       { vehicleId: "sedan", pricePerLegEUR: toNum("€75") },
       { vehicleId: "vclass", pricePerLegEUR: toNum("€100") },
+    ],
+  },
+  {
+    id: "nicosia-troodos",
+    from: "Nicosia",
+    to: "Troodos",
+    vehicleOptions: [
+      { vehicleId: "sedan", pricePerLegEUR: toNum("€80") },
+      { vehicleId: "vclass", pricePerLegEUR: toNum("€110") },
     ],
   },
   {
@@ -246,4 +256,25 @@ export function computePrice(
     discount,
     total,
   };
+}
+
+// ---------------------------------------------------------
+// Strict price calculator for payments (throws on error)
+// ---------------------------------------------------------
+export function computePriceOrThrow(params: {
+  routeId: RouteId;
+  vehicleTypeId: VehicleId;
+  tripType: "one-way" | "return";
+}): number {
+  const result = computePrice(
+    params.routeId,
+    params.vehicleTypeId,
+    params.tripType
+  );
+
+  if (!result || !Number.isFinite(result.total)) {
+    throw new Error("Failed to compute price");
+  }
+
+  return result.total;
 }

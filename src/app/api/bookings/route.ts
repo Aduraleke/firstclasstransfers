@@ -3,7 +3,11 @@ export const runtime = "nodejs";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { BookingBaseSchema, type BookingBase } from "@/lib/booking/schema";
-import { computePrice } from "@/lib/pricing";
+import { computePrice, RouteId, VehicleId } from "@/lib/pricing";
+
+// myPOS IPC helpers
+import { buildMyPOSFormHTML } from "@/lib/payments/mypos-form";
+import { signOrder } from "@/lib/payments/order-token";
 
 // Email sender
 import { sendEmail } from "@/lib/email/nodemailer";
@@ -15,42 +19,6 @@ import {
   officeCashBooking,
   officeCardPending,
 } from "@/lib/email/templates";
-
-/* ---------- myPOS helper types (unchanged) ---------- */
-type MyPOSCartItem = { name: string; quantity: number; price: number };
-type MyPOSCustomer = {
-  email?: string;
-  firstNames?: string;
-  familyName?: string;
-  phone?: string;
-  country?: string;
-};
-type ComputePriceRouteId = Parameters<typeof computePrice>[0];
-type ComputePriceVehicleTypeId = Parameters<typeof computePrice>[1];
-
-type MyPOSPurchaseParams = {
-  orderId: string;
-  amount: number;
-  cartItems: MyPOSCartItem[];
-  customer?: MyPOSCustomer;
-  note?: string;
-  [k: string]: unknown;
-};
-
-type MyPOSFakeResponse = {
-  write: (chunk: string | Buffer) => void;
-  end: (chunk?: string | Buffer) => void;
-  setHeader?: (name: string, value: string) => void;
-  getHeader?: (name: string) => string | undefined;
-};
-
-type MyPOSInstance = {
-  checkout: {
-    purchase: (params: MyPOSPurchaseParams, res: MyPOSFakeResponse) => void;
-  };
-};
-
-type MyPOSFactoryFn = (cfg: { [k: string]: unknown }) => MyPOSInstance;
 
 /* ---------- helpers ---------- */
 const RATE_LIMIT_WINDOW_MS = 60_000;
@@ -78,7 +46,7 @@ export async function POST(req: NextRequest) {
   const ip = getClientIp(req);
 
   try {
-    // Rate limiting
+    // 1️⃣ Rate limiting
     const recent = cleanUpIp(ip);
     if (recent.length >= RATE_LIMIT_MAX) {
       return NextResponse.json(
@@ -88,13 +56,13 @@ export async function POST(req: NextRequest) {
     }
     recent.push(Date.now());
 
-    // Read request
+    // 2️⃣ Read request
     const contentType = (req.headers.get("content-type") || "").toLowerCase();
     const raw = contentType.includes("application/json")
       ? await req.json()
       : Object.fromEntries((await req.formData()).entries());
 
-    // Validate booking
+    // 3️⃣ Validate booking payload
     let parsed: BookingBase;
     try {
       parsed = BookingBaseSchema.parse(raw);
@@ -105,12 +73,11 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Compute price
+    // 4️⃣ Compute price (server-trusted)
     let price;
     try {
-      const routeId = parsed.routeId as unknown as ComputePriceRouteId;
-      const vehicleTypeId =
-        parsed.vehicleTypeId as unknown as ComputePriceVehicleTypeId;
+      const routeId = parsed.routeId as RouteId;
+      const vehicleTypeId = parsed.vehicleTypeId as VehicleId;
 
       price = computePrice(routeId, vehicleTypeId, parsed.tripType);
     } catch {
@@ -139,14 +106,12 @@ export async function POST(req: NextRequest) {
     };
 
     const url = new URL(req.url);
-    const pay = url.searchParams.get("pay") === "true";
+    const payByCard = url.searchParams.get("pay") === "true";
 
     /* ============================
-       EMAILS (ALWAYS SENT)
+       CASH BOOKING (NO PAYMENT)
     ============================ */
-
-    if (!pay) {
-      // CASH BOOKING
+    if (!payByCard) {
       const customerMail = customerCashConfirmed(bookingData);
       const officeMail = officeCashBooking(bookingData);
 
@@ -165,7 +130,9 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ ok: true, price });
     }
 
-    // CARD BOOKING (PAYMENT PENDING)
+    /* ============================
+       CARD BOOKING (PAYMENT PENDING)
+    ============================ */
     const customerMail = customerCardPending(bookingData);
     const officeMail = officeCardPending(bookingData);
 
@@ -182,51 +149,36 @@ export async function POST(req: NextRequest) {
     });
 
     /* ============================
-       myPOS REDIRECT
+       myPOS IPC CHECKOUT (HTML POST)
     ============================ */
-
-    const mod = await import("@mypos-ltd/mypos");
-    const myposFactory = (mod.default ?? mod) as MyPOSFactoryFn;
-
-    const mypos = myposFactory({
-      checkout: {
-        sid: process.env.MYPOS_SID,
-        currency: "EUR",
-        clientNumber: process.env.MYPOS_CLIENT_NUMBER,
-        privateKey: process.env.MYPOS_PRIVATE_KEY,
-      },
-    });
-
     const orderId = `BKG-${Date.now()}`;
     const amount = Number(price.total);
 
-    const chunks: Buffer[] = [];
-    mypos.checkout.purchase(
-      {
-        orderId,
-        amount,
-        cartItems: [
-          { name: `${parsed.routeId} transfer`, quantity: 1, price: amount },
-        ],
-        customer: {
-          email: parsed.email,
-          firstNames: parsed.name.split(" ")[0],
-          familyName: parsed.name.split(" ").slice(1).join(" "),
-          phone: parsed.phone,
-          country: "CYP",
-        },
-      },
-      {
-        write(chunk) {
-          chunks.push(Buffer.from(chunk));
-        },
-        end(chunk) {
-          if (chunk) chunks.push(Buffer.from(chunk));
-        },
-      }
-    );
+    const token = signOrder({
+      orderId,
+      amount,
+      currency: "EUR",
+      createdAt: Date.now(),
+    });
 
-    return new NextResponse(Buffer.concat(chunks).toString("utf8"), {
+    if (!token) {
+      return NextResponse.json(
+        { error: "Failed to sign order" },
+        { status: 500 }
+      );
+    }
+
+    const html = buildMyPOSFormHTML({
+      orderId,
+      amount,
+      currency: "EUR",
+      customerEmail: parsed.email,
+      customerPhone: parsed.phone,
+      udf1: token,
+    });
+
+    // 🚀 Return HTML → browser auto-submits to myPOS
+    return new NextResponse(html, {
       headers: { "Content-Type": "text/html; charset=utf-8" },
     });
   } catch (err) {
