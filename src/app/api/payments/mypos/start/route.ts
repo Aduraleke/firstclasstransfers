@@ -1,37 +1,22 @@
 export const runtime = "nodejs";
 
 import { NextResponse } from "next/server";
+import { BookingBaseSchema } from "@/lib/booking/schema";
+import { createBooking } from "@/lib/booking/createBooking";
 import { buildMyPOSFormHTML } from "@/lib/payments/mypos-form";
 import { signOrder } from "@/lib/payments/order-token";
-import { computePriceOrThrow } from "@/lib/pricing";
 
 export async function POST(req: Request) {
   try {
-    const {
-      routeId,
-      vehicleTypeId,
-      tripType,
-      customerEmail,
-      customerPhone,
-    } = await req.json();
+    const raw = await req.json();
 
-    if (!routeId || !vehicleTypeId || !tripType || !customerEmail) {
-      return NextResponse.json(
-        { error: "Missing required fields" },
-        { status: 400 }
-      );
-    }
+    const parsed = BookingBaseSchema.parse(raw);
 
-    // 🔐 Trusted server price
-    const amount = computePriceOrThrow({
-      routeId,
-      vehicleTypeId,
-      tripType,
-    });
+    // Always treat as card booking
+    const { amount } = await createBooking(parsed, true);
 
     const orderId = `ORD-${Date.now()}`;
 
-    // 🔑 Sign order (UDF1)
     const token = signOrder({
       orderId,
       amount,
@@ -46,13 +31,12 @@ export async function POST(req: Request) {
       );
     }
 
-    // 🧾 Build IPC checkout HTML
     const html = buildMyPOSFormHTML({
       orderId,
       amount,
       currency: "EUR",
-      customerEmail,
-      customerPhone,
+      customerEmail: parsed.email,
+      customerPhone: parsed.phone,
       udf1: token,
     });
 

@@ -10,6 +10,7 @@ type Params = {
 };
 
 export function buildMyPOSFormHTML(params: Params): string {
+
   const isSandbox = process.env.MYPOS_SANDBOX === "true";
 
   const actionUrl = isSandbox
@@ -51,6 +52,7 @@ export function buildMyPOSFormHTML(params: Params): string {
     fields.UDF1 = params.udf1;
   }
 
+  // 🔐 Signature MUST be last
   fields.Signature = signMyPOS(fields);
 
   const inputs = Object.entries(fields)

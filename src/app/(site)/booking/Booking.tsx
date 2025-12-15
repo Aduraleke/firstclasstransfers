@@ -1,4 +1,3 @@
-// app/(site)/booking/Booking.tsx
 "use client";
 
 import React, { useCallback, useEffect, useState } from "react";
@@ -17,32 +16,27 @@ type ApiRoute = { id: string; title: string };
 
 function createInitialDraft(initialRouteId?: string): BookingDraft {
   return {
-    // main route
     routeId: initialRouteId ?? "",
     vehicleTypeId: "",
     timePeriod: "day",
     date: "",
     time: "",
 
-    // return trip
     tripType: "one-way",
     returnDate: "",
     returnTime: "",
     returnTimePeriod: "day",
 
-    // flight / pax / baggage
     flightNumber: "",
     adults: 1,
     children: 0,
     baggageType: "hand",
 
-    // contact
     name: "",
     phone: "",
     email: "",
     notes: "",
 
-    // payment
     paymentMethod: "cash",
   };
 }
@@ -51,66 +45,37 @@ export default function Booking({
   initialRouteId = "",
   initialVehicleTypeId = "",
 }: BookingProps) {
-
   const [step, setStep] = useState<1 | 2>(1);
   const [submitted, setSubmitted] = useState(false);
-  const [draft, setDraft] = useState<BookingDraft>(() =>
-        ({
-      ...createInitialDraft(initialRouteId),
-      vehicleTypeId: initialVehicleTypeId || "",
-    }) as BookingDraft
-
-  );
+  const [draft, setDraft] = useState<BookingDraft>(() => ({
+    ...createInitialDraft(initialRouteId),
+    vehicleTypeId: initialVehicleTypeId || "",
+  }));
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
-  // route metadata fetched from server
-  const [routeList, setRouteList] = useState<
-    Array<{ id: string; title: string }>
-  >([]);
-  const [routeFetchError, setRouteFetchError] = useState<string | null>(null);
+  const [routeList, setRouteList] = useState<ApiRoute[]>([]);
   const [routesLoading, setRoutesLoading] = useState(true);
+  const [routeFetchError, setRouteFetchError] = useState<string | null>(null);
 
-  // modal state for card redirect confirmation
   const [showCardModal, setShowCardModal] = useState(false);
 
-  useEffect(() => {
-    if (initialRouteId && initialRouteId !== draft.routeId) {
-      setDraft((prev) => ({ ...prev, routeId: initialRouteId }));
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [initialRouteId]);
+  const topRef = React.useRef<HTMLDivElement | null>(null);
+  const scrollToTop = () => {
+    topRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
 
-
-  useEffect(() => {
-  if (initialVehicleTypeId && initialVehicleTypeId !== draft.vehicleTypeId) {
-    setDraft((prev) => ({ ...prev, vehicleTypeId: initialVehicleTypeId }));
-  }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-}, [initialVehicleTypeId]);
-
-
-  // Fetch canonical routes from server so client & server share IDs
   useEffect(() => {
     let mounted = true;
     (async () => {
-      setRoutesLoading(true);
       try {
         const res = await fetch("/api/routes");
         const json = await res.json();
-        if (!res.ok || !json?.ok) {
-          throw new Error(json?.error ?? "Failed to fetch routes");
-        }
+        if (!res.ok || !json?.ok) throw new Error();
         if (!mounted) return;
-        const routes = (json.routes || []).map((r: ApiRoute) => ({
-          id: r.id,
-          title: r.title,
-        }));
-        setRouteList(routes);
-        setRouteFetchError(null);
-      } catch (err: unknown) {
-        console.error("Failed to load routes list:", err);
-        setRouteFetchError((err as Error)?.message ?? "Failed to load routes");
+        setRouteList(json.routes || []);
+      } catch {
+        setRouteFetchError("Failed to load routes");
       } finally {
         if (mounted) setRoutesLoading(false);
       }
@@ -119,14 +84,6 @@ export default function Booking({
       mounted = false;
     };
   }, []);
-
-  const topRef = React.useRef<HTMLDivElement | null>(null);
-  const scrollToTop = () => {
-    if (topRef.current)
-      topRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
-    else if (typeof window !== "undefined")
-      window.scrollTo({ top: 0, behavior: "smooth" });
-  };
 
   const updateDraft = useCallback(
     <K extends keyof BookingDraft>(key: K, value: BookingDraft[K]) => {
@@ -139,18 +96,19 @@ export default function Booking({
     setStep(2);
     scrollToTop();
   };
+
   const goBackToStep1 = () => {
     setStep(1);
     scrollToTop();
   };
 
-  const allowedRouteIds = routeList.map((r) => r.id);
-
+  /* ============================
+     CONFIRM BOOKING (SINGLE FLOW)
+  ============================ */
   const handleConfirm = async () => {
     if (submitting) return;
     setSubmitError(null);
 
-    // minimal validation
     if (!draft.name || !draft.phone || !draft.email) {
       setSubmitError("Please complete all required fields.");
       scrollToTop();
@@ -158,238 +116,140 @@ export default function Booking({
     }
 
     if (routesLoading) {
-      setSubmitError("Routes are still loading. Please wait.");
+      setSubmitError("Routes are still loading.");
       return;
     }
 
-    if (!allowedRouteIds.includes(draft.routeId)) {
-      setSubmitError("Invalid route selected.");
-      return;
-    }
-
-    // CARD FLOW
+    // CARD → show modal only
     if (draft.paymentMethod === "card") {
       setShowCardModal(true);
       return;
     }
 
-    // CASH FLOW
+    // CASH → submit directly
+    await submitBooking(false);
+  };
+
+  const submitBooking = async (payByCard: boolean) => {
     setSubmitting(true);
+    setSubmitError(null);
 
     try {
-      const res = await fetch("/api/bookings/cash", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(draft),
-      });
+      const res = await fetch(
+        payByCard ? "/api/bookings?pay=true" : "/api/bookings",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(draft),
+        }
+      );
 
-      const json = await res.json();
-      if (!res.ok || !json.ok) {
+      if (!res.ok) {
+        const json = await res.json();
         throw new Error(json?.error || "Booking failed");
       }
 
+      // CARD → backend returns HTML
+      if (payByCard) {
+        const html = await res.text();
+        document.open();
+        document.write(html);
+        document.close();
+        return;
+      }
+
+      // CASH → success UI
       setSubmitted(true);
-      setSubmitting(false);
     } catch (err) {
-      setSubmitError(err instanceof Error ? err.message : "Booking failed");
+      setSubmitError(
+        err instanceof Error ? err.message : "Booking failed"
+      );
       setSubmitting(false);
     }
   };
 
-  // invoked from the modal: proceed to myPOS by submitting a hidden form (browser navigates)
-const redirectToCardPayment = async () => {
-  setSubmitting(true);
-  setSubmitError(null);
-
-  try {
-    const res = await fetch("/api/payments/mypos/start", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        routeId: draft.routeId,
-        vehicleTypeId: draft.vehicleTypeId,
-        tripType: draft.tripType,
-        customerEmail: draft.email,
-        customerPhone: draft.phone,
-      }),
-    });
-
-    if (!res.ok) {
-      throw new Error("Payment initialization failed");
-    }
-
-    const html = await res.text();
-
-    document.open();
-    document.write(html);
-    document.close();
-  } catch (err) {
-    setSubmitError(
-      err instanceof Error ? err.message : "Payment failed"
-    );
-    setSubmitting(false);
-  }
-};
-
-
-  // After confirm – thank you UI (same as before)
+  /* ============================
+     SUCCESS UI
+  ============================ */
   if (submitted) {
     return (
-      <div className="bg-white min-h-screen">
-        <div ref={topRef} className="pt-32 sm:pt-36 pb-16">
-          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="relative max-w-xl mx-auto overflow-hidden rounded-3xl border border-gray-100 bg-white/95 shadow-[0_24px_70px_rgba(15,23,42,0.16)]">
-              <div className="absolute inset-x-0 top-0 h-1 bg-linear-to-r from-[#162c4b] via-[#b07208] to-[#162c4b]" />
-
-              <div className="px-6 sm:px-8 py-7 sm:py-8 text-center space-y-5">
-                <div className="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1 border border-emerald-100">
-                  <span className="h-2 w-2 rounded-full bg-emerald-500 shadow-[0_0_0_3px_rgba(16,185,129,0.35)]" />
-                  <span className="text-[11px] font-medium uppercase tracking-[0.2em] text-emerald-700">
-                    Request received
-                  </span>
-                </div>
-
-                <div className="space-y-2">
-                  <h1 className="text-2xl sm:text-3xl font-semibold text-[#111827]">
-                    Booking request sent
-                  </h1>
-                  <p className="text-sm text-gray-600 max-w-md mx-auto">
-                    Thank you for choosing First Class Transfers. Our dispatch
-                    team is reviewing your request and will confirm your pickup
-                    by email or WhatsApp shortly.
-                  </p>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-left text-[13px] text-gray-600">
-                  <div className="space-y-1.5">
-                    <p className="font-medium text-gray-800">
-                      What happens next?
-                    </p>
-                    <ul className="space-y-1.5">
-                      <li>• We verify your route and pickup time.</li>
-                      <li>• A driver is assigned from our fleet.</li>
-                      <li>• You receive a confirmation message.</li>
-                    </ul>
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <p className="font-medium text-gray-800">
-                      Need it urgently?
-                    </p>
-                    <p className="text-[13px] text-gray-600">
-                      For transfers within the next{" "}
-                      <span className="font-semibold text-[#162c4b]">
-                        12 hours
-                      </span>
-                      , please also contact our 24/7 dispatch line for priority
-                      handling.
-                    </p>
-                    <p className="text-[12px] text-gray-500">
-                      Phone:{" "}
-                      <span className="font-medium text-[#162c4b]">
-                        +357 99 240868
-                      </span>
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
-                  <Link
-                    href="/"
-                    className="inline-flex items-center justify-center px-5 py-2.5 rounded-full text-sm font-semibold shadow-md transition"
-                    style={{
-                      background: "linear-gradient(135deg, #b07208, #162c4b)",
-                      color: "#ffffff",
-                    }}
-                  >
-                    Back to homepage
-                  </Link>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+      <div className="bg-white min-h-screen pt-32 text-center">
+        <h1 className="text-2xl font-semibold">Booking request sent</h1>
+        <p className="mt-2 text-gray-600">
+          We’ve emailed you and our office. We’ll confirm shortly.
+        </p>
+        <Link
+          href="/"
+          className="inline-block mt-6 px-5 py-2.5 rounded-full text-white"
+          style={{
+            background: "linear-gradient(135deg,#b07208,#162c4b)",
+          }}
+        >
+          Back to homepage
+        </Link>
       </div>
     );
   }
 
-  // Normal 2-step flow (show modal when showCardModal === true)
   return (
     <div className="bg-white min-h-screen">
-      <div ref={topRef} className="pt-32 sm:pt-36 pb-12">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="max-w-4xl mx-auto">
-            <BookingStepper currentStep={step} />
+      <div ref={topRef} className="pt-32 pb-12 max-w-6xl mx-auto px-4">
+        <BookingStepper currentStep={step} />
 
-            {/* Show route-loading or error banner so admin/dev can see mismatch early */}
-            {routesLoading && (
-              <div className="mb-3 text-sm text-gray-600">Loading routes…</div>
-            )}
-            {routeFetchError && (
-              <div className="mb-3 rounded-md bg-yellow-50 border border-yellow-100 p-3 text-sm text-yellow-700">
-                Warning: failed to load routes from server: {routeFetchError}
-              </div>
-            )}
-
-            {step === 1 && (
-              <Step1Trip
-                data={draft}
-                onChange={updateDraft}
-                onNext={goToStep2}
-                routeList={routeList}
-              />
-            )}
-            {step === 2 && (
-              <Step2Details
-                data={draft}
-                onChange={updateDraft}
-                onBack={goBackToStep1}
-                onConfirm={handleConfirm}
-              />
-            )}
-
-            {/* inline submission status / error area */}
-            {submitError && (
-              <div className="mt-4 rounded-md bg-red-50 border border-red-100 p-3 text-sm text-red-700">
-                {submitError}
-              </div>
-            )}
-            {submitting && (
-              <div className="mt-3 text-sm text-gray-600">Processing…</div>
-            )}
+        {routeFetchError && (
+          <div className="mt-3 text-sm text-red-600">
+            {routeFetchError}
           </div>
-        </div>
+        )}
+
+        {step === 1 && (
+          <Step1Trip
+            data={draft}
+            onChange={updateDraft}
+            onNext={goToStep2}
+            routeList={routeList}
+          />
+        )}
+
+        {step === 2 && (
+          <Step2Details
+            data={draft}
+            onChange={updateDraft}
+            onBack={goBackToStep1}
+            onConfirm={handleConfirm}
+          />
+        )}
+
+        {submitError && (
+          <div className="mt-4 text-sm text-red-600">{submitError}</div>
+        )}
+        {submitting && (
+          <div className="mt-2 text-sm text-gray-500">Processing…</div>
+        )}
       </div>
 
-      {/* Card confirmation modal */}
+      {/* CARD CONFIRMATION MODAL */}
       {showCardModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div
-            className="absolute inset-0 bg-black/40"
-            onClick={() => setShowCardModal(false)}
-          />
-          <div className="relative max-w-md w-full bg-white rounded-2xl shadow-lg p-6 z-10">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+          <div className="bg-white rounded-2xl p-6 max-w-md w-full">
             <h3 className="text-lg font-semibold">Pay by card</h3>
             <p className="mt-2 text-sm text-gray-600">
-              You will be redirected to our secure payment provider to complete
-              the card payment. The payment page will open in your current tab.
-              Do you want to continue?
+              You’ll be redirected to our secure payment provider.
             </p>
 
-            <div className="mt-4 flex items-center justify-end gap-3">
+            <div className="mt-4 flex justify-end gap-3">
               <button
-                type="button"
                 onClick={() => setShowCardModal(false)}
-                className="px-4 py-2 rounded-full border"
+                className="px-4 py-2 border rounded-full"
               >
                 Cancel
               </button>
               <button
-                type="button"
-                onClick={redirectToCardPayment}
+                onClick={() => submitBooking(true)}
                 className="px-4 py-2 rounded-full text-white"
                 style={{
-                  background: "linear-gradient(135deg,#b07208,#162c4b)",
+                  background:
+                    "linear-gradient(135deg,#b07208,#162c4b)",
                 }}
               >
                 Continue to payment
