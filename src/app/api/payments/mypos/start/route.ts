@@ -1,3 +1,5 @@
+export const runtime = "nodejs";
+
 import { NextResponse } from "next/server";
 import { buildMyPOSFormHTML } from "@/lib/payments/mypos-form";
 import { signOrder } from "@/lib/payments/order-token";
@@ -5,17 +7,22 @@ import { computePriceOrThrow } from "@/lib/pricing";
 
 export async function POST(req: Request) {
   try {
-    const body = await req.json();
-
     const {
       routeId,
       vehicleTypeId,
       tripType,
       customerEmail,
       customerPhone,
-    } = body;
+    } = await req.json();
 
-    // 1️⃣ Server-side price (trusted)
+    if (!routeId || !vehicleTypeId || !tripType || !customerEmail) {
+      return NextResponse.json(
+        { error: "Missing required fields" },
+        { status: 400 }
+      );
+    }
+
+    // 🔐 Trusted server price
     const amount = computePriceOrThrow({
       routeId,
       vehicleTypeId,
@@ -24,7 +31,7 @@ export async function POST(req: Request) {
 
     const orderId = `ORD-${Date.now()}`;
 
-    // 2️⃣ Sign order → goes into UDF1
+    // 🔑 Sign order (UDF1)
     const token = signOrder({
       orderId,
       amount,
@@ -39,7 +46,7 @@ export async function POST(req: Request) {
       );
     }
 
-    // 3️⃣ Build IPC checkout HTML
+    // 🧾 Build IPC checkout HTML
     const html = buildMyPOSFormHTML({
       orderId,
       amount,
@@ -49,9 +56,8 @@ export async function POST(req: Request) {
       udf1: token,
     });
 
-    // 4️⃣ Return HTML (browser auto-posts)
     return new NextResponse(html, {
-      headers: { "Content-Type": "text/html" },
+      headers: { "Content-Type": "text/html; charset=utf-8" },
     });
   } catch (err) {
     console.error("myPOS start error:", err);
