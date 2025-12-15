@@ -3,24 +3,13 @@ export const runtime = "nodejs";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { BookingBaseSchema, type BookingBase } from "@/lib/booking/schema";
-import { computePrice, RouteId, VehicleId } from "@/lib/pricing";
+import { createBooking } from "@/lib/booking/createBooking";
 
-// myPOS IPC helpers
+// myPOS helpers
 import { buildMyPOSFormHTML } from "@/lib/payments/mypos-form";
 import { signOrder } from "@/lib/payments/order-token";
 
-// Email sender
-import { sendEmail } from "@/lib/email/nodemailer";
-
-// Email templates
-import {
-  customerCashConfirmed,
-  customerCardPending,
-  officeCashBooking,
-  officeCardPending,
-} from "@/lib/email/templates";
-
-/* ---------- helpers ---------- */
+/* ---------- rate limiting ---------- */
 const RATE_LIMIT_WINDOW_MS = 60_000;
 const RATE_LIMIT_MAX = 6;
 const ipMap = new Map<string, number[]>();
@@ -41,12 +30,12 @@ function getClientIp(req: NextRequest) {
   );
 }
 
-/* ---------- POST handler ---------- */
+/* ---------- POST ---------- */
 export async function POST(req: NextRequest) {
   const ip = getClientIp(req);
 
   try {
-    // 1️⃣ Rate limiting
+    // 1️⃣ Rate limit
     const recent = cleanUpIp(ip);
     if (recent.length >= RATE_LIMIT_MAX) {
       return NextResponse.json(
@@ -56,13 +45,10 @@ export async function POST(req: NextRequest) {
     }
     recent.push(Date.now());
 
-    // 2️⃣ Read request
-    const contentType = (req.headers.get("content-type") || "").toLowerCase();
-    const raw = contentType.includes("application/json")
-      ? await req.json()
-      : Object.fromEntries((await req.formData()).entries());
+    // 2️⃣ Parse body
+    const raw = await req.json();
 
-    // 3️⃣ Validate booking payload
+    // 3️⃣ Validate booking (FULL booking only)
     let parsed: BookingBase;
     try {
       parsed = BookingBaseSchema.parse(raw);
@@ -73,86 +59,19 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // 4️⃣ Compute price (server-trusted)
-    let price;
-    try {
-      const routeId = parsed.routeId as RouteId;
-      const vehicleTypeId = parsed.vehicleTypeId as VehicleId;
-
-      price = computePrice(routeId, vehicleTypeId, parsed.tripType);
-    } catch {
-      return NextResponse.json(
-        { error: "Invalid route or vehicle selection" },
-        { status: 400 }
-      );
-    }
-
-    const officeEmail =
-      process.env.BOOKING_EMAIL || "booking@firstclasstransfers.eu";
-
-    const bookingData = {
-      name: parsed.name,
-      email: parsed.email,
-      phone: parsed.phone,
-      route: parsed.routeId,
-      vehicle: parsed.vehicleTypeId,
-      tripType: parsed.tripType,
-      date: parsed.date,
-      time: parsed.time,
-      adults: parsed.adults,
-      children: parsed.children,
-      baggage: parsed.baggageType,
-      amount: price.total,
-    };
-
     const url = new URL(req.url);
     const payByCard = url.searchParams.get("pay") === "true";
 
-    /* ============================
-       CASH BOOKING (NO PAYMENT)
-    ============================ */
+    // 4️⃣ CREATE BOOKING + SEND EMAILS (ALWAYS)
+    const { amount } = await createBooking(parsed, payByCard);
+
+    // 5️⃣ CASH FLOW — DONE
     if (!payByCard) {
-      const customerMail = customerCashConfirmed(bookingData);
-      const officeMail = officeCashBooking(bookingData);
-
-      await sendEmail({
-        to: parsed.email,
-        subject: customerMail.subject,
-        html: customerMail.html,
-      });
-
-      await sendEmail({
-        to: officeEmail,
-        subject: officeMail.subject,
-        html: officeMail.html,
-      });
-
-      return NextResponse.json({ ok: true, price });
+      return NextResponse.json({ ok: true, amount });
     }
 
-    /* ============================
-       CARD BOOKING (PAYMENT PENDING)
-    ============================ */
-    const customerMail = customerCardPending(bookingData);
-    const officeMail = officeCardPending(bookingData);
-
-    await sendEmail({
-      to: parsed.email,
-      subject: customerMail.subject,
-      html: customerMail.html,
-    });
-
-    await sendEmail({
-      to: officeEmail,
-      subject: officeMail.subject,
-      html: officeMail.html,
-    });
-
-    /* ============================
-       myPOS IPC CHECKOUT (HTML POST)
-    ============================ */
+    // 6️⃣ CARD FLOW — REDIRECT AFTER EMAILS
     const orderId = `BKG-${Date.now()}`;
-    const amount = Number(price.total);
 
     const token = signOrder({
       orderId,
@@ -177,7 +96,6 @@ export async function POST(req: NextRequest) {
       udf1: token,
     });
 
-    // 🚀 Return HTML → browser auto-submits to myPOS
     return new NextResponse(html, {
       headers: { "Content-Type": "text/html; charset=utf-8" },
     });
