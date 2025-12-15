@@ -1,5 +1,4 @@
 import nodemailer from "nodemailer";
-import type SendmailTransport from "nodemailer/lib/sendmail-transport";
 
 export type SendArgs = {
   to: string;
@@ -11,15 +10,18 @@ export type SendArgs = {
 let transporter: nodemailer.Transporter | null = null;
 
 function ensureEnv() {
-  if (!process.env.FROM_EMAIL) {
-    console.warn(
-      "FROM_EMAIL not set — defaulting to booking@firstclasstransfers.eu"
-    );
-  }
-  if (!process.env.BOOKING_EMAIL) {
-    console.warn(
-      "BOOKING_EMAIL not set — defaulting to booking@firstclasstransfers.eu"
-    );
+  const required = [
+    "SMTP_HOST",
+    "SMTP_PORT",
+    "SMTP_USER",
+    "SMTP_PASS",
+    "FROM_EMAIL",
+  ];
+
+  for (const key of required) {
+    if (!process.env[key]) {
+      throw new Error(`Missing environment variable: ${key}`);
+    }
   }
 }
 
@@ -28,18 +30,17 @@ function getTransporter(): nodemailer.Transporter {
 
   ensureEnv();
 
-  const sendmailPath = process.env.SENDMAIL_PATH || "/usr/sbin/sendmail";
+  transporter = nodemailer.createTransport({
+    host: process.env.SMTP_HOST,
+    port: Number(process.env.SMTP_PORT),
+    secure: Number(process.env.SMTP_PORT) === 465, // true for 465, false for 587
+    auth: {
+      user: process.env.SMTP_USER,
+      pass: process.env.SMTP_PASS,
+    },
+  });
 
-  // ✅ Properly typed sendmail config
-  const transportOptions: SendmailTransport.Options = {
-    sendmail: true,
-    newline: "unix",
-    path: sendmailPath,
-  };
 
-  transporter = nodemailer.createTransport(transportOptions);
-
-  console.info(`📧 Sendmail transporter ready (${sendmailPath})`);
 
   return transporter;
 }
@@ -47,15 +48,19 @@ function getTransporter(): nodemailer.Transporter {
 export async function sendEmail({ to, subject, text, html }: SendArgs) {
   const t = getTransporter();
 
-  const fromAddress =
-    process.env.FROM_EMAIL || "booking@firstclasstransfers.eu";
-  const fromLabel = process.env.FROM_LABEL || "First Class Transfers";
+  try {
+    const info = await t.sendMail({
+      from: `${process.env.FROM_LABEL ?? "First Class Transfers"} <${process.env.FROM_EMAIL}>`,
+      to,
+      subject,
+      text,
+      html,
+    });
 
-  return await t.sendMail({
-    from: `${fromLabel} <${fromAddress}>`,
-    to,
-    subject,
-    text,
-    html,
-  });
+
+    return info;
+  } catch (err) {
+    console.error("❌ Email send failed:", err);
+    throw err;
+  }
 }
