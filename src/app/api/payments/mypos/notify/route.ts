@@ -1,42 +1,74 @@
+export const runtime = "nodejs";
+
 import { NextResponse } from "next/server";
-import { verifyMyPOSSignature } from "@/lib/payments/mypos-signature";
+import crypto from "crypto";
 import { verifyOrder } from "@/lib/payments/order-token";
+
 
 export async function POST(req: Request) {
   try {
     const form = await req.formData();
-    const data = Object.fromEntries(form.entries()) as Record<string, string>;
+    const entries = Array.from(form.entries());
 
-    // 1️⃣ Verify myPOS signature
-    if (!verifyMyPOSSignature(data)) {
-      console.error("❌ Invalid myPOS signature");
-      return new NextResponse("INVALID SIGNATURE", { status: 400 });
+    // 🟡 If empty notify (manual test, retries, etc)
+    if (entries.length === 0) {
+      console.warn("⚠️ Empty myPOS notify payload");
+      return new NextResponse("OK", { status: 200 });
     }
 
-    // 2️⃣ Check success (IPC standard)
+    // Extract signature
+    const sigEntry = entries.find(([k]) => k === "Signature");
+    if (!sigEntry) {
+      console.error("❌ Missing Signature");
+      return new NextResponse("OK", { status: 200 });
+    }
+
+    const signature = sigEntry[1] as string;
+
+    // Remove Signature
+    const signedFields = entries.filter(([k]) => k !== "Signature");
+
+    // Build raw string in RECEIVED ORDER
+    const raw = signedFields.map(([, v]) => String(v)).join("-");
+    const base64 = Buffer.from(raw).toString("base64");
+
+    const isValid = crypto.verify(
+      "RSA-SHA256",
+      Buffer.from(base64),
+      process.env.MYPOS_PUBLIC_CERT!,
+      Buffer.from(signature, "base64")
+    );
+
+    if (!isValid) {
+      console.error("❌ Invalid myPOS signature");
+      return new NextResponse("OK", { status: 200 });
+    }
+
+    const data = Object.fromEntries(entries) as Record<string, string>;
+
+    // IPC success = Status === "0"
     if (data.Status !== "0") {
       console.warn("⚠️ Payment not successful:", data.Status);
       return new NextResponse("OK", { status: 200 });
     }
 
-    // 3️⃣ Verify order token
+    // Verify merchant order token
     const token = data.UDF1;
     if (!token) {
       console.error("❌ Missing UDF1");
-      return new NextResponse("MISSING ORDER", { status: 400 });
+      return new NextResponse("OK", { status: 200 });
     }
 
     const order = verifyOrder(token);
     if (!order) {
       console.error("❌ Invalid order token");
-      return new NextResponse("INVALID ORDER", { status: 400 });
+      return new NextResponse("OK", { status: 200 });
     }
 
-    // 4️⃣ Amount check
     const paidAmount = Number(data.Amount);
     if (paidAmount !== order.amount) {
       console.error("❌ Amount mismatch", paidAmount, order.amount);
-      return new NextResponse("AMOUNT MISMATCH", { status: 400 });
+      return new NextResponse("OK", { status: 200 });
     }
 
     // ✅ CONFIRMED PAYMENT
@@ -44,16 +76,12 @@ export async function POST(req: Request) {
     console.log("Order:", order.orderId);
     console.log("Txn:", data.IPC_Trnref);
 
-    /**
-     * Do your business logic here:
-     * - save booking
-     * - send email
-     * - notify admin
-     */
+    // Do async work AFTER responding (queue, webhook, etc)
 
     return new NextResponse("OK", { status: 200 });
   } catch (err) {
     console.error("🔥 myPOS notify error:", err);
-    return new NextResponse("ERROR", { status: 500 });
+    // 🚨 NEVER return error to myPOS
+    return new NextResponse("OK", { status: 200 });
   }
 }
