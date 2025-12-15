@@ -7,15 +7,13 @@ import { computePriceOrThrow } from "@/lib/pricing";
 
 export async function POST(req: Request) {
   try {
-    const body = await req.json();
-
     const {
       routeId,
       vehicleTypeId,
       tripType,
       customerEmail,
       customerPhone,
-    } = body;
+    } = await req.json();
 
     if (!routeId || !vehicleTypeId || !tripType || !customerEmail) {
       return NextResponse.json(
@@ -24,7 +22,7 @@ export async function POST(req: Request) {
       );
     }
 
-    // 1️⃣ Server-side trusted price
+    // 🔐 Trusted server price
     const amount = computePriceOrThrow({
       routeId,
       vehicleTypeId,
@@ -33,7 +31,7 @@ export async function POST(req: Request) {
 
     const orderId = `ORD-${Date.now()}`;
 
-    // 2️⃣ Sign order (UDF1)
+    // 🔑 Sign order (UDF1)
     const token = signOrder({
       orderId,
       amount,
@@ -48,7 +46,7 @@ export async function POST(req: Request) {
       );
     }
 
-    // 3️⃣ Build myPOS HTML
+    // 🧾 Build IPC checkout HTML
     const html = buildMyPOSFormHTML({
       orderId,
       amount,
@@ -58,7 +56,6 @@ export async function POST(req: Request) {
       udf1: token,
     });
 
-    // 4️⃣ Return HTML
     return new NextResponse(html, {
       headers: { "Content-Type": "text/html; charset=utf-8" },
     });

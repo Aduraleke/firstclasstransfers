@@ -202,20 +202,24 @@ const redirectToCardPayment = async () => {
   setSubmitError(null);
 
   try {
-    const res = await fetch("/api/bookings/card/init", {
+    const res = await fetch("/api/payments/mypos/start", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(draft),
+      body: JSON.stringify({
+        routeId: draft.routeId,
+        vehicleTypeId: draft.vehicleTypeId,
+        tripType: draft.tripType,
+        customerEmail: draft.email,
+        customerPhone: draft.phone,
+      }),
     });
 
     if (!res.ok) {
       throw new Error("Payment initialization failed");
     }
 
-    // ✅ Backend returns HTML, not JSON
     const html = await res.text();
 
-    // ✅ Replace current document with the payment form
     document.open();
     document.write(html);
     document.close();
@@ -226,6 +230,7 @@ const redirectToCardPayment = async () => {
     setSubmitting(false);
   }
 };
+
 
   // After confirm – thank you UI (same as before)
   if (submitted) {
