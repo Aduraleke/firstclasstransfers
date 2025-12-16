@@ -10,49 +10,43 @@ type Params = {
 };
 
 export function buildMyPOSFormHTML(params: Params): string {
-
-  const isSandbox = process.env.MYPOS_SANDBOX === "true";
+  const isSandbox =
+    process.env.MYPOS_SANDBOX === "true"
+      ? true
+      : process.env.MYPOS_SANDBOX === "false"
+      ? false
+      : (() => {
+          throw new Error("MYPOS_SANDBOX must be 'true' or 'false'");
+        })();
 
   const actionUrl = isSandbox
     ? "https://www.mypos.eu/vmp/checkout-test"
     : "https://www.mypos.eu/vmp/checkout";
 
-  const fields: Record<string, string | number> = {
-    IPCmethod: "IPCPurchase",
-    IPCVersion: "1.4",
-    IPCLanguage: "EN",
+const fields = {
+  IPCmethod: "IPCPurchase",
+  IPCVersion: "1.4",
+  IPCLanguage: "EN",
 
-    SID: process.env.MYPOS_SID!,
-    WalletNumber: process.env.MYPOS_WALLET_NUMBER!,
+  SID: process.env.MYPOS_SID!,
+  WalletNumber: process.env.MYPOS_WALLET_NUMBER!,
 
-    Amount: params.amount.toFixed(2),
-    Currency: params.currency,
-    OrderID: params.orderId,
+  Amount: params.amount.toFixed(2),
+  Currency: "EUR",
+  OrderID: params.orderId,
 
-    URL_OK: process.env.MYPOS_OK_URL!,
-    URL_Cancel: process.env.MYPOS_CANCEL_URL!,
-    URL_Notify: process.env.MYPOS_NOTIFY_URL!,
+  URL_OK: process.env.MYPOS_OK_URL!,
+  URL_Cancel: process.env.MYPOS_CANCEL_URL!,
+  URL_Notify: process.env.MYPOS_NOTIFY_URL!,
 
-    PaymentParametersRequired: 3,
-
-    CustomerEmail: params.customerEmail,
-    CustomerPhone: params.customerPhone ?? "",
-
-    CartItems: 1,
-    Article_1: "Airport Transfer",
-    Quantity_1: 1,
-    Price_1: params.amount.toFixed(2),
-    Currency_1: params.currency,
-    Amount_1: params.amount.toFixed(2),
-
-    KeyIndex: process.env.MYPOS_KEY_INDEX!,
-  };
+  KeyIndex: process.env.MYPOS_KEY_INDEX!,
+};
 
   if (params.udf1) {
     fields.UDF1 = params.udf1;
   }
 
-  // 🔐 Signature MUST be last
+  // SIGNATURE MUST BE LAST
   fields.Signature = signMyPOS(fields);
 
   const inputs = Object.entries(fields)

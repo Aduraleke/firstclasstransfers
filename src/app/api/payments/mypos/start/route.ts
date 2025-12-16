@@ -1,18 +1,16 @@
-export const runtime = "nodejs";
-
 import { NextResponse } from "next/server";
 import { BookingBaseSchema } from "@/lib/booking/schema";
 import { createBooking } from "@/lib/booking/createBooking";
 import { buildMyPOSFormHTML } from "@/lib/payments/mypos-form";
 import { signOrder } from "@/lib/payments/order-token";
 
+export const runtime = "nodejs";
+
 export async function POST(req: Request) {
   try {
     const raw = await req.json();
-
     const parsed = BookingBaseSchema.parse(raw);
 
-    // Always treat as card booking
     const { amount } = await createBooking(parsed, true);
 
     const orderId = `ORD-${Date.now()}`;
