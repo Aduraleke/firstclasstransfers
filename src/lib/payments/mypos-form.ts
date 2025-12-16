@@ -41,34 +41,22 @@ export function buildMyPOSFormHTML(params: Params): string {
     SID: requireEnv("MYPOS_SID"),
     WalletNumber: requireEnv("MYPOS_WALLET_NUMBER"),
 
-    Amount: params.amount.toFixed(2),
-    Currency: params.currency,
-    OrderID: params.orderId,
+  Amount: params.amount.toFixed(2),
+  Currency: "EUR",
+  OrderID: params.orderId,
 
-    URL_OK: process.env.MYPOS_OK_URL!,
-    URL_Cancel: process.env.MYPOS_CANCEL_URL!,
-    URL_Notify: process.env.MYPOS_NOTIFY_URL!,
+  URL_OK: process.env.MYPOS_OK_URL!,
+  URL_Cancel: process.env.MYPOS_CANCEL_URL!,
+  URL_Notify: process.env.MYPOS_NOTIFY_URL!,
 
-    PaymentParametersRequired: 3,
-
-    CustomerEmail: params.customerEmail,
-    CustomerPhone: params.customerPhone ?? "",
-
-    CartItems: 1,
-    Article_1: "Airport Transfer",
-    Quantity_1: 1,
-    Price_1: params.amount.toFixed(2),
-    Currency_1: params.currency,
-    Amount_1: params.amount.toFixed(2),
-
-    KeyIndex: process.env.MYPOS_KEY_INDEX!,
-  };
+  KeyIndex: process.env.MYPOS_KEY_INDEX!,
+};
 
   if (params.udf1) {
     fields.UDF1 = params.udf1;
   }
 
-  // 🔐 Signature MUST be last
+  // SIGNATURE MUST BE LAST
   fields.Signature = signMyPOS(fields);
 
   const inputs = Object.entries(fields)

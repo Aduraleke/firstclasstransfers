@@ -1,5 +1,3 @@
-export const runtime = "nodejs";
-
 import { NextResponse } from "next/server";
 import { BookingBaseSchema } from "@/lib/booking/schema";
 import { createBooking } from "@/lib/booking/createBooking";
@@ -24,7 +22,6 @@ export async function POST(req: Request) {
     requireEnv("MYPOS_SID");
     requireEnv("MYPOS_WALLET_NUMBER");
     const raw = await req.json();
-
     const parsed = BookingBaseSchema.parse(raw);
 
     const { amount } = await createBooking(parsed, true);

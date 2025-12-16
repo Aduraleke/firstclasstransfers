@@ -1,13 +1,13 @@
 import crypto from "crypto";
 
 /**
- * myPOS signature rules:
- * 1. Concatenate VALUES ONLY
- * 2. Use "-" separator
- * 3. Base64 encode
- * 4. RSA-SHA256 sign
- *
- * ⚠️ ORDER MATTERS — MUST BE FIXED
+ * myPOS IPC v1.4 signature
+ * RULES:
+ * - VALUES ONLY
+ * - "-" separator
+ * - Base64 encode
+ * - RSA-SHA256
+ * - ORDER IS CRITICAL
  */
 
 const SIGNATURE_ORDER = [
@@ -22,36 +22,35 @@ const SIGNATURE_ORDER = [
   "URL_OK",
   "URL_Cancel",
   "URL_Notify",
-  "PaymentParametersRequired",
-  "CustomerEmail",
-  "CustomerPhone",
-  "CartItems",
-  "Article_1",
-  "Quantity_1",
-  "Price_1",
-  "Currency_1",
-  "Amount_1",
   "KeyIndex",
-  "UDF1", // include ONLY if present
-];
+] as const;
+
 
 function normalizeKey(key?: string): string {
-  if (!key) throw new Error("Missing RSA key");
+  if (!key) throw new Error("Missing myPOS RSA key");
   return key.replace(/\\n/g, "\n");
 }
 
 export function signMyPOS(
   fields: Record<string, string | number>
 ): string {
+  if (!process.env.MYPOS_PRIVATE_KEY) {
+    throw new Error("MYPOS_PRIVATE_KEY missing");
+  }
+
   const values: string[] = [];
 
   for (const key of SIGNATURE_ORDER) {
-    if (fields[key] !== undefined) {
+    if (fields[key] !== undefined && fields[key] !== "") {
       values.push(String(fields[key]));
     }
   }
 
   const raw = values.join("-");
+
+  // 🔴 DEBUG — THIS IS WHAT YOU WANT
+  console.log("myPOS SIGN STRING:", raw);
+
   const base64 = Buffer.from(raw).toString("base64");
 
   const signer = crypto.createSign("RSA-SHA256");
@@ -61,33 +60,5 @@ export function signMyPOS(
   return signer.sign(
     normalizeKey(process.env.MYPOS_PRIVATE_KEY),
     "base64"
-  );
-}
-
-export function verifyMyPOSSignature(
-  data: Record<string, string>
-): boolean {
-  const signature = data.Signature;
-  if (!signature) return false;
-
-  const fields = { ...data };
-  delete fields.Signature;
-
-  const values: string[] = [];
-
-  for (const key of SIGNATURE_ORDER) {
-    if (fields[key] !== undefined) {
-      values.push(String(fields[key]));
-    }
-  }
-
-  const raw = values.join("-");
-  const base64 = Buffer.from(raw).toString("base64");
-
-  return crypto.verify(
-    "RSA-SHA256",
-    Buffer.from(base64),
-    normalizeKey(process.env.MYPOS_PUBLIC_CERT),
-    Buffer.from(signature, "base64")
   );
 }

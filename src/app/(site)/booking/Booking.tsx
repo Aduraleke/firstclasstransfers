@@ -66,6 +66,16 @@ export default function Booking({
   };
 
   useEffect(() => {
+    if (typeof window !== "undefined") {
+      window.dataLayer = window.dataLayer || [];
+      window.dataLayer.push({
+        event: "lead",
+        page: "booking",
+      });
+    }
+  }, []);
+
+  useEffect(() => {
     let mounted = true;
     (async () => {
       try {
@@ -144,8 +154,9 @@ export default function Booking({
         }
       );
 
+      const json = await res.json();
+
       if (!res.ok) {
-        const json = await res.json();
         throw new Error(json?.error || "Booking failed");
       }
 
@@ -159,11 +170,19 @@ export default function Booking({
       }
 
       // CASH → success UI
+      if (typeof window !== "undefined") {
+        window.dataLayer = window.dataLayer || [];
+        window.dataLayer.push({
+          event: "purchase",
+          bookingValue: json.amount,
+          currency: "EUR",
+          paymentMethod: "cash",
+        });
+      }
+
       setSubmitted(true);
     } catch (err) {
-      setSubmitError(
-        err instanceof Error ? err.message : "Booking failed"
-      );
+      setSubmitError(err instanceof Error ? err.message : "Booking failed");
       setSubmitting(false);
     }
   };
@@ -197,9 +216,7 @@ export default function Booking({
         <BookingStepper currentStep={step} />
 
         {routeFetchError && (
-          <div className="mt-3 text-sm text-red-600">
-            {routeFetchError}
-          </div>
+          <div className="mt-3 text-sm text-red-600">{routeFetchError}</div>
         )}
 
         {step === 1 && (
@@ -248,8 +265,7 @@ export default function Booking({
                 onClick={() => submitBooking(true)}
                 className="px-4 py-2 rounded-full text-white"
                 style={{
-                  background:
-                    "linear-gradient(135deg,#b07208,#162c4b)",
+                  background: "linear-gradient(135deg,#b07208,#162c4b)",
                 }}
               >
                 Continue to payment

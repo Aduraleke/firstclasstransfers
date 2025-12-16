@@ -18,20 +18,26 @@ export async function POST(req: Request) {
     const officeEmail =
       process.env.BOOKING_EMAIL || "booking@firstclasstransfers.eu";
 
-    const bookingData = {
-      name: body.name,
-      email: body.email,
-      phone: body.phone,
-      route: body.routeId,
-      vehicle: body.vehicleTypeId,
-      tripType: body.tripType,
-      date: body.date,
-      time: body.time,
-      adults: body.adults,
-      children: body.children,
-      baggage: body.baggageType,
-      amount,
-    };
+  const bookingData = {
+  name: body.name,
+  email: body.email,
+  phone: body.phone,
+  route: body.routeId,
+  vehicle: body.vehicleTypeId,
+  tripType: body.tripType,
+
+  date: body.date,
+  time: body.time,
+
+  returnDate: body.returnDate,
+  returnTime: body.returnTime,
+
+  adults: body.adults,
+  children: body.children,
+  baggage: body.baggageType,
+  amount,
+};
+
 
     // Customer email
     const customerMail = customerCashConfirmed(bookingData);

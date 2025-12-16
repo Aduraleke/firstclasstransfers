@@ -61,22 +61,40 @@ export default function Step1Trip({ data, onChange, onNext }: Props) {
   const timeDropdownRef = React.useRef<HTMLDivElement | null>(null);
   const timeInputRef = React.useRef<HTMLInputElement | null>(null);
 
+  // RETURN TIME (✅ SEPARATE)
+  const [returnTimeOpen, setReturnTimeOpen] = useState(false);
+  const returnTimeInputRef = React.useRef<HTMLInputElement | null>(null);
+  const returnTimeDropdownRef = React.useRef<HTMLDivElement | null>(null);
+
   // CLOSE DROPDOWN WHEN CLICKING OUTSIDE
   useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (
-        timeDropdownRef.current &&
-        !timeDropdownRef.current.contains(event.target as Node) &&
-        timeInputRef.current &&
-        !timeInputRef.current.contains(event.target as Node)
-      ) {
-        setTimeOpen(false);
-      }
+  function handleClickOutside(event: MouseEvent) {
+    // MAIN TIME
+    if (
+      timeDropdownRef.current &&
+      !timeDropdownRef.current.contains(event.target as Node) &&
+      timeInputRef.current &&
+      !timeInputRef.current.contains(event.target as Node)
+    ) {
+      setTimeOpen(false);
     }
 
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
+    // RETURN TIME
+    if (
+      returnTimeDropdownRef.current &&
+      !returnTimeDropdownRef.current.contains(event.target as Node) &&
+      returnTimeInputRef.current &&
+      !returnTimeInputRef.current.contains(event.target as Node)
+    ) {
+      setReturnTimeOpen(false);
+    }
+  }
+
+  document.addEventListener("mousedown", handleClickOutside);
+  return () =>
+    document.removeEventListener("mousedown", handleClickOutside);
+}, []);
+
 
   // Highlight vehicle on load (deep link)
   useEffect(() => {
@@ -120,12 +138,6 @@ export default function Step1Trip({ data, onChange, onNext }: Props) {
   };
 
   // Auto-set date if time is set first
-  const ensureDate = () => {
-    if (!data.date) {
-      const today = new Date().toISOString().split("T")[0];
-      onChange("date", today);
-    }
-  };
 
   const handleTimeChange = (value: string) => {
     if (!value) return;
@@ -149,9 +161,19 @@ export default function Step1Trip({ data, onChange, onNext }: Props) {
   };
 
   const handleReturnTimeChange = (value: string) => {
-    onChange("returnTime", value);
-    ensureDate();
     if (!value) return;
+
+    const baseDate = data.returnDate || data.date || getTodayISO();
+
+    // If return time is past on same day → move to tomorrow
+    if (isTimeInPast(baseDate, value)) {
+      onChange("returnDate", getTomorrowISO());
+    } else {
+      onChange("returnDate", baseDate);
+    }
+
+    onChange("returnTime", value);
+
     const hour = Number(value.split(":")[0]);
     onChange("returnTimePeriod", hour >= 6 && hour < 22 ? "day" : "night");
   };
@@ -490,56 +512,64 @@ export default function Step1Trip({ data, onChange, onNext }: Props) {
               </label>
               <input
                 type="date"
+                min={data.date || getTodayISO()}
                 value={data.returnDate}
                 onChange={(e) => onChange("returnDate", e.target.value)}
                 className="mt-1 w-full rounded-2xl border border-emerald-200 bg-white px-3 py-2.5 shadow-sm text-sm"
               />
             </div>
 
-            <div>
+            <div className="relative">
               <label className="text-xs font-medium text-emerald-900">
                 Return pickup time
               </label>
+
               <input
+                ref={returnTimeInputRef}
                 type="time"
                 value={data.returnTime}
+                onFocus={() => setReturnTimeOpen(true)}
                 onChange={(e) => handleReturnTimeChange(e.target.value)}
-                className="mt-1 w-full rounded-2xl border border-emerald-200 bg-white px-3 py-2.5 shadow-sm text-sm"
+                className="mt-1 w-full rounded-2xl border border-gray-300 bg-white px-3 py-2.5 shadow-sm text-sm"
               />
-            </div>
-          </div>
 
-          {/* Return time period */}
-          <div>
-            <p className="text-xs font-medium text-emerald-900 mb-1">
-              Return time period
-            </p>
-            <div className="inline-flex gap-2 bg-emerald-100 p-1 border border-emerald-200 rounded-2xl">
-              {TIME_PERIODS.map((tp) => {
-                const active = data.returnTimePeriod === tp.id;
-                return (
-                  <button
-                    key={tp.id}
-                    onClick={() => onChange("returnTimePeriod", tp.id)}
-                    className={`px-3 py-1.5 rounded-2xl transition-all ${
-                      active ? "shadow-sm scale-[1.03]" : "hover:bg-white"
-                    }`}
-                    style={{
-                      backgroundColor: active ? BRAND_ACCENT : "transparent",
-                      color: active ? "#fff" : "#064e3b",
-                    }}
-                  >
-                    <span className="text-xs font-semibold">{tp.label}</span>
-                    <span
-                      className={`block text-[10px] ${
-                        active ? "text-white/80" : "text-emerald-700"
-                      }`}
-                    >
-                      {tp.range}
-                    </span>
-                  </button>
-                );
-              })}
+              {returnTimeOpen && (
+                <div
+                  ref={returnTimeDropdownRef}
+                  className="absolute z-40 mt-2 w-full max-h-60 overflow-y-auto rounded-2xl border border-gray-200 bg-white shadow-xl"
+                >
+                  {Array.from({ length: 24 }, (_, h) =>
+                    ["00", "15", "30", "45"].map((m) => {
+                      const t = `${String(h).padStart(2, "0")}:${m}`;
+                      const today = getTodayISO();
+                      const isPast =
+                        data.returnDate === today && isTimeInPast(today, t);
+
+                      return (
+                        <button
+                          key={t}
+                          disabled={isPast}
+                          onClick={() => {
+                            handleReturnTimeChange(t);
+                            setReturnTimeOpen(false);
+                          }}
+                          className={`block w-full px-4 py-2 text-left text-sm ${
+                            isPast
+                              ? "text-gray-300 cursor-not-allowed"
+                              : "hover:bg-gray-50"
+                          } ${
+                            data.returnTime === t
+                              ? "bg-emerald-50 font-semibold"
+                              : ""
+                          }`}
+                        >
+                          {t}
+                        </button>
+                      );
+                    })
+                  )}
+                </div>
+              )}
             </div>
           </div>
         </section>
