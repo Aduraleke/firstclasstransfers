@@ -1,4 +1,3 @@
-cat src/app/api/payments/mypos/start/route.ts
 export const runtime = "nodejs";
 
 import { NextResponse } from "next/server";
