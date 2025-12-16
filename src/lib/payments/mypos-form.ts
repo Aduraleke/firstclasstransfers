@@ -9,27 +9,37 @@ type Params = {
   udf1?: string;
 };
 
+function requireEnv(name: string): string {
+  const v = process.env[name];
+  if (!v) throw new Error(`Missing env var: ${name}`);
+  return v;
+}
+
 export function buildMyPOSFormHTML(params: Params): string {
-  const isSandbox =
-    process.env.MYPOS_SANDBOX === "true"
-      ? true
-      : process.env.MYPOS_SANDBOX === "false"
-      ? false
-      : (() => {
-          throw new Error("MYPOS_SANDBOX must be 'true' or 'false'");
-        })();
+
+  console.log("env check", {
+    isServer: typeof window === "undefined",
+    sidPresent: !!process.env.MYPOS_SID,
+    walletPresent: !!process.env.MYPOS_WALLET_NUMBER,
+    sidLen: process.env.MYPOS_SID?.length,
+    walletLen: process.env.MYPOS_WALLET_NUMBER?.length,
+  });
+
+  const isSandbox = process.env.MYPOS_SANDBOX === "true";
 
   const actionUrl = isSandbox
     ? "https://www.mypos.eu/vmp/checkout-test"
     : "https://www.mypos.eu/vmp/checkout";
 
-const fields = {
-  IPCmethod: "IPCPurchase",
-  IPCVersion: "1.4",
-  IPCLanguage: "EN",
+    console.log("MYPOS_WALLET_NUMBER at runtime:", process.env.MYPOS_WALLET_NUMBER);
 
-  SID: process.env.MYPOS_SID!,
-  WalletNumber: process.env.MYPOS_WALLET_NUMBER!,
+  const fields: Record<string, string | number> = {
+    IPCmethod: "IPCPurchase",
+    IPCVersion: "1.4",
+    IPCLanguage: "EN",
+
+    SID: requireEnv("MYPOS_SID"),
+    WalletNumber: requireEnv("MYPOS_WALLET_NUMBER"),
 
   Amount: params.amount.toFixed(2),
   Currency: "EUR",
@@ -55,6 +65,8 @@ const fields = {
         `<input type="hidden" name="${k}" value="${String(v)}" />`
     )
     .join("\n");
+
+    console.log(fields);
 
   return `<!DOCTYPE html>
 <html>

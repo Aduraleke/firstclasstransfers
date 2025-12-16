@@ -1,8 +1,26 @@
-export default function SuccessPage() {
+import { verifyOrderToken } from "@/lib/payments/order-token";
+import { notFound } from "next/navigation";
+import SuccessClient from "./SuccessClient";
+
+type Props = {
+  searchParams?: { token?: string };
+};
+
+export default async function SuccessPage({ searchParams }: Props) {
+  const token = searchParams?.token;
+  if (!token) notFound();
+
+  const payload = verifyOrderToken(token);
+  if (!payload) notFound();
+
+  // ⛔ OPTIONAL BUT STRONGLY RECOMMENDED
+  // Verify orderId with payment provider / database here
+
   return (
-    <div className="pt-32 text-center">
-      <h1 className="text-2xl font-bold">Payment Successful 🎉</h1>
-      <p>Thank you. Your transfer is confirmed.</p>
-    </div>
+    <SuccessClient
+      orderId={payload.orderId}
+      amount={payload.amount}
+      currency={payload.currency}
+    />
   );
 }

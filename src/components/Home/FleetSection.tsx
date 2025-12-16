@@ -219,23 +219,7 @@ export default function FleetSection() {
           })}
         </div>
 
-        {/* CTA */}
-        <div className="text-center mt-16 sm:mt-20">
-          <a
-            href="/fleet"
-            className="inline-flex items-center gap-2 text-sm font-semibold px-6 sm:px-7 py-3 rounded-full shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition transform border border-white/10"
-            style={{
-              background: `linear-gradient(135deg, ${BRAND.gold}, ${BRAND.navy})`,
-            }}
-          >
-            View our full fleet
-            <Icon icon="mdi:arrow-right" width={18} height={18} />
-          </a>
-          <p className="mt-3 text-[11px] text-white/55">
-            Need something special? We also arrange custom vehicles for events, VIPs and
-            corporate roadshows.
-          </p>
-        </div>
+    
       </div>
     </section>
   );

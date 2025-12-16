@@ -2,20 +2,28 @@
 "use client";
 
 import { useEffect } from "react";
+import { usePathname } from "next/navigation";
+
+type Props = {
+  enableOverlay?: boolean;
+  watermarkText?: string;
+};
 
 export default function AntiCopyClient({
   enableOverlay = true,
   watermarkText = "© First Class Transfers",
-}: {
-  enableOverlay?: boolean;
-  watermarkText?: string;
-}) {
-  useEffect(() => {
-    const onContextMenu = (e: MouseEvent) => {
-      e.preventDefault();
-    };
+}: Props) {
+  const pathname = usePathname();
 
-    const onSelectStart = (e: Event) => {
+  // 🚫 Disable on conversion-critical pages
+  const disabled =
+    pathname.startsWith("/booking") ||
+    pathname.startsWith("/payment");
+
+  useEffect(() => {
+    if (disabled) return;
+
+    const onContextMenu = (e: MouseEvent) => {
       const target = e.target as HTMLElement | null;
       if (
         target &&
@@ -28,8 +36,8 @@ export default function AntiCopyClient({
       e.preventDefault();
     };
 
-    const onCopyCutPaste = (e: ClipboardEvent) => {
-      const target = e?.target as HTMLElement | null;
+    const onCopyCut = (e: ClipboardEvent) => {
+      const target = e.target as HTMLElement | null;
       if (
         target &&
         (target.tagName === "INPUT" ||
@@ -41,88 +49,66 @@ export default function AntiCopyClient({
       e.preventDefault();
     };
 
-    const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "F12") {
-        e.preventDefault();
-      }
-      if (
-        (e.ctrlKey || e.metaKey) &&
-        (e.key.toLowerCase() === "u" ||
-          e.key.toLowerCase() === "s" ||
-          (e.shiftKey && e.key.toLowerCase() === "i"))
-      ) {
-        e.preventDefault();
-      }
-      if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === "c") {
-        e.preventDefault();
-      }
-    };
-
     document.addEventListener("contextmenu", onContextMenu);
-    document.addEventListener("selectstart", onSelectStart);
-    document.addEventListener("copy", onCopyCutPaste);
-    document.addEventListener("cut", onCopyCutPaste);
-    document.addEventListener("paste", onCopyCutPaste);
-    document.addEventListener("keydown", onKeyDown);
+    document.addEventListener("copy", onCopyCut);
+    document.addEventListener("cut", onCopyCut);
 
     return () => {
       document.removeEventListener("contextmenu", onContextMenu);
-      document.removeEventListener("selectstart", onSelectStart);
-      document.removeEventListener("copy", onCopyCutPaste);
-      document.removeEventListener("cut", onCopyCutPaste);
-      document.removeEventListener("paste", onCopyCutPaste);
-      document.removeEventListener("keydown", onKeyDown);
+      document.removeEventListener("copy", onCopyCut);
+      document.removeEventListener("cut", onCopyCut);
     };
-  }, []);
+  }, [disabled]);
+
+  if (disabled) return null;
 
   return (
     <>
       <style
         dangerouslySetInnerHTML={{
           __html: `
-html, body, #__next {
-  -webkit-user-select: none !important;
-  -moz-user-select: none !important;
-  -ms-user-select: none !important;
-  user-select: none !important;
+/* 🔒 Protect only marked content */
+.anticopy-protected {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
 }
 
+/* Allow normal interaction everywhere else */
 input, textarea, [contenteditable="true"] {
-  -webkit-user-select: text !important;
-  -moz-user-select: text !important;
-  -ms-user-select: text !important;
-  user-select: text !important;
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  -ms-user-select: text;
+  user-select: text;
 }
 
 img {
-  -webkit-user-drag: none !important;
-  user-drag: none !important;
-  pointer-events: auto;
+  -webkit-user-drag: none;
+  user-drag: none;
 }
 
-/* Overlay and watermark */
-.anticopy-overlay {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  z-index: 99998;
-}
-
+/* Watermark */
 .anticopy-watermark {
   position: fixed;
   bottom: 12px;
   right: 12px;
   opacity: 0.12;
   font-size: 12px;
-  z-index: 99999;
+  z-index: 9999;
   pointer-events: none;
   user-select: none;
 }
-      `,
+        `,
         }}
       />
 
-      {enableOverlay && <div className="anticopy-overlay" aria-hidden="true" />}
+      {enableOverlay && (
+        <div
+          className="anticopy-overlay"
+          aria-hidden="true"
+        />
+      )}
 
       <div className="anticopy-watermark" aria-hidden="true">
         {watermarkText}
