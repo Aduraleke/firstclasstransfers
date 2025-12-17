@@ -2272,7 +2272,7 @@ This route should NOT be visible in production.`,
     },
   ],
 
-  image: "/test-route.jpg",
+  image: "/protaras.jpg",
   bookHref: "/booking?route=nicosia-test-destination",
   bookCtaLabel: "TEST – Book This Route",
   bookCtaSupport:
