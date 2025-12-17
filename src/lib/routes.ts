@@ -6,6 +6,7 @@
 
 export type RouteDetailSlug =
   | "nicosia-larnaca-airport"
+  | "nicosia-test-destination"
   | "nicosia-troodos"
   | "nicosia-limassol"
   | "nicosia-paphos-airport"
@@ -2185,6 +2186,99 @@ Your driver will collect you from your home, hotel, office or university in Nico
     bookCtaSupport:
       "Reserve your fixed-price mountain transfer and enjoy a comfortable, scenic ride from Nicosia to the Troodos Mountains.",
   },
+
+  // 🔧 TEST ROUTE — FOR DEVELOPMENT ONLY
+{
+  bookingRouteId: "test-route",
+
+  slug: "nicosia-test-destination",
+  from: "Nicosia",
+  to: "Test Destination",
+
+  metaTitle: "TEST Taxi from Nicosia to Test Destination | Fixed Price Transfer",
+  metaDescription:
+    "TEST ROUTE ONLY. Private taxi from Nicosia to Test Destination at a fixed price. Used for development, layout and booking flow testing.",
+
+  heroTitle: "TEST Taxi Transfer from Nicosia to Test Destination",
+  subheadline:
+    "TEST PRICES: €1 (up to 4 passengers) · €1 (up to 6 passengers)\nDistance: ~10 km · Average Journey: 15 minutes",
+
+  body: `⚠️ This is a TEST ROUTE used for development and QA purposes only.
+
+It follows the exact same data structure as real routes and allows developers to test:
+• Route pages
+• Booking links
+• Pricing logic
+• SEO metadata
+• UI layouts
+• FAQ rendering
+
+This route should NOT be visible in production.`,
+
+  distance: "10 km",
+  time: "15 minutes",
+  sedanPrice: "€1",
+  vanPrice: "€1",
+
+  whatMakesBetter: [
+    "TEST DATA – do not publish",
+    "Used for UI, booking and pricing validation",
+    "Safe placeholder content",
+  ],
+
+  whatsIncluded: [
+    "TEST standard car (up to 4 passengers)",
+    "TEST minivan (up to 6 passengers)",
+    "Dummy pickup and drop-off",
+    "No real transport provided",
+  ],
+
+  vehicleOptions: [
+    {
+      type: "Standard Car",
+      maxPassengers: "up to 4",
+      idealFor: "UI testing",
+      fixedPrice: "€1",
+    },
+    {
+      type: "Minivan",
+      maxPassengers: "up to 6",
+      idealFor: "Layout testing",
+      fixedPrice: "€1",
+    },
+  ],
+
+  destinationHighlights: [
+    "Placeholder destination",
+    "Used only in development",
+  ],
+
+  idealFor: [
+    "Developers",
+    "QA testing",
+    "Design previews",
+  ],
+
+  faq: [
+    {
+      question: "Is this a real transfer?",
+      answer:
+        "No. This is a test route used only for development and testing purposes.",
+    },
+    {
+      question: "Will this appear on the live site?",
+      answer:
+        "It should not. Remove this route before production deployment.",
+    },
+  ],
+
+  image: "/test-route.jpg",
+  bookHref: "/booking?route=nicosia-test-destination",
+  bookCtaLabel: "TEST – Book This Route",
+  bookCtaSupport:
+    "Development-only CTA for booking flow testing.",
+}
+
 ];
 
 // helper
