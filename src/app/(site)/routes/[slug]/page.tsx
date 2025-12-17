@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -12,7 +13,82 @@ type RouteParams = {
   slug: string;
 };
 
-const VEHICLE_IMAGE_MAP: Record<string, string> = {
+/* =========================================================
+   STATIC PARAMS (SSG)
+========================================================= */
+export async function generateStaticParams() {
+  return ROUTE_DETAILS.map((r) => ({ slug: r.slug }));
+}
+
+/* =========================================================
+   PER-ROUTE SEO (THIS IS THE KEY PART)
+========================================================= */
+export async function generateMetadata(
+  { params }: { params: Promise<RouteParams> }
+): Promise<Metadata> {
+  const { slug } = await params;
+  const route = getRouteDetailBySlug(slug);
+
+  if (!route) {
+    return {};
+  }
+
+  const title =
+    route.metaTitle ||
+    `${route.from} to ${route.to} Taxi Transfer | Fixed Price`;
+
+  const description =
+    route.metaDescription ||
+    `Book a private taxi from ${route.from} to ${route.to} with a fixed price per vehicle. 24/7 service, no hidden fees, professional drivers.`;
+
+  const canonical = `https://firstclasstransfers.eu/routes/${route.slug}`;
+
+  return {
+    title,
+    description,
+    alternates: {
+      canonical,
+    },
+    openGraph: {
+      title,
+      description,
+      url: canonical,
+      siteName: "First Class Transfers Cyprus",
+      images: [
+        {
+          url: route.image,
+          width: 1200,
+          height: 630,
+          alt: `${route.from} to ${route.to} private transfer`,
+        },
+      ],
+      type: "website",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [route.image],
+    },
+  };
+}
+
+/* =========================================================
+   PAGE
+========================================================= */
+export default async function RouteDetailsPage({
+  params,
+}: {
+  params: Promise<RouteParams>;
+}) {
+  const { slug } = await params;
+  const route = getRouteDetailBySlug(slug);
+
+  if (!route) {
+    return notFound();
+  }
+
+  const VEHICLE_IMAGE_MAP: Record<string, string> = {
   "Standard Car": "/ford-carpri.jpg",
   Sedan: "/ford-carpri.jpg",
   Minivan: "/mercedesVclass.jpg",
@@ -36,35 +112,22 @@ function getVehicleImage(type: string): string | null {
   return null;
 }
 
-export async function generateStaticParams() {
-  return ROUTE_DETAILS.map((r) => ({ slug: r.slug }));
-}
-
-export default async function RouteDetailsPage({
-  params,
-}: {
-  params: Promise<RouteParams>;
-}) {
-  const { slug } = await params;
-  const route = getRouteDetailBySlug(slug);
-
-  if (!route) {
-    return notFound();
-  }
-
+  /* -----------------------------
+     helpers
+  ------------------------------ */
   const subheadlineLines = route.subheadline.split("\n").filter(Boolean);
   const bodyParagraphs = route.body
     .split(/\n{2,}/)
     .filter((p) => p.trim().length);
 
-  const recommendedRoutes = ROUTE_DETAILS.filter((r) => r.slug !== slug).slice(
-    0,
-    3
-  );
+  const recommendedRoutes = ROUTE_DETAILS.filter(
+    (r) => r.slug !== slug
+  ).slice(0, 3);
 
-  // 👇 build booking URL based on bookingRouteId / slug
   const bookingRouteId = route.bookingRouteId ?? route.slug;
   const bookingHref = `/booking?routeId=${encodeURIComponent(bookingRouteId)}`;
+
+
 
   return (
     <main className="relative mx-auto mt-24 max-w-6xl px-4 pb-20 pt-10 sm:px-6 lg:px-8">

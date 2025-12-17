@@ -19,8 +19,8 @@ type DestLink = {
 };
 
 const LARNACA_DESTINATIONS: DestLink[] = [
-  { label: "Larnaca City & Mackenzie Beach", slug: "larnaca-airport-larnaca" },
-  { label: "Ayia Napa, Nissi Beach & Makronissos", slug: "larnaca-airport-ayia-napa" },
+  { label: "Larnaca City & Mackenzie Beach", slug: "paphos-airport-larnaca" },
+  { label: "Ayia Napa, Nissi Beach & Makronissos", slug: "paphos-airport-ayia-napa" },
   { label: "Protaras, Pernera, Paralimni & Kapparis", slug: "larnaca-airport-protaras" },
   { label: "Nicosia (Lefkosia)", slug: "larnaca-airport-nicosia" },
   { label: "Limassol & Limassol Marina", slug: "larnaca-airport-limassol" },
