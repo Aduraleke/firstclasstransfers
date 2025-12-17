@@ -28,7 +28,7 @@ export const metadata: Metadata = {
     template: "%s | First Class Transfers Cyprus",
   },
   description:
-    "Fixed-price private airport transfers in Cyprus from Larnaca and Paphos Airports to Ayia Napa, Protaras, Nicosia, Limassol and more. 24/7 service, modern vehicles, English-speaking drivers.",
+    "Fixed-price private airport transfers in Cyprus. Reliable taxi and minivan services from Larnaca and Paphos Airports, available 24/7.",
   icons: {
     icon: "/favicon.ico",
   },
@@ -37,14 +37,14 @@ export const metadata: Metadata = {
     url: "https://firstclasstransfers.eu/",
     title: "First Class Transfers Cyprus",
     description:
-      "Book fixed-price private Cyprus airport taxis from Larnaca (LCA) and Paphos (PFO). Sedans and Mercedes V-Class minivans, 24/7, child seats on request.",
+      "Book fixed-price private Cyprus airport transfers from Larnaca and Paphos Airports. Sedans and Mercedes V-Class available 24/7.",
     siteName: "First Class Transfers Cyprus",
     images: [
       {
         url: "/og-home.jpg",
         width: 1200,
         height: 630,
-        alt: "First Class Transfers – Cyprus airport taxi and minivan service",
+        alt: "First Class Transfers – Cyprus airport taxi service",
       },
     ],
   },
@@ -52,7 +52,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "First Class Transfers Cyprus",
     description:
-      "Private, fixed-price Cyprus airport transfers from Larnaca and Paphos Airports.",
+      "Private, fixed-price Cyprus airport transfers from Larnaca and Paphos.",
     images: ["/og-home.jpg"],
   },
   robots: {
@@ -60,6 +60,7 @@ export const metadata: Metadata = {
     follow: true,
   },
 };
+
 
 // Confirm GTM ID matches what you want to use.
 const GTM_ID = "GTM-5D5XWZG9";

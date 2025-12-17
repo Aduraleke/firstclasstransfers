@@ -1,16 +1,16 @@
-import { Metadata } from 'next';
-import ServiceGuide from './ServiceGuide';
-
+// app/(site)/service-guide/page.tsx
+import { Metadata } from "next";
+import ServiceGuide from "./ServiceGuide";
 
 export const metadata: Metadata = {
-  title: "How Your Cyprus Airport Transfer Works | First Class Transfers",
+  title: "How Our Cyprus Airport Transfers Work",
   description:
-    "Step-by-step guide to how our Cyprus airport taxi service works: from instant quote and booking to flight monitoring, meet & greet at arrivals and private transfer to your hotel or villa.",
+    "Learn how our Cyprus airport taxi service works, from booking and flight tracking to meet & greet and hotel drop-off.",
   alternates: {
     canonical: "https://firstclasstransfers.eu/service-guide",
   },
 };
 
-export default function page() {
-  return <ServiceGuide/>
+export default function Page() {
+  return <ServiceGuide />;
 }

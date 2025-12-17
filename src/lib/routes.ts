@@ -24,7 +24,6 @@ export type RouteDetailSlug =
   | "limassol-nicosia"
   | "limassol-paphos-airport"
   | "limassol-paphos"
-
   | "limassol-troodos";
 
 export type RouteFAQ = {
@@ -188,18 +187,19 @@ We plan pickup times around your flight, taking into account traffic, check-in a
     from: "Nicosia",
     to: "Limassol",
 
-    metaTitle:
-      "Taxi from Nicosia to Limassol | Fixed-Price City-to-City Transfer",
+    metaTitle: "Taxi from Nicosia to Limassol | Private Coastal City Transfer",
     metaDescription:
-      "Private taxi from Nicosia to Limassol at a fixed price: €75 for up to 4 passengers or €100 for up to 6. No hidden extras. 24/7 service with Wi-Fi and bottled water included.",
+      "Private taxi from Nicosia to Limassol at a fixed price: €75 for up to 4 passengers or €100 for up to 6. No meter, no hidden extras, 24/7 service. Door-to-door transfers to Limassol Marina, seafront hotels and city areas with Wi-Fi and bottled water.",
 
     heroTitle: "Taxi Transfer from Nicosia to Limassol",
     subheadline:
-      "Fixed Prices: €75 (up to 4 passengers) · €100 (up to 6 passengers)\nDistance: 85–95 km · Average Journey: 1h 10–1h 25",
+      "Fixed Prices: €75 (up to 4 passengers) · €100 (up to 6 passengers)\nDistance: ~85–95 km · Average Journey: 1h 10–1h 25",
 
-    body: `Travel from the capital to Cyprus’s main coastal city with a direct, fixed-price taxi. Our Nicosia → Limassol transfer is ideal for business, leisure and residents who regularly move between the two cities.
+    body: `Connect the capital with Cyprus’s main coastal business city via our Nicosia to Limassol private taxi transfer. For €75 per car (up to 4 passengers) or €100 per minivan (up to 6 passengers), we take you directly from any address in Nicosia to Limassol Marina, the seafront, business districts or residential areas.
 
-You’ll be collected from any address in Nicosia and dropped at any Limassol location – Marina, seafront hotels, business district or suburbs – with a clear fare agreed in advance.`,
+Whether you’re travelling for work, a cruise, a weekend break or a relocation, this door-to-door service saves you time and effort compared to buses, car rentals or self-driving. There is no meter, no per-kilometre charging and no hidden extras under normal conditions, and the price is the same day and night.
+
+All vehicles are modern, air-conditioned and equipped with free Wi-Fi and bottled water, so you can work, rest or simply enjoy the ride.`,
 
     distance: "85–95 km",
     time: "1h 10–1h 25",
@@ -263,6 +263,11 @@ You’ll be collected from any address in Nicosia and dropped at any Limassol lo
         question: "Do you operate 24/7?",
         answer:
           "Yes, this route is available 24/7 with advance booking, and the fare is the same day and night.",
+      },
+      {
+        question: "Can you drop me at a specific hotel, office or the Marina?",
+        answer:
+          "Of course. We provide door-to-door service to any Limassol address, including Limassol Marina, Old Port, seafront hotels and business districts.",
       },
     ],
 
@@ -586,15 +591,21 @@ For €135 per car (up to 4 passengers) or €190 per minivan (up to 6 passenger
     to: "Limassol",
 
     metaTitle:
-      "Taxi from Paphos Airport to Limassol | Fast Highway Transfer",
+      "Taxi from Paphos Airport to Limassol | Fast, Fixed-Price Transfers",
     metaDescription:
-      "Private taxi from Paphos Airport to Limassol at a fixed price: €70 for up to 4 passengers or €95 for up to 6. No hidden extras. Fast highway transfer to Limassol Marina and seafront hotels.",
+      "Fixed-price taxi from Paphos Airport to Limassol: €70 for up to 4 passengers or €95 for up to 6. 24/7 service, English-speaking drivers, meet-and-greet at arrivals, Wi-Fi and bottled water included.",
 
     heroTitle: "Taxi Transfer from Paphos Airport to Limassol",
     subheadline:
       "Fixed Prices: €70 (up to 4 passengers) · €95 (up to 6 passengers)\nDistance: ~60 km · Average Journey: 45–55 minutes",
 
-    body: `Enjoy a fast, comfortable highway transfer from Paphos Airport to Limassol. Ideal for business travellers, cruise passengers and holidaymakers heading straight to the coast or marina.`,
+    body: `Heading to Limassol from Paphos Airport? First Class Transfers offers a quick, reliable and comfortable door-to-door service from PFO to any address in Limassol.
+
+For a fixed fare of €70 per car (up to 4 passengers) or €95 per minivan (up to 6 passengers), your driver will be waiting in the arrivals hall with a name sign and will take you directly to your hotel, apartment, cruise terminal or office in Limassol.
+
+You skip bus connections, waiting times and meter uncertainty. All our vehicles are modern, air-conditioned and kept spotless. You’ll have free Wi-Fi, bottled water and a professional driver who knows both the coastal roads and city shortcuts, helping you arrive on time and without stress.
+
+There is no meter, no per-kilometre charge and no hidden extras under normal conditions, and the fare is the same day and night.`,
 
     distance: "~60 km",
     time: "45–55 min",
@@ -604,12 +615,12 @@ For €135 per car (up to 4 passengers) or €190 per minivan (up to 6 passenger
     whatsIncluded: [
       "€70 per standard car (up to 4 passengers)",
       "€95 per minivan (up to 6 passengers)",
-      "Pickup at Paphos Airport arrivals",
-      "Drop-off at any Limassol address including Marina, hotels and city centre",
-      "Free Wi-Fi & bottled water in every vehicle",
-      "Child / baby seats on request (no extra charge)",
+      "Meet & greet at Paphos Airport (PFO) arrivals",
+      "Door-to-door drop-off anywhere in Limassol (Marina, seafront, centre, suburbs)",
+      "Free Wi-Fi and bottled water on board",
+      "Baby / child seats on request (no extra fee)",
       "Licensed, insured, English-speaking driver",
-      "All road tolls, VAT and normal waiting time included",
+      "VAT, tolls and normal waiting time included",
       "Fixed price 24/7 – no night or weekend surcharge",
       "All prices are per vehicle, not per person.",
     ],
@@ -624,21 +635,23 @@ For €135 per car (up to 4 passengers) or €190 per minivan (up to 6 passenger
       {
         type: "Minivan",
         maxPassengers: "up to 6",
-        idealFor: "Families, cruise groups, extra luggage",
+        idealFor: "Larger families, cruise groups, extra luggage",
         fixedPrice: "€95",
       },
     ],
 
     destinationHighlights: [
-      "Limassol Marina & Old Port",
-      "Seafront hotels along the promenade",
-      "City of Dreams Mediterranean and other resorts",
+      "Limassol Marina and Old Port",
+      "Seafront promenade, beaches and resorts",
+      "City of Dreams Mediterranean and major conference venues",
+      "Restaurants, shops, nightlife and coastal bars",
     ],
 
     idealFor: [
-      "Holidaymakers heading straight to Limassol hotels",
-      "Cruise passengers embarking at Limassol Marina",
-      "Business travellers with meetings in Limassol",
+      "Cruise passengers embarking or disembarking at Limassol Marina or Old Port",
+      "Business travellers attending meetings, conferences or expos",
+      "Tourists staying along the Limassol seafront",
+      "Families heading to resorts, waterparks and beachfront hotels",
     ],
 
     faq: [
@@ -652,6 +665,11 @@ For €135 per car (up to 4 passengers) or €190 per minivan (up to 6 passenger
           "Can you take us directly to Limassol Marina or the cruise terminal?",
         answer:
           "Absolutely. Just enter “Limassol Marina” or your ship name when booking, and your driver will take you straight there.",
+      },
+      {
+        question: "Can I book last-minute?",
+        answer:
+          "Same-day bookings are often possible subject to availability, but we recommend booking in advance, especially during high season.",
       },
       {
         question: "Is the price per person or per car?",
@@ -679,15 +697,19 @@ For €135 per car (up to 4 passengers) or €190 per minivan (up to 6 passenger
     to: "Larnaca",
 
     metaTitle:
-      "Taxi from Paphos Airport to Larnaca | Cross-Island Private Transfer",
+      "Taxi from Paphos Airport to Larnaca | Comfortable Private Transfers",
     metaDescription:
-      "Private taxi from Paphos Airport to Larnaca at a fixed price: €135 for up to 4 passengers or €175 for up to 6. No hidden extras. 24/7 cross-island transfer with Wi-Fi and bottled water.",
+      "Private taxi from Paphos Airport to Larnaca at a fixed price: €135 for up to 4 passengers or €175 for up to 6. No meter, no hidden extras. 24/7 service with professional drivers, Wi-Fi and door-to-door transfers.",
 
     heroTitle: "Taxi Transfer from Paphos Airport to Larnaca",
     subheadline:
       "Fixed Prices: €135 (up to 4 passengers) · €175 (up to 6 passengers)\nDistance: ~125 km · Average Journey: 1h 30–1h 45",
 
-    body: `Travel cross-island from Paphos Airport to Larnaca city and coastal areas in a private, fixed-price taxi. Avoid multiple bus changes and queues and start your stay in Larnaca relaxed and organised.`,
+    body: `Travelling from Paphos Airport (PFO) to Larnaca? Our private taxi transfers make the cross-island trip simple, comfortable and stress-free.
+
+For a fixed fare of €135 per car (up to 4 passengers) or €175 per minivan (up to 6 passengers), your driver will collect you from the arrivals hall and drive you directly to your hotel, seafront apartment or business address in Larnaca.
+
+There are no taxi queues, no surge pricing and no meter surprises. Your transfer includes free Wi-Fi, bottled water, air-conditioning and generous luggage space – ideal for families, long stays and digital nomads carrying equipment.`,
 
     distance: "~125 km",
     time: "1h 30–1h 45",
@@ -741,12 +763,12 @@ For €135 per car (up to 4 passengers) or €190 per minivan (up to 6 passenger
         question:
           "Is this service different from Paphos Airport → Larnaca Airport?",
         answer:
-          "Yes. This page is for transfers to Larnaca city and coastal areas. We also offer a direct Paphos Airport → Larnaca Airport (LCA) service – see the related route page for that transfer.",
+          "Yes. This page is for transfers to Larnaca city and coastal areas. We also offer a direct Paphos Airport → Larnaca Airport (LCA) service – please see the related route page for that transfer.",
       },
       {
         question: "Do you offer round-trip discounts?",
         answer:
-          "Yes. If you book both directions in advance (e.g. Larnaca → Paphos Airport on your return), we can offer package pricing. Please contact us for details.",
+          "Yes. If you book both directions in advance (for example, Larnaca → Paphos Airport on your return), we can offer package pricing. Please contact us for details.",
       },
       {
         question: "Is the price per person or per car?",
@@ -757,6 +779,11 @@ For €135 per car (up to 4 passengers) or €190 per minivan (up to 6 passenger
         question: "Do you charge more at night?",
         answer:
           "No. With advance booking, the fare is the same day and night, including weekends.",
+      },
+      {
+        question: "Can we add a supermarket stop on the way?",
+        answer:
+          "Yes, a short stop such as a supermarket visit can usually be added on request, subject to reasonable time.",
       },
     ],
 
@@ -1635,8 +1662,7 @@ Because this route involves a border crossing, we strongly recommend allowing ex
     from: "Limassol",
     to: "Nicosia",
 
-    metaTitle:
-      "Taxi from Limassol to Nicosia | Capital City Private Transfer",
+    metaTitle: "Taxi from Limassol to Nicosia | Capital City Private Transfer",
     metaDescription:
       "Private taxi from Limassol to Nicosia at a fixed price: €75 for up to 4 passengers or €100 for up to 6. No hidden extras, same price day and night. 24/7 availability, ideal for business, embassies, universities and city breaks.",
 
@@ -1843,8 +1869,7 @@ You just choose your pickup time, meet your driver at the door and enjoy a smoot
     from: "Limassol",
     to: "Paphos",
 
-    metaTitle:
-      "Taxi from Limassol to Paphos | Coastal City Transfer",
+    metaTitle: "Taxi from Limassol to Paphos | Coastal City Transfer",
     metaDescription:
       "Private taxi from Limassol to Paphos at a fixed price: €85 for up to 4 passengers or €100 for up to 6. No hidden extras, 24/7 service. Door-to-door transfers to Paphos and Kato Paphos seafront hotels with Wi-Fi and bottled water included.",
 
@@ -2049,123 +2074,120 @@ Our drivers are used to winding mountain roads and changing weather, including w
   },
 
   // 20) Nicosia → Troodos
-{
-  slug: "nicosia-troodos",
-  from: "Nicosia",
-  to: "Troodos Mountains",
+  {
+    slug: "nicosia-troodos",
+    from: "Nicosia",
+    to: "Troodos Mountains",
 
-  metaTitle:
-    "Taxi from Nicosia to Troodos | Private Mountain Transfer (from €80)",
-  metaDescription:
-    "Private taxi from Nicosia to the Troodos Mountains from €80. Fixed price per vehicle, experienced mountain drivers, flexible stops and door-to-door service. Ideal for day trips, hiking and ski season.",
+    metaTitle:
+      "Taxi from Nicosia to Troodos | Private Mountain Transfer (from €80)",
+    metaDescription:
+      "Private taxi from Nicosia to the Troodos Mountains from €80. Fixed price per vehicle, experienced mountain drivers, flexible stops and door-to-door service. Ideal for day trips, hiking and ski season.",
 
-  heroTitle: "Taxi Transfer from Nicosia to Troodos Mountains",
-  subheadline:
-    "Fixed Prices: €80 (up to 4 passengers) · €110 (up to 6 passengers)\nDistance: 80–85 km · Average Journey: 1h 20–1h 40",
+    heroTitle: "Taxi Transfer from Nicosia to Troodos Mountains",
+    subheadline:
+      "Fixed Prices: €80 (up to 4 passengers) · €110 (up to 6 passengers)\nDistance: 80–85 km · Average Journey: 1h 20–1h 40",
 
-  body: `Escape the city and head into the fresh mountain air of Troodos with a private taxi from Nicosia. Whether you’re planning a hiking day, a cool summer escape, a winter ski trip, or a quiet village stay, our door-to-door transfer is the most comfortable and time-efficient way to travel from the capital to the Troodos Mountains.
+    body: `Escape the city and head into the fresh mountain air of Troodos with a private taxi from Nicosia. Whether you’re planning a hiking day, a cool summer escape, a winter ski trip, or a quiet village stay, our door-to-door transfer is the most comfortable and time-efficient way to travel from the capital to the Troodos Mountains.
 
 Your driver will collect you from your home, hotel, office or university in Nicosia and drive you safely into the mountains, with optional short photo or coffee stops along the way. No need to worry about mountain roads, parking or winter conditions – you simply relax and enjoy the scenery.`,
 
-  distance: "80–85 km",
-  time: "1h 20–1h 40",
-  sedanPrice: "€80",
-  vanPrice: "€110",
+    distance: "80–85 km",
+    time: "1h 20–1h 40",
+    sedanPrice: "€80",
+    vanPrice: "€110",
 
-  whatMakesBetter: [
-    "Fixed price per vehicle – €80 (1–4 passengers) · €110 (up to 6 passengers)",
-    "No meter, no night surcharge – same price day & night",
-    "Drivers experienced with mountain roads and winter conditions",
-    "Flexible drop-off at Troodos Square, hotels, lodges or trailheads",
-    "Perfect for day trips, hiking weekends or ski season",
-    "Comfortable sedans and V-Class minivans for groups & families"
-  ],
+    whatMakesBetter: [
+      "Fixed price per vehicle – €80 (1–4 passengers) · €110 (up to 6 passengers)",
+      "No meter, no night surcharge – same price day & night",
+      "Drivers experienced with mountain roads and winter conditions",
+      "Flexible drop-off at Troodos Square, hotels, lodges or trailheads",
+      "Perfect for day trips, hiking weekends or ski season",
+      "Comfortable sedans and V-Class minivans for groups & families",
+    ],
 
-  whatsIncluded: [
-    "€80 per standard car (up to 4 passengers)",
-    "€110 per minivan (up to 6 passengers)",
-    "Door-to-door pickup from any address in Nicosia",
-    "Drop-off at Troodos Square, hotels, lodges or trailheads",
-    "Air-conditioned vehicle suitable for mountain driving",
-    "Free Wi-Fi & bottled water",
-    "Baby/child seats on request (no extra charge)",
-    "Licensed, insured, English-speaking driver",
-    "All tolls, VAT and insurance included",
-    "All prices are per vehicle, not per person."
-  ],
+    whatsIncluded: [
+      "€80 per standard car (up to 4 passengers)",
+      "€110 per minivan (up to 6 passengers)",
+      "Door-to-door pickup from any address in Nicosia",
+      "Drop-off at Troodos Square, hotels, lodges or trailheads",
+      "Air-conditioned vehicle suitable for mountain driving",
+      "Free Wi-Fi & bottled water",
+      "Baby/child seats on request (no extra charge)",
+      "Licensed, insured, English-speaking driver",
+      "All tolls, VAT and insurance included",
+      "All prices are per vehicle, not per person.",
+    ],
 
-  vehicleOptions: [
-    {
-      type: "Standard Car",
-      maxPassengers: "up to 4",
-      idealFor: "Couples, small families, hikers",
-      fixedPrice: "€80",
-    },
-    {
-      type: "Minivan",
-      maxPassengers: "up to 6",
-      idealFor: "Families, groups, ski or hiking equipment",
-      fixedPrice: "€110",
-    },
-  ],
+    vehicleOptions: [
+      {
+        type: "Standard Car",
+        maxPassengers: "up to 4",
+        idealFor: "Couples, small families, hikers",
+        fixedPrice: "€80",
+      },
+      {
+        type: "Minivan",
+        maxPassengers: "up to 6",
+        idealFor: "Families, groups, ski or hiking equipment",
+        fixedPrice: "€110",
+      },
+    ],
 
-  destinationHighlights: [
-    "Cooler temperatures in summer – perfect escape from city heat",
-    "Scenic hiking trails, forests and waterfalls",
-    "Ski area in winter (seasonal)",
-    "Nearby traditional villages like Platres, Kakopetria and Pedoulas",
-    "Stone-built guesthouses, cosy hotels and mountain tavernas",
-  ],
+    destinationHighlights: [
+      "Cooler temperatures in summer – perfect escape from city heat",
+      "Scenic hiking trails, forests and waterfalls",
+      "Ski area in winter (seasonal)",
+      "Nearby traditional villages like Platres, Kakopetria and Pedoulas",
+      "Stone-built guesthouses, cosy hotels and mountain tavernas",
+    ],
 
-  idealFor: [
-    "Day trips from Nicosia",
-    "Hikers, cyclists and nature lovers",
-    "Families seeking cooler weather in summer",
-    "Couples on scenic mountain getaways",
-    "Groups travelling with luggage or ski equipment",
-  ],
+    idealFor: [
+      "Day trips from Nicosia",
+      "Hikers, cyclists and nature lovers",
+      "Families seeking cooler weather in summer",
+      "Couples on scenic mountain getaways",
+      "Groups travelling with luggage or ski equipment",
+    ],
 
-  faq: [
-    {
-      question: "Is €80 per person or per car?",
-      answer:
-        "The €80 fare is per car, for up to 4 passengers. For up to 6 passengers, the fixed price is €110 per minivan.",
-    },
-    {
-      question: "Is there any extra charge at night or on weekends?",
-      answer:
-        "No. Prices are fixed 24/7 for pre-booked transfers – no night or weekend surcharge.",
-    },
-    {
-      question: "Can we stop on the way for photos or coffee?",
-      answer:
-        "Yes. Short photo or comfort stops are included – just ask your driver.",
-    },
-    {
-      question: "Do you operate in winter when there is snow?",
-      answer:
-        "Yes, we operate all year. Travel time may be longer during heavy snow, and your driver will advise you if needed.",
-    },
-    {
-      question:
-        "Can we combine Troodos with villages like Platres or Omodos in one trip?",
-      answer:
-        "Yes. We can arrange a customised day trip with multiple stops. Contact us for a tailored quote.",
-    },
-  ],
+    faq: [
+      {
+        question: "Is €80 per person or per car?",
+        answer:
+          "The €80 fare is per car, for up to 4 passengers. For up to 6 passengers, the fixed price is €110 per minivan.",
+      },
+      {
+        question: "Is there any extra charge at night or on weekends?",
+        answer:
+          "No. Prices are fixed 24/7 for pre-booked transfers – no night or weekend surcharge.",
+      },
+      {
+        question: "Can we stop on the way for photos or coffee?",
+        answer:
+          "Yes. Short photo or comfort stops are included – just ask your driver.",
+      },
+      {
+        question: "Do you operate in winter when there is snow?",
+        answer:
+          "Yes, we operate all year. Travel time may be longer during heavy snow, and your driver will advise you if needed.",
+      },
+      {
+        question:
+          "Can we combine Troodos with villages like Platres or Omodos in one trip?",
+        answer:
+          "Yes. We can arrange a customised day trip with multiple stops. Contact us for a tailored quote.",
+      },
+    ],
 
-  image: "/troodos.jpeg",
-  bookHref: "/booking?route=nicosia-troodos",
-  bookCtaLabel: "Book Your Taxi from Nicosia to Troodos",
-  bookCtaSupport:
-    "Reserve your fixed-price mountain transfer and enjoy a comfortable, scenic ride from Nicosia to the Troodos Mountains.",
-},
-
+    image: "/troodos.jpeg",
+    bookHref: "/booking?route=nicosia-troodos",
+    bookCtaLabel: "Book Your Taxi from Nicosia to Troodos",
+    bookCtaSupport:
+      "Reserve your fixed-price mountain transfer and enjoy a comfortable, scenic ride from Nicosia to the Troodos Mountains.",
+  },
 ];
 
 // helper
-export function getRouteDetailBySlug(
-  slug: string
-): RouteDetail | undefined {
+export function getRouteDetailBySlug(slug: string): RouteDetail | undefined {
   return ROUTE_DETAILS.find((r) => r.slug === slug);
 }
