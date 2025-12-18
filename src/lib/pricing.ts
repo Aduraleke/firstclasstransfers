@@ -9,6 +9,7 @@ export type VehicleId = "sedan" | "vclass";
 export type RouteId =
   | "nicosia-larnaca-airport"
   | "nicosia-limassol"
+  | "nicosia-test-destination"
   |"nicosia-troodos"
   | "nicosia-paphos-airport"
   | "nicosia-ercan-airport"
@@ -75,6 +76,15 @@ export const ROUTE_PRICING: RoutePricing[] = [
       { vehicleId: "vclass", pricePerLegEUR: toNum("€110") },
     ],
   },
+  {
+  id: "nicosia-test-destination",
+  from: "Nicosia",
+  to: "Test Destination",
+  vehicleOptions: [
+    { vehicleId: "sedan", pricePerLegEUR: toNum("€1") },
+    { vehicleId: "vclass", pricePerLegEUR: toNum("€1") },
+  ],
+},
   {
     id: "nicosia-paphos-airport",
     from: "Nicosia",

@@ -141,51 +141,58 @@ export default function Booking({
   };
 
   const submitBooking = async (payByCard: boolean) => {
-    setSubmitting(true);
-    setSubmitError(null);
+  setSubmitting(true);
+  setSubmitError(null);
 
-    try {
-      const res = await fetch(
-        payByCard ? "/api/bookings?pay=true" : "/api/bookings",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(draft),
-        }
-      );
+  try {
+    const res = await fetch(
+      payByCard ? "/api/bookings?pay=true" : "/api/bookings",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(draft),
+      }
+    );
 
-      const json = await res.json();
-
+    // ❗ CARD FLOW → HTML ONLY
+    if (payByCard) {
       if (!res.ok) {
-        throw new Error(json?.error || "Booking failed");
+        const text = await res.text();
+        throw new Error(text || "Payment initiation failed");
       }
 
-      // CARD → backend returns HTML
-      if (payByCard) {
-        const html = await res.text();
-        document.open();
-        document.write(html);
-        document.close();
-        return;
-      }
-
-      // CASH → success UI
-      if (typeof window !== "undefined") {
-        window.dataLayer = window.dataLayer || [];
-        window.dataLayer.push({
-          event: "purchase",
-          bookingValue: json.amount,
-          currency: "EUR",
-          paymentMethod: "cash",
-        });
-      }
-
-      setSubmitted(true);
-    } catch (err) {
-      setSubmitError(err instanceof Error ? err.message : "Booking failed");
-      setSubmitting(false);
+      const html = await res.text();
+      document.open();
+      document.write(html);
+      document.close();
+      return;
     }
-  };
+
+    // ❗ CASH FLOW → JSON ONLY
+    const json = await res.json();
+
+    if (!res.ok) {
+      throw new Error(json?.error || "Booking failed");
+    }
+
+    // Analytics
+    if (typeof window !== "undefined") {
+      window.dataLayer = window.dataLayer || [];
+      window.dataLayer.push({
+        event: "purchase",
+        bookingValue: json.amount,
+        currency: "EUR",
+        paymentMethod: "cash",
+      });
+    }
+
+    setSubmitted(true);
+  } catch (err) {
+    setSubmitError(err instanceof Error ? err.message : "Booking failed");
+    setSubmitting(false);
+  }
+};
+
 
   /* ============================
      SUCCESS UI

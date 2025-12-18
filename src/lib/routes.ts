@@ -2188,97 +2188,117 @@ Your driver will collect you from your home, hotel, office or university in Nico
   },
 
   // 🔧 TEST ROUTE — FOR DEVELOPMENT ONLY
-{
-  bookingRouteId: "test-route",
+  {
+    slug: "nicosia-test-destination",
+    from: "Nicosia",
+    to: "Test Destination",
 
-  slug: "nicosia-test-destination",
-  from: "Nicosia",
-  to: "Test Destination",
+    metaTitle:
+      "Taxi from Nicosia to Test Destination | Private Mountain Transfer (from €1)",
+    metaDescription:
+      "Private taxi from Nicosia to the Test Destination Mountains from €1. Fixed price per vehicle, experienced mountain drivers, flexible stops and door-to-door service. Ideal for day trips, hiking and ski season.",
 
-  metaTitle: "TEST Taxi from Nicosia to Test Destination | Fixed Price Transfer",
-  metaDescription:
-    "TEST ROUTE ONLY. Private taxi from Nicosia to Test Destination at a fixed price. Used for development, layout and booking flow testing.",
+    heroTitle: "Taxi Transfer from Nicosia to Test Destination Mountains",
+    subheadline:
+      "Fixed Prices: €1 (up to 4 passengers) · €1 (up to 6 passengers)\nDistance: 80–85 km · Average Journey: 1h 20–1h 40",
 
-  heroTitle: "TEST Taxi Transfer from Nicosia to Test Destination",
-  subheadline:
-    "TEST PRICES: €1 (up to 4 passengers) · €1 (up to 6 passengers)\nDistance: ~10 km · Average Journey: 15 minutes",
+    body: `Escape the city and head into the fresh mountain air of Test Destination with a private taxi from Nicosia. Whether you’re planning a hiking day, a cool summer escape, a winter ski trip, or a quiet village stay, our door-to-door transfer is the most comfortable and time-efficient way to travel from the capital to the Test Destination Mountains.
 
-  body: `⚠️ This is a TEST ROUTE used for development and QA purposes only.
+Your driver will collect you from your home, hotel, office or university in Nicosia and drive you safely into the mountains, with optional short photo or coffee stops along the way. No need to worry about mountain roads, parking or winter conditions – you simply relax and enjoy the scenery.`,
 
-It follows the exact same data structure as real routes and allows developers to test:
-• Route pages
-• Booking links
-• Pricing logic
-• SEO metadata
-• UI layouts
-• FAQ rendering
+    distance: "80–85 km",
+    time: "1h 20–1h 40",
+    sedanPrice: "€1",
+    vanPrice: "€1",
 
-This route should NOT be visible in production.`,
+    whatMakesBetter: [
+      "Fixed price per vehicle – €1 (1–4 passengers) · €1 (up to 6 passengers)",
+      "No meter, no night surcharge – same price day & night",
+      "Drivers experienced with mountain roads and winter conditions",
+      "Flexible drop-off at Test Destination Square, hotels, lodges or trailheads",
+      "Perfect for day trips, hiking weekends or ski season",
+      "Comfortable sedans and V-Class minivans for groups & families",
+    ],
 
-  distance: "10 km",
-  time: "15 minutes",
-  sedanPrice: "€1",
-  vanPrice: "€1",
+    whatsIncluded: [
+      "€1 per standard car (up to 4 passengers)",
+      "€1 per minivan (up to 6 passengers)",
+      "Door-to-door pickup from any address in Nicosia",
+      "Drop-off at Test Destination Square, hotels, lodges or trailheads",
+      "Air-conditioned vehicle suitable for mountain driving",
+      "Free Wi-Fi & bottled water",
+      "Baby/child seats on request (no extra charge)",
+      "Licensed, insured, English-speaking driver",
+      "All tolls, VAT and insurance included",
+      "All prices are per vehicle, not per person.",
+    ],
 
-  whatMakesBetter: [
-    "TEST DATA – do not publish",
-    "Used for UI, booking and pricing validation",
-    "Safe placeholder content",
-  ],
+    vehicleOptions: [
+      {
+        type: "Standard Car",
+        maxPassengers: "up to 4",
+        idealFor: "Couples, small families, hikers",
+        fixedPrice: "€1",
+      },
+      {
+        type: "Minivan",
+        maxPassengers: "up to 6",
+        idealFor: "Families, groups, ski or hiking equipment",
+        fixedPrice: "€1",
+      },
+    ],
 
-  whatsIncluded: [
-    "TEST standard car (up to 4 passengers)",
-    "TEST minivan (up to 6 passengers)",
-    "Dummy pickup and drop-off",
-    "No real transport provided",
-  ],
+    destinationHighlights: [
+      "Cooler temperatures in summer – perfect escape from city heat",
+      "Scenic hiking trails, forests and waterfalls",
+      "Ski area in winter (seasonal)",
+      "Nearby traditional villages like Platres, Kakopetria and Pedoulas",
+      "Stone-built guesthouses, cosy hotels and mountain tavernas",
+    ],
 
-  vehicleOptions: [
-    {
-      type: "Standard Car",
-      maxPassengers: "up to 4",
-      idealFor: "UI testing",
-      fixedPrice: "€1",
-    },
-    {
-      type: "Minivan",
-      maxPassengers: "up to 6",
-      idealFor: "Layout testing",
-      fixedPrice: "€1",
-    },
-  ],
+    idealFor: [
+      "Day trips from Nicosia",
+      "Hikers, cyclists and nature lovers",
+      "Families seeking cooler weather in summer",
+      "Couples on scenic mountain getaways",
+      "Groups travelling with luggage or ski equipment",
+    ],
 
-  destinationHighlights: [
-    "Placeholder destination",
-    "Used only in development",
-  ],
+    faq: [
+      {
+        question: "Is €1 per person or per car?",
+        answer:
+          "The €1 fare is per car, for up to 4 passengers. For up to 6 passengers, the fixed price is €1 per minivan.",
+      },
+      {
+        question: "Is there any extra charge at night or on weekends?",
+        answer:
+          "No. Prices are fixed 24/7 for pre-booked transfers – no night or weekend surcharge.",
+      },
+      {
+        question: "Can we stop on the way for photos or coffee?",
+        answer:
+          "Yes. Short photo or comfort stops are included – just ask your driver.",
+      },
+      {
+        question: "Do you operate in winter when there is snow?",
+        answer:
+          "Yes, we operate all year. Travel time may be longer during heavy snow, and your driver will advise you if needed.",
+      },
+      {
+        question:
+          "Can we combine Test Destination with villages like Platres or Omodos in one trip?",
+        answer:
+          "Yes. We can arrange a customised day trip with multiple stops. Contact us for a tailored quote.",
+      },
+    ],
 
-  idealFor: [
-    "Developers",
-    "QA testing",
-    "Design previews",
-  ],
-
-  faq: [
-    {
-      question: "Is this a real transfer?",
-      answer:
-        "No. This is a test route used only for development and testing purposes.",
-    },
-    {
-      question: "Will this appear on the live site?",
-      answer:
-        "It should not. Remove this route before production deployment.",
-    },
-  ],
-
-  image: "/protaras.jpg",
-  bookHref: "/booking?route=nicosia-test-destination",
-  bookCtaLabel: "TEST – Book This Route",
-  bookCtaSupport:
-    "Development-only CTA for booking flow testing.",
-}
-
+    image: "/protaras.jpg",
+    bookHref: "/booking?route=nicosia-test-destination",
+    bookCtaLabel: "Book Your Taxi from Nicosia to Test Destination",
+    bookCtaSupport:
+      "Reserve your fixed-price mountain transfer and enjoy a comfortable, scenic ride from Nicosia to the Troodos Mountains.",
+  },
 ];
 
 // helper
