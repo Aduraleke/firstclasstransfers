@@ -25,7 +25,8 @@ export async function POST(req: Request) {
   route: body.routeId,
   vehicle: body.vehicleTypeId,
   tripType: body.tripType,
-
+  
+  flightNumber: body.flightNumber,
   date: body.date,
   time: body.time,
 

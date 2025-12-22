@@ -10,12 +10,12 @@ export type BookingData = {
   vehicle: string;
   tripType: string;
 
-  // outbound
+  flightNumber: string;
+
   date?: string;
   time?: string;
   timePeriod?: string;
 
-  // return
   returnDate?: string;
   returnTime?: string;
   returnTimePeriod?: string;
@@ -130,14 +130,28 @@ export function customerCashConfirmed(data: BookingData) {
   <tr><td><strong>Route</strong></td><td>${data.route}</td></tr>
   <tr><td><strong>Vehicle</strong></td><td>${data.vehicle}</td></tr>
   <tr><td><strong>Trip type</strong></td><td>${data.tripType}</td></tr>
+  <tr>
+  <td><strong>Flight number</strong></td>
+  <td>${data.flightNumber}</td>
+</tr>
 
-  ${data.date ? `<tr><td><strong>Pickup date</strong></td><td>${data.date}</td></tr>` : ""}
-  ${data.time ? `<tr><td><strong>Pickup time</strong></td><td>${data.time}</td></tr>` : ""}
+  ${
+    data.date
+      ? `<tr><td><strong>Pickup date</strong></td><td>${data.date}</td></tr>`
+      : ""
+  }
+  ${
+    data.time
+      ? `<tr><td><strong>Pickup time</strong></td><td>${data.time}</td></tr>`
+      : ""
+  }
 
   ${
     data.tripType === "return"
       ? `
         <tr><td colspan="2"><strong>Return Trip</strong></td></tr>
+
+
         <tr><td><strong>Return date</strong></td><td>${data.returnDate}</td></tr>
         <tr><td><strong>Return time</strong></td><td>${data.returnTime}</td></tr>
         <tr><td><strong>Return period</strong></td><td>${data.returnTimePeriod}</td></tr>
@@ -187,10 +201,12 @@ export function customerCardPending(data: BookingData) {
   <li><strong>Route:</strong> ${data.route}</li>
   <li><strong>Vehicle:</strong> ${data.vehicle}</li>
   <li><strong>Trip type:</strong> ${data.tripType}</li>
-
+<li><strong>Flight number:</strong> ${data.flightNumber}</li>
   ${
     data.tripType === "return"
       ? `
+      
+
         <li><strong>Return date:</strong> ${data.returnDate}</li>
         <li><strong>Return time:</strong> ${data.returnTime}</li>
       `
@@ -233,6 +249,12 @@ export function officeCashBooking(data: BookingData) {
   <li><strong>Route:</strong> ${data.route}</li>
   <li><strong>Vehicle:</strong> ${data.vehicle}</li>
   <li><strong>Trip type:</strong> ${data.tripType}</li>
+
+  <h3>Flight</h3>
+<ul>
+  <li><strong>Flight number:</strong> ${data.flightNumber}</li>
+</ul>
+
 
   ${data.date ? `<li><strong>Pickup date:</strong> ${data.date}</li>` : ""}
   ${data.time ? `<li><strong>Pickup time:</strong> ${data.time}</li>` : ""}
@@ -293,10 +315,16 @@ export function officeCardPending(data: BookingData) {
   <li><strong>Route:</strong> ${data.route}</li>
   <li><strong>Vehicle:</strong> ${data.vehicle}</li>
   <li><strong>Trip type:</strong> ${data.tripType}</li>
+  <h3>Flight</h3>
+<ul>
+  <li><strong>Flight number:</strong> ${data.flightNumber}</li>
+</ul>
+
 
   ${
     data.tripType === "return"
       ? `
+
         <li><strong>Return date:</strong> ${data.returnDate}</li>
         <li><strong>Return time:</strong> ${data.returnTime}</li>
         <li><strong>Return period:</strong> ${data.returnTimePeriod}</li>

@@ -12,7 +12,6 @@ export async function createBooking(
   booking: BookingBase,
   payByCard: boolean
 ): Promise<{ amount: number }> {
-  // 🔐 Server-trusted pricing
   const price = computePrice(
     booking.routeId as RouteId,
     booking.vehicleTypeId as VehicleId,
@@ -29,26 +28,20 @@ export async function createBooking(
     tripType: booking.tripType,
 
     // outbound
+    flightNumber: booking.flightNumber.trim(),
     date: booking.date,
     time: booking.time,
     timePeriod: booking.timePeriod,
 
-    // ✅ return (ONLY if return trip)
-returnDate:
-  booking.tripType === "return" && booking.returnDate
-    ? booking.returnDate
-    : undefined,
-
-returnTime:
-  booking.tripType === "return" && booking.returnTime
-    ? booking.returnTime
-    : undefined,
-
-returnTimePeriod:
-  booking.tripType === "return" && booking.returnTimePeriod
-    ? booking.returnTimePeriod
-    : undefined,
-
+    // return
+    returnDate:
+      booking.tripType === "return" ? booking.returnDate || undefined : undefined,
+    returnTime:
+      booking.tripType === "return" ? booking.returnTime || undefined : undefined,
+    returnTimePeriod:
+      booking.tripType === "return"
+        ? booking.returnTimePeriod || undefined
+        : undefined,
 
     adults: booking.adults,
     children: booking.children,
@@ -60,7 +53,6 @@ returnTimePeriod:
   const officeEmail =
     process.env.BOOKING_EMAIL || "booking@firstclasstransfers.eu";
 
-  // 📧 EMAILS ALWAYS SENT
   if (payByCard) {
     await sendEmail({
       to: booking.email,
