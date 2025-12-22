@@ -1,5 +1,7 @@
 import { signMyPOS } from "./mypos-signature";
 
+
+
 type CartItem = {
   article: string;
   quantity: number;
@@ -23,7 +25,13 @@ function requireEnv(name: string): string {
   return v;
 }
 
+
+
 export function buildMyPOSFormHTML(params: Params): string {
+  console.log("🔥 buildMyPOSFormHTML called");
+  console.log("🔥 params received:", params);
+
+  
   const isSandbox = process.env.MYPOS_SANDBOX === "true";
 
   const actionUrl = isSandbox
@@ -72,8 +80,10 @@ export function buildMyPOSFormHTML(params: Params): string {
     fields.UDF1 = params.udf1;
   }
 
+
   // 🔐 SIGNATURE MUST BE LAST
   fields.Signature = signMyPOS(fields);
+
 
   const inputs = Object.entries(fields)
     .map(
