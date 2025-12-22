@@ -1,12 +1,22 @@
 import { signMyPOS } from "./mypos-signature";
 
+
+
+type CartItem = {
+  article: string;
+  quantity: number;
+  price: number;
+  currency: "EUR";
+};
+
 type Params = {
   orderId: string;
   amount: number;
   currency: "EUR";
   customerEmail: string;
-  customerPhone?: string;
+  customerPhone: string;
   udf1?: string;
+  cartItems?: CartItem[];
 };
 
 function requireEnv(name: string): string {
@@ -15,23 +25,18 @@ function requireEnv(name: string): string {
   return v;
 }
 
+
+
 export function buildMyPOSFormHTML(params: Params): string {
+  console.log("🔥 buildMyPOSFormHTML called");
+  console.log("🔥 params received:", params);
 
-  console.log("env check", {
-    isServer: typeof window === "undefined",
-    sidPresent: !!process.env.MYPOS_SID,
-    walletPresent: !!process.env.MYPOS_WALLET_NUMBER,
-    sidLen: process.env.MYPOS_SID?.length,
-    walletLen: process.env.MYPOS_WALLET_NUMBER?.length,
-  });
-
+  
   const isSandbox = process.env.MYPOS_SANDBOX === "true";
 
   const actionUrl = isSandbox
     ? "https://www.mypos.eu/vmp/checkout-test"
     : "https://www.mypos.eu/vmp/checkout";
-
-    console.log("MYPOS_WALLET_NUMBER at runtime:", process.env.MYPOS_WALLET_NUMBER);
 
   const fields: Record<string, string | number> = {
     IPCmethod: "IPCPurchase",
@@ -41,23 +46,44 @@ export function buildMyPOSFormHTML(params: Params): string {
     SID: requireEnv("MYPOS_SID"),
     WalletNumber: requireEnv("MYPOS_WALLET_NUMBER"),
 
-  Amount: params.amount.toFixed(2),
-  Currency: "EUR",
-  OrderID: params.orderId,
+    Amount: params.amount.toFixed(2),
+    Currency: params.currency,
+    OrderID: params.orderId,
 
-  URL_OK: process.env.MYPOS_OK_URL!,
-  URL_Cancel: process.env.MYPOS_CANCEL_URL!,
-  URL_Notify: process.env.MYPOS_NOTIFY_URL!,
+    // ✅ CORRECT myPOS FIELD NAMES
+    CustomerEmail: params.customerEmail,
+    CustomerPhone: params.customerPhone,
 
-  KeyIndex: process.env.MYPOS_KEY_INDEX!,
-};
+    URL_OK: requireEnv("MYPOS_OK_URL"),
+    URL_Cancel: requireEnv("MYPOS_CANCEL_URL"),
+    URL_Notify: requireEnv("MYPOS_NOTIFY_URL"),
+
+    KeyIndex: Number(requireEnv("MYPOS_KEY_INDEX")),
+  };
+
+  // ✅ Enforce full checkout if cart is present
+  if (params.cartItems?.length) {
+    fields.PaymentParametersRequired = 3;
+    fields.CartItems = params.cartItems.length;
+
+    params.cartItems.forEach((item, index) => {
+      const i = index + 1;
+      fields[`Article_${i}`] = item.article;
+      fields[`Quantity_${i}`] = item.quantity;
+      fields[`Price_${i}`] = item.price.toFixed(2);
+      fields[`Currency_${i}`] = item.currency;
+      fields[`Amount_${i}`] = (item.price * item.quantity).toFixed(2);
+    });
+  }
 
   if (params.udf1) {
     fields.UDF1 = params.udf1;
   }
 
-  // SIGNATURE MUST BE LAST
+
+  // 🔐 SIGNATURE MUST BE LAST
   fields.Signature = signMyPOS(fields);
+
 
   const inputs = Object.entries(fields)
     .map(
@@ -65,8 +91,6 @@ export function buildMyPOSFormHTML(params: Params): string {
         `<input type="hidden" name="${k}" value="${String(v)}" />`
     )
     .join("\n");
-
-    console.log(fields);
 
   return `<!DOCTYPE html>
 <html>

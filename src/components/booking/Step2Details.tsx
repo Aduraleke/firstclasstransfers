@@ -31,10 +31,7 @@ const VEHICLE_CAPACITY: Record<string, number> = {
 
 const VEHICLE_ORDER = ["sedan", "vclass"] as const;
 
-function getUpgradeVehicle(
-  current: string,
-  passengers: number
-): string | null {
+function getUpgradeVehicle(current: string, passengers: number): string | null {
   const currentIndex = VEHICLE_ORDER.indexOf(
     current as (typeof VEHICLE_ORDER)[number]
   );
@@ -137,6 +134,7 @@ export default function Step2Details({
     Boolean(data.phone) &&
     Boolean(data.email) &&
     emailValid &&
+    Boolean(data.flightNumber) &&
     data.adults > 0 &&
     Boolean(data.baggageType) &&
     Boolean(data.paymentMethod) &&
@@ -517,10 +515,11 @@ export default function Step2Details({
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div>
             <label className="block text-xs font-medium text-gray-700">
-              Flight number (optional)
+              Flight number <span className="text-red-500">*</span>
             </label>
             <input
               type="text"
+              required
               value={data.flightNumber}
               onChange={(e) => onChange("flightNumber", e.target.value)}
               placeholder="e.g. BA662"
