@@ -17,11 +17,12 @@ export async function POST(req: Request) {
     sidLen: process.env.MYPOS_SID?.length,
     walletLen: process.env.MYPOS_WALLET_NUMBER?.length,
   });
-  
+
   try {
     requireEnv("MYPOS_SID");
     requireEnv("MYPOS_WALLET_NUMBER");
     const raw = await req.json();
+    console.log(raw);
     const parsed = BookingBaseSchema.parse(raw);
 
     const { amount } = await createBooking(parsed, true);
@@ -46,8 +47,20 @@ export async function POST(req: Request) {
       orderId,
       amount,
       currency: "EUR",
+
       customerEmail: parsed.email,
       customerPhone: parsed.phone,
+
+
+      cartItems: [
+        {
+          article: "Airport Transfer",
+          quantity: 1,
+          price: amount,
+          currency: "EUR",
+        },
+      ],
+
       udf1: token,
     });
 
