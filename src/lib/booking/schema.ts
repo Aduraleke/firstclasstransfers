@@ -1,4 +1,3 @@
-// lib/booking/schema.ts
 import { z } from "zod";
 
 export const BookingBaseSchema = z
@@ -13,13 +12,13 @@ export const BookingBaseSchema = z
     time: z.string().min(1),
     timePeriod: z.enum(["day", "night"]).default("day"),
 
-    // return (optional but conditionally required)
+    // return
     returnDate: z.string().optional().nullable().or(z.literal("")),
     returnTime: z.string().optional().nullable().or(z.literal("")),
     returnTimePeriod: z.enum(["day", "night"]).optional(),
 
     // pax / baggage
-    flightNumber: z.string().optional().nullable().or(z.literal("")),
+    flightNumber: z.string().min(1, "Flight number is required"),
     adults: z.number().int().min(1),
     children: z.number().int().min(0).default(0),
     baggageType: z.enum(["hand", "medium", "large", "extra_large"]),
