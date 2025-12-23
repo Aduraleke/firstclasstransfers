@@ -148,22 +148,37 @@ export default function Step2Details({
     const priceStr = routeDetail.vehicleOptions?.[idx]?.fixedPrice;
     return parsePriceToNumber(priceStr ?? undefined);
   }, [routeDetail, data.vehicleTypeId]);
+const isReturn = data.tripType === "return";
+const legs = isReturn ? 2 : 1;
 
-  const isReturn = data.tripType === "return";
-  const legs = isReturn ? 2 : 1;
-  const subtotal = perLegPriceNumber != null ? perLegPriceNumber * legs : null;
-  const discount =
-    isReturn && subtotal != null ? Math.round(subtotal * 0.1) : 0;
-  const total = subtotal != null ? Math.round(subtotal - discount) : null;
+const subtotal =
+  perLegPriceNumber != null ? perLegPriceNumber * legs : null;
 
-  const perLegDisplay = formatEuro(perLegPriceNumber);
-  const subtotalDisplay = formatEuro(subtotal);
-  const discountDisplay = discount ? formatEuro(discount) : null;
-  const totalDisplay = formatEuro(total);
+// ❌ 10% discount removed
+// const discount =
+//   isReturn && subtotal != null ? Math.round(subtotal * 0.1) : 0;
 
-  const discountText = isReturn
-    ? "10% discount applied for booking return together."
-    : "Return trips booked together receive a 10% discount.";
+const total =
+  subtotal != null
+    ? Math.round(
+        subtotal
+        // - discount
+      )
+    : null;
+
+const perLegDisplay = formatEuro(perLegPriceNumber);
+const subtotalDisplay = formatEuro(subtotal);
+
+// ❌ Discount display removed
+// const discountDisplay = discount ? formatEuro(discount) : null;
+
+const totalDisplay = formatEuro(total);
+
+// ❌ Discount explanatory text removed
+// const discountText = isReturn
+//   ? "10% discount applied for booking return together."
+//   : "Return trips booked together receive a 10% discount.";
+
 
   return (
     <div className="bg-white rounded-3xl border border-gray-100 shadow-lg shadow-gray-100/70 p-5 sm:p-6 lg:p-7 space-y-6">
@@ -196,11 +211,11 @@ export default function Step2Details({
               <div className="text-[11px] opacity-85 mt-1">
                 {perLegDisplay} {isReturn ? "· per leg" : "· per vehicle"}
               </div>
-              {isReturn && discount > 0 && (
+              {/* {isReturn && discount > 0 && (
                 <div className="mt-2 text-[11px] text-emerald-100/90">
                   −{discountDisplay} discount
                 </div>
-              )}
+              )} */}
             </div>
           </div>
         </div>
@@ -223,7 +238,7 @@ export default function Step2Details({
             <p className="text-sm font-semibold text-gray-900 capitalize">
               {data.tripType === "return" ? "Return (round trip)" : "One-way"}
             </p>
-            <p className="text-[11px] text-emerald-700">{discountText}</p>
+            {/* <p className="text-[11px] text-emerald-700">{discountText}</p> */}
           </div>
 
           {/* Route */}
@@ -446,7 +461,7 @@ export default function Step2Details({
               <span className="font-semibold">{subtotalDisplay}</span>
             </div>
 
-            {/* Discount */}
+            {/* Discount
             {isReturn && discount > 0 && (
               <div className="flex items-center justify-between text-emerald-700">
                 <div className="flex items-center gap-2">
@@ -467,7 +482,7 @@ export default function Step2Details({
                   -{discountDisplay}
                 </span>
               </div>
-            )}
+            )} */}
 
             {/* Total */}
             <div className="flex items-center justify-between pt-2">
