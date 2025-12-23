@@ -33,6 +33,9 @@ export function buildMyPOSFormHTML(params: Params): string {
 
     console.log("MYPOS_WALLET_NUMBER at runtime:", process.env.MYPOS_WALLET_NUMBER);
 
+  // ⚠️  IMPORTANT: Field order matters for signature generation!
+  // This order must match SIGNATURE_ORDER in mypos-signature.ts
+  // All fields below (except Signature) are included in the signature calculation
   const fields: Record<string, string | number> = {
     IPCmethod: "IPCPurchase",
     IPCVersion: "1.4",
@@ -64,11 +67,12 @@ export function buildMyPOSFormHTML(params: Params): string {
     KeyIndex: process.env.MYPOS_KEY_INDEX!,
   };
 
+  // UDF1 (order token) is optional and inserted before KeyIndex in signature
   if (params.udf1) {
     fields.UDF1 = params.udf1;
   }
 
-  // 🔐 Signature MUST be last
+  // 🔐 Signature MUST be calculated last (after all other fields are set)
   fields.Signature = signMyPOS(fields);
 
   const inputs = Object.entries(fields)
