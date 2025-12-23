@@ -217,7 +217,7 @@ export default function Step1Trip({ data, onChange, onNext }: Props) {
         <div className="inline-flex gap-2 rounded-2xl bg-gray-50 p-1 border border-gray-200">
           {[
             { id: "one-way" as const, label: "One-way" },
-            { id: "return" as const, label: "Return · Save 10%" },
+            { id: "return" as const, label: "Return" },
           ].map((tp) => {
             const active = data.tripType === tp.id;
             return (

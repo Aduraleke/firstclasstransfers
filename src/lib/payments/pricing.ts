@@ -17,7 +17,12 @@ export function computePriceOrThrow(params: {
 
   const legs = params.tripType === "return" ? 2 : 1;
   const subtotal = base * legs;
-  const discount = params.tripType === "return" ? subtotal * 0.1 : 0;
 
-  return Math.round(subtotal - discount);
+  // ❌ 10% return discount removed
+  // const discount = params.tripType === "return" ? subtotal * 0.1 : 0;
+
+  return (
+    subtotal
+    // - discount
+  );
 }
