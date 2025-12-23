@@ -58,23 +58,24 @@ export function signMyPOS(
   const values: string[] = [];
 
   // Add all required fields in order (except UDF1 and KeyIndex)
+  // Note: Empty strings are included as they are explicitly set in the form
   for (const key of SIGNATURE_ORDER) {
     if (key === "KeyIndex") {
       // KeyIndex is added after UDF1 (if present)
       break;
     }
-    if (fields[key] !== undefined && fields[key] !== "") {
+    if (fields[key] !== undefined) {
       values.push(String(fields[key]));
     }
   }
 
   // Add optional UDF1 before KeyIndex (per myPOS spec)
-  if (fields.UDF1 !== undefined && fields.UDF1 !== "") {
+  if (fields.UDF1 !== undefined) {
     values.push(String(fields.UDF1));
   }
 
   // Add KeyIndex last
-  if (fields.KeyIndex !== undefined && fields.KeyIndex !== "") {
+  if (fields.KeyIndex !== undefined) {
     values.push(String(fields.KeyIndex));
   }
 
