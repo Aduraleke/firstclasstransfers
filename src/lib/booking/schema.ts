@@ -1,9 +1,10 @@
 import { z } from "zod";
+import { VEHICLE_TYPES } from "@/lib/booking/types";
 
 export const BookingBaseSchema = z
   .object({
     routeId: z.string().min(1),
-    vehicleTypeId: z.string().min(1),
+    vehicleTypeId: z.enum(VEHICLE_TYPES),
 
     tripType: z.enum(["one-way", "return"]).default("one-way"),
 

@@ -51,6 +51,7 @@ export default function Booking({
     ...createInitialDraft(initialRouteId),
     vehicleTypeId: initialVehicleTypeId || "",
   }));
+
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
@@ -60,21 +61,23 @@ export default function Booking({
 
   const [showCardModal, setShowCardModal] = useState(false);
 
+  // 🔐 Revolut order id
+  const [revolutOrderId, setRevolutOrderId] = useState<string | null>(null);
+
   const topRef = React.useRef<HTMLDivElement | null>(null);
   const scrollToTop = () => {
     topRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
+  /* ---------- analytics ---------- */
   useEffect(() => {
     if (typeof window !== "undefined") {
       window.dataLayer = window.dataLayer || [];
-      window.dataLayer.push({
-        event: "lead",
-        page: "booking",
-      });
+      window.dataLayer.push({ event: "lead", page: "booking" });
     }
   }, []);
 
+  /* ---------- load routes ---------- */
   useEffect(() => {
     let mounted = true;
     (async () => {
@@ -113,7 +116,7 @@ export default function Booking({
   };
 
   /* ============================
-     CONFIRM BOOKING (SINGLE FLOW)
+     CONFIRM BOOKING
   ============================ */
   const handleConfirm = async () => {
     if (submitting) return;
@@ -130,69 +133,68 @@ export default function Booking({
       return;
     }
 
-    // CARD → show modal only
     if (draft.paymentMethod === "card") {
       setShowCardModal(true);
       return;
     }
 
-    // CASH → submit directly
-    await submitBooking(false);
+    // CASH
+    await submitCashBooking();
   };
 
-  const submitBooking = async (payByCard: boolean) => {
-  setSubmitting(true);
-  setSubmitError(null);
+  /* ---------- CASH ---------- */
+  const submitCashBooking = async () => {
+    try {
+      setSubmitting(true);
 
-  try {
-    const res = await fetch(
-      payByCard ? "/api/bookings?pay=true" : "/api/bookings",
-      {
+      const res = await fetch("/api/bookings", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(draft),
-      }
-    );
-
-    // ❗ CARD FLOW → HTML ONLY
-    if (payByCard) {
-      if (!res.ok) {
-        const text = await res.text();
-        throw new Error(text || "Payment initiation failed");
-      }
-
-      const html = await res.text();
-      document.open();
-      document.write(html);
-      document.close();
-      return;
-    }
-
-    // ❗ CASH FLOW → JSON ONLY
-    const json = await res.json();
-
-    if (!res.ok) {
-      throw new Error(json?.error || "Booking failed");
-    }
-
-    // Analytics
-    if (typeof window !== "undefined") {
-      window.dataLayer = window.dataLayer || [];
-      window.dataLayer.push({
-        event: "purchase",
-        bookingValue: json.amount,
-        currency: "EUR",
-        paymentMethod: "cash",
       });
+
+      const json = await res.json();
+      if (!res.ok) throw new Error(json?.error || "Booking failed");
+
+      if (typeof window !== "undefined") {
+        window.dataLayer = window.dataLayer || [];
+        window.dataLayer.push({
+          event: "purchase",
+          bookingValue: json.amount,
+          currency: "EUR",
+          paymentMethod: "cash",
+        });
+      }
+
+      setSubmitted(true);
+    } catch (err) {
+      setSubmitError(err instanceof Error ? err.message : "Booking failed");
+    } finally {
+      setSubmitting(false);
     }
+  };
 
-    setSubmitted(true);
-  } catch (err) {
-    setSubmitError(err instanceof Error ? err.message : "Booking failed");
-    setSubmitting(false);
-  }
-};
+  /* ---------- CARD (REVOLUT) ---------- */
+  const startCardPayment = async () => {
+    try {
+      setSubmitting(true);
+      setShowCardModal(false);
 
+      const res = await fetch("/api/payments/revolut/create-order", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(draft),
+      });
+
+      const json = await res.json();
+      if (!res.ok) throw new Error(json?.error || "Payment init failed");
+
+      setRevolutOrderId(json.publicId);
+    } catch (err) {
+      setSubmitError(err instanceof Error ? err.message : "Payment failed");
+      setSubmitting(false);
+    }
+  };
 
   /* ============================
      SUCCESS UI
@@ -207,9 +209,7 @@ export default function Booking({
         <Link
           href="/"
           className="inline-block mt-6 px-5 py-2.5 rounded-full text-white"
-          style={{
-            background: "linear-gradient(135deg,#b07208,#162c4b)",
-          }}
+          style={{ background: "linear-gradient(135deg,#b07208,#162c4b)" }}
         >
           Back to homepage
         </Link>
@@ -241,6 +241,8 @@ export default function Booking({
             onChange={updateDraft}
             onBack={goBackToStep1}
             onConfirm={handleConfirm}
+            revolutOrderId={revolutOrderId} // 👈 NEW
+            onPaymentSuccess={() => setSubmitted(true)} // 👈 webhook-safe UI
           />
         )}
 
@@ -258,7 +260,7 @@ export default function Booking({
           <div className="bg-white rounded-2xl p-6 max-w-md w-full">
             <h3 className="text-lg font-semibold">Pay by card</h3>
             <p className="mt-2 text-sm text-gray-600">
-              You’ll be redirected to our secure payment provider.
+              You’ll complete payment securely via Revolut.
             </p>
 
             <div className="mt-4 flex justify-end gap-3">
@@ -269,7 +271,7 @@ export default function Booking({
                 Cancel
               </button>
               <button
-                onClick={() => submitBooking(true)}
+                onClick={startCardPayment}
                 className="px-4 py-2 rounded-full text-white"
                 style={{
                   background: "linear-gradient(135deg,#b07208,#162c4b)",

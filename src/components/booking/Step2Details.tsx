@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useMemo } from "react";
+import React, { useMemo, useEffect } from "react";
+import RevolutCheckout from "@revolut/checkout";
 import type { BookingDraft } from "@/lib/booking/types";
 import {
   BAGGAGE_OPTIONS,
@@ -18,6 +19,9 @@ type Props = {
   ) => void;
   onBack: () => void;
   onConfirm: () => void;
+  // 🔐 NEW (from Booking.tsx)
+  revolutOrderId?: string | null;
+  onPaymentSuccess: () => void;
 };
 
 const BRAND_PRIMARY = "#162c4b";
@@ -69,6 +73,8 @@ export default function Step2Details({
   onChange,
   onBack,
   onConfirm,
+  revolutOrderId,
+  onPaymentSuccess,
 }: Props) {
   // ---------------------------------------
   // FIXED: These must come BEFORE any usage
@@ -94,6 +100,19 @@ export default function Step2Details({
     data.vehicleTypeId,
     totalPassengers
   );
+
+useEffect(() => {
+  if (revolutOrderId) {
+    document.body.style.overflow = "hidden";
+  } else {
+    document.body.style.overflow = "";
+  }
+
+  return () => {
+    document.body.style.overflow = "";
+  };
+}, [revolutOrderId]);
+
 
   React.useEffect(() => {
     if (exceedsCapacity && upgradeVehicleId) {
@@ -152,18 +171,62 @@ export default function Step2Details({
   const isReturn = data.tripType === "return";
   const legs = isReturn ? 2 : 1;
   const subtotal = perLegPriceNumber != null ? perLegPriceNumber * legs : null;
-  const discount =
-    isReturn && subtotal != null ? Math.round(subtotal * 0.1) : 0;
-  const total = subtotal != null ? Math.round(subtotal - discount) : null;
+  
+  const total = subtotal != null ? Math.round(subtotal) : null;
+
 
   const perLegDisplay = formatEuro(perLegPriceNumber);
   const subtotalDisplay = formatEuro(subtotal);
-  const discountDisplay = discount ? formatEuro(discount) : null;
   const totalDisplay = formatEuro(total);
 
-  const discountText = isReturn
-    ? "10% discount applied for booking return together."
-    : "Return trips booked together receive a 10% discount.";
+  useEffect(() => {
+    if (!revolutOrderId) return;
+
+    let destroy: (() => void) | undefined;
+    let cancelled = false;
+
+    (async () => {
+      try {
+        const result = await RevolutCheckout.embeddedCheckout({
+          publicToken: process.env.NEXT_PUBLIC_REVOLUT_PUBLIC_KEY!,
+          environment:
+            process.env.NEXT_PUBLIC_REVOLUT_ENV === "sandbox"
+              ? "sandbox"
+              : "prod",
+          target: document.getElementById("revolut-checkout")!,
+          createOrder: async () => ({ publicId: revolutOrderId }),
+
+          onSuccess() {
+            if (!cancelled) {
+              onPaymentSuccess();
+            }
+          },
+
+          onError(error: unknown) {
+            console.error("Revolut error:", error);
+            alert("Payment failed. Please try again.");
+          },
+
+          onCancel() {
+            console.warn("Payment cancelled");
+          },
+        });
+
+        destroy = result.destroy;
+      } catch (e) {
+        console.error("Failed to initialise Revolut Checkout", e);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+      if (destroy) {
+        destroy(); // ✅ REQUIRED
+      }
+    };
+  }, [revolutOrderId, onPaymentSuccess]);
+
+
 
   return (
     <div className="bg-white rounded-3xl border border-gray-100 shadow-lg shadow-gray-100/70 p-5 sm:p-6 lg:p-7 space-y-6">
@@ -196,11 +259,7 @@ export default function Step2Details({
               <div className="text-[11px] opacity-85 mt-1">
                 {perLegDisplay} {isReturn ? "· per leg" : "· per vehicle"}
               </div>
-              {isReturn && discount > 0 && (
-                <div className="mt-2 text-[11px] text-emerald-100/90">
-                  −{discountDisplay} discount
-                </div>
-              )}
+             
             </div>
           </div>
         </div>
@@ -223,7 +282,6 @@ export default function Step2Details({
             <p className="text-sm font-semibold text-gray-900 capitalize">
               {data.tripType === "return" ? "Return (round trip)" : "One-way"}
             </p>
-            <p className="text-[11px] text-emerald-700">{discountText}</p>
           </div>
 
           {/* Route */}
@@ -446,28 +504,7 @@ export default function Step2Details({
               <span className="font-semibold">{subtotalDisplay}</span>
             </div>
 
-            {/* Discount */}
-            {isReturn && discount > 0 && (
-              <div className="flex items-center justify-between text-emerald-700">
-                <div className="flex items-center gap-2">
-                  <svg
-                    className="w-4 h-4 text-emerald-600"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="1.7"
-                    viewBox="0 0 24 24"
-                  >
-                    <path d="M3 12l5 5L21 4" />
-                  </svg>
-                  <span className="text-[13px] font-medium">
-                    Return discount (10%)
-                  </span>
-                </div>
-                <span className="font-semibold transition-all duration-300 text-emerald-700">
-                  -{discountDisplay}
-                </span>
-              </div>
-            )}
+            
 
             {/* Total */}
             <div className="flex items-center justify-between pt-2">
@@ -846,6 +883,13 @@ export default function Step2Details({
                 Upgrade vehicle
               </button>
             </div>
+          </div>
+        </div>
+      )}
+      {revolutOrderId && (
+        <div className="fixed inset-0 z-100 bg-black/50 flex items-center justify-center">
+          <div className="bg-white w-full max-w-lg rounded-2xl p-4">
+            <div id="revolut-checkout" />
           </div>
         </div>
       )}

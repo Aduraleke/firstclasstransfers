@@ -11,6 +11,7 @@
   "dependencies": {
     "@iconify/icons-mdi": "^1.2.48",
     "@iconify/react": "^6.0.2",
+    "@revolut/checkout": "^1.1.24",
     "framer-motion": "^12.23.25",
     "mongoose": "^9.0.1",
     "next": "^16.0.10",
