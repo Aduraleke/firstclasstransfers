@@ -902,7 +902,7 @@ export default function Step2Details({
       {/* PAYMENT MODAL */}
       {paymentLoading && (
         <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center">
-          <div className="bg-white w-full max-w-lg rounded-2xl min-h-lg p-4 relative">
+          <div className="bg-white w-full max-w-lg rounded-2xl min-h-lg py-10 p-4 relative">
             {/* CLOSE */}
             <button
               onClick={onPaymentCancel}
@@ -917,7 +917,7 @@ export default function Step2Details({
 
             {/* FALLBACK SPINNER (brief only) */}
             {!checkoutMounted && (
-              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none gap-3">
                 <div className="h-10 w-10 animate-spin rounded-full border-4 border-gray-200 border-t-[#b07208]" />
                 <div className="text-center">
                   <p className="text-sm font-semibold text-gray-800">
