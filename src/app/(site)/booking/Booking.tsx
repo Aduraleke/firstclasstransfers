@@ -85,9 +85,12 @@ export default function Booking({
       try {
         const res = await fetch("/api/routes");
         const json = await res.json();
-        if (!res.ok || !json?.ok) throw new Error();
+        if (!res.ok || !json?.ok) {
+          throw new Error(`Failed to load routes: ${res.status} ${res.statusText}`);
+        }
         if (mounted) setRouteList(json.routes || []);
-      } catch {
+      } catch (error) {
+        console.error("Error while loading routes:", error);
         setRouteFetchError("Failed to load routes");
       } finally {
         if (mounted) setRoutesLoading(false);
