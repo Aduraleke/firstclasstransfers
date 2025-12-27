@@ -15,14 +15,9 @@ export function computePriceOrThrow(params: {
   const base = Number(priceStr.replace(/[^\d.]/g, ""));
   if (Number.isNaN(base)) throw new Error("Invalid price");
 
+  // 🔥 NO DISCOUNT — return trip = double price
   const legs = params.tripType === "return" ? 2 : 1;
-  const subtotal = base * legs;
+  const total = base * legs;
 
-  // ❌ 10% return discount removed
-  // const discount = params.tripType === "return" ? subtotal * 0.1 : 0;
-
-  return (
-    subtotal
-    // - discount
-  );
+  return Math.round(total);
 }
