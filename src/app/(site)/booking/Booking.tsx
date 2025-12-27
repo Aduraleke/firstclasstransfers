@@ -1,19 +1,27 @@
 "use client";
 
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import Link from "next/link";
+
 import BookingStepper from "@/components/booking/BookingStepper";
 import Step1Trip from "@/components/booking/Step1Trip";
 import Step2Details from "@/components/booking/Step2Details";
+
 import type { BookingDraft } from "@/lib/booking/types";
-import Link from "next/link";
 
 type BookingProps = {
   initialRouteId?: string;
   initialVehicleTypeId?: string;
 };
 
-type ApiRoute = { id: string; title: string };
+type ApiRoute = {
+  id: string;
+  title: string;
+};
 
+/* --------------------------------
+   INITIAL DRAFT
+-------------------------------- */
 function createInitialDraft(initialRouteId?: string): BookingDraft {
   return {
     routeId: initialRouteId ?? "",
@@ -41,50 +49,69 @@ function createInitialDraft(initialRouteId?: string): BookingDraft {
   };
 }
 
+/* ============================================
+   BOOKING COMPONENT (CLIENT ONLY)
+============================================ */
 export default function Booking({
   initialRouteId = "",
   initialVehicleTypeId = "",
 }: BookingProps) {
+  /* ---------- step control ---------- */
   const [step, setStep] = useState<1 | 2>(1);
   const [submitted, setSubmitted] = useState(false);
+
+  /* ---------- draft ---------- */
   const [draft, setDraft] = useState<BookingDraft>(() => ({
     ...createInitialDraft(initialRouteId),
     vehicleTypeId: initialVehicleTypeId || "",
   }));
 
+  /* ---------- ui state ---------- */
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
+  /* ---------- routes ---------- */
   const [routeList, setRouteList] = useState<ApiRoute[]>([]);
   const [routesLoading, setRoutesLoading] = useState(true);
   const [routeFetchError, setRouteFetchError] = useState<string | null>(null);
 
+  /* ---------- card payment ---------- */
   const [showCardModal, setShowCardModal] = useState(false);
-
-  // 🔐 Revolut order id
   const [revolutOrderId, setRevolutOrderId] = useState<string | null>(null);
+  const [paymentLoading, setPaymentLoading] = useState(false);
 
-  const topRef = React.useRef<HTMLDivElement | null>(null);
-  const scrollToTop = () => {
+  /* ---------- scroll ---------- */
+  const topRef = useRef<HTMLDivElement | null>(null);
+  const scrollToTop = () =>
     topRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
 
-  /* ---------- analytics ---------- */
+  /* ============================================
+     ANALYTICS (SAFE)
+  ============================================ */
   useEffect(() => {
     if (typeof window !== "undefined") {
+
       window.dataLayer = window.dataLayer || [];
+
       window.dataLayer.push({ event: "lead", page: "booking" });
     }
   }, []);
 
-  /* ---------- load routes ---------- */
+  /* ============================================
+     LOAD ROUTES
+  ============================================ */
   useEffect(() => {
     let mounted = true;
+
     (async () => {
       try {
         const res = await fetch("/api/routes");
         const json = await res.json();
-        if (!res.ok || !json?.ok) throw new Error();
+
+        if (!res.ok || !json?.ok) {
+          throw new Error("Failed to load routes");
+        }
+
         if (!mounted) return;
         setRouteList(json.routes || []);
       } catch {
@@ -93,11 +120,15 @@ export default function Booking({
         if (mounted) setRoutesLoading(false);
       }
     })();
+
     return () => {
       mounted = false;
     };
   }, []);
 
+  /* ============================================
+     DRAFT UPDATE
+  ============================================ */
   const updateDraft = useCallback(
     <K extends keyof BookingDraft>(key: K, value: BookingDraft[K]) => {
       setDraft((prev) => ({ ...prev, [key]: value }));
@@ -105,6 +136,9 @@ export default function Booking({
     []
   );
 
+  /* ============================================
+     STEP CONTROL
+  ============================================ */
   const goToStep2 = () => {
     setStep(2);
     scrollToTop();
@@ -115,11 +149,12 @@ export default function Booking({
     scrollToTop();
   };
 
-  /* ============================
+  /* ============================================
      CONFIRM BOOKING
-  ============================ */
+  ============================================ */
   const handleConfirm = async () => {
     if (submitting) return;
+
     setSubmitError(null);
 
     if (!draft.name || !draft.phone || !draft.email) {
@@ -138,11 +173,12 @@ export default function Booking({
       return;
     }
 
-    // CASH
     await submitCashBooking();
   };
 
-  /* ---------- CASH ---------- */
+  /* ============================================
+     CASH BOOKING
+  ============================================ */
   const submitCashBooking = async () => {
     try {
       setSubmitting(true);
@@ -157,6 +193,7 @@ export default function Booking({
       if (!res.ok) throw new Error(json?.error || "Booking failed");
 
       if (typeof window !== "undefined") {
+
         window.dataLayer = window.dataLayer || [];
         window.dataLayer.push({
           event: "purchase",
@@ -174,10 +211,13 @@ export default function Booking({
     }
   };
 
-  /* ---------- CARD (REVOLUT) ---------- */
+  /* ============================================
+     CARD (REVOLUT)
+  ============================================ */
   const startCardPayment = async () => {
     try {
       setSubmitting(true);
+      setPaymentLoading(true);
       setShowCardModal(false);
 
       const res = await fetch("/api/payments/revolut/create-order", {
@@ -192,13 +232,21 @@ export default function Booking({
       setRevolutOrderId(json.publicId);
     } catch (err) {
       setSubmitError(err instanceof Error ? err.message : "Payment failed");
+      setPaymentLoading(false);
+    } finally {
       setSubmitting(false);
     }
   };
 
-  /* ============================
-     SUCCESS UI
-  ============================ */
+  const closeRevolutModal = useCallback(() => {
+    setRevolutOrderId(null);
+    setPaymentLoading(false);
+    setSubmitting(false);
+  }, []);
+
+  /* ============================================
+     SUCCESS STATE
+  ============================================ */
   if (submitted) {
     return (
       <div className="bg-white min-h-screen pt-32 text-center">
@@ -206,6 +254,7 @@ export default function Booking({
         <p className="mt-2 text-gray-600">
           We’ve emailed you and our office. We’ll confirm shortly.
         </p>
+
         <Link
           href="/"
           className="inline-block mt-6 px-5 py-2.5 rounded-full text-white"
@@ -217,6 +266,9 @@ export default function Booking({
     );
   }
 
+  /* ============================================
+     RENDER
+  ============================================ */
   return (
     <div className="bg-white min-h-screen">
       <div ref={topRef} className="pt-32 pb-12 max-w-6xl mx-auto px-4">
@@ -241,14 +293,17 @@ export default function Booking({
             onChange={updateDraft}
             onBack={goBackToStep1}
             onConfirm={handleConfirm}
-            revolutOrderId={revolutOrderId} // 👈 NEW
-            onPaymentSuccess={() => setSubmitted(true)} // 👈 webhook-safe UI
+            revolutOrderId={revolutOrderId}
+            paymentLoading={paymentLoading}
+            onPaymentSuccess={() => setSubmitted(true)}
+            onPaymentCancel={closeRevolutModal}
           />
         )}
 
         {submitError && (
           <div className="mt-4 text-sm text-red-600">{submitError}</div>
         )}
+
         {submitting && (
           <div className="mt-2 text-sm text-gray-500">Processing…</div>
         )}

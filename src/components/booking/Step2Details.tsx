@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useMemo, useEffect } from "react";
-import RevolutCheckout from "@revolut/checkout";
 import type { BookingDraft } from "@/lib/booking/types";
 import {
   BAGGAGE_OPTIONS,
@@ -21,7 +20,9 @@ type Props = {
   onConfirm: () => void;
   // 🔐 NEW (from Booking.tsx)
   revolutOrderId?: string | null;
+  paymentLoading: boolean;
   onPaymentSuccess: () => void;
+  onPaymentCancel: () => void;
 };
 
 const BRAND_PRIMARY = "#162c4b";
@@ -74,7 +75,9 @@ export default function Step2Details({
   onBack,
   onConfirm,
   revolutOrderId,
+  paymentLoading,
   onPaymentSuccess,
+  onPaymentCancel,
 }: Props) {
   // ---------------------------------------
   // FIXED: These must come BEFORE any usage
@@ -101,18 +104,17 @@ export default function Step2Details({
     totalPassengers
   );
 
-useEffect(() => {
-  if (revolutOrderId) {
-    document.body.style.overflow = "hidden";
-  } else {
-    document.body.style.overflow = "";
-  }
+  useEffect(() => {
+    if (revolutOrderId) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
 
-  return () => {
-    document.body.style.overflow = "";
-  };
-}, [revolutOrderId]);
-
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [revolutOrderId]);
 
   React.useEffect(() => {
     if (exceedsCapacity && upgradeVehicleId) {
@@ -171,9 +173,8 @@ useEffect(() => {
   const isReturn = data.tripType === "return";
   const legs = isReturn ? 2 : 1;
   const subtotal = perLegPriceNumber != null ? perLegPriceNumber * legs : null;
-  
-  const total = subtotal != null ? Math.round(subtotal) : null;
 
+  const total = subtotal != null ? Math.round(subtotal) : null;
 
   const perLegDisplay = formatEuro(perLegPriceNumber);
   const subtotalDisplay = formatEuro(subtotal);
@@ -186,47 +187,44 @@ useEffect(() => {
     let cancelled = false;
 
     (async () => {
-      try {
-        const result = await RevolutCheckout.embeddedCheckout({
-          publicToken: process.env.NEXT_PUBLIC_REVOLUT_PUBLIC_KEY!,
-          environment:
-            process.env.NEXT_PUBLIC_REVOLUT_ENV === "sandbox"
-              ? "sandbox"
-              : "prod",
-          target: document.getElementById("revolut-checkout")!,
-          createOrder: async () => ({ publicId: revolutOrderId }),
+      const target = document.getElementById("revolut-checkout");
+      if (!target) return;
 
-          onSuccess() {
-            if (!cancelled) {
-              onPaymentSuccess();
-            }
-          },
+      const { default: RevolutCheckout } = await import("@revolut/checkout");
+      const revolut = await RevolutCheckout();
+      
 
-          onError(error: unknown) {
-            console.error("Revolut error:", error);
-            alert("Payment failed. Please try again.");
-          },
+      const result = await revolut.embeddedCheckout({
+        publicToken: process.env.NEXT_PUBLIC_REVOLUT_PUBLIC_KEY!,
+        environment:
+          process.env.NEXT_PUBLIC_REVOLUT_ENV === "sandbox"
+            ? "sandbox"
+            : "prod",
+        target,
+        createOrder: async () => ({ publicId: revolutOrderId }),
 
-          onCancel() {
-            console.warn("Payment cancelled");
-          },
-        });
+        onSuccess() {
+          if (!cancelled) onPaymentSuccess();
+        },
 
-        destroy = result.destroy;
-      } catch (e) {
-        console.error("Failed to initialise Revolut Checkout", e);
-      }
+        onError(err) {
+          console.error("Revolut error:", err);
+          if (!cancelled) onPaymentCancel(); // ✅ CLOSE
+        },
+
+        onCancel() {
+          if (!cancelled) onPaymentCancel(); // ✅ CLOSE
+        },
+      });
+
+      destroy = result.destroy;
     })();
 
     return () => {
       cancelled = true;
-      if (destroy) {
-        destroy(); // ✅ REQUIRED
-      }
+      destroy?.();
     };
-  }, [revolutOrderId, onPaymentSuccess]);
-
-
+  }, [revolutOrderId, onPaymentSuccess, onPaymentCancel]);
 
   return (
     <div className="bg-white rounded-3xl border border-gray-100 shadow-lg shadow-gray-100/70 p-5 sm:p-6 lg:p-7 space-y-6">
@@ -259,7 +257,6 @@ useEffect(() => {
               <div className="text-[11px] opacity-85 mt-1">
                 {perLegDisplay} {isReturn ? "· per leg" : "· per vehicle"}
               </div>
-             
             </div>
           </div>
         </div>
@@ -503,8 +500,6 @@ useEffect(() => {
               </div>
               <span className="font-semibold">{subtotalDisplay}</span>
             </div>
-
-            
 
             {/* Total */}
             <div className="flex items-center justify-between pt-2">
@@ -886,9 +881,35 @@ useEffect(() => {
           </div>
         </div>
       )}
+
+      {paymentLoading && !revolutOrderId && (
+        <div className="fixed inset-0 z-90 bg-black/40 flex items-center justify-center">
+          <div className="bg-white rounded-2xl px-6 py-5 shadow-xl flex flex-col items-center gap-4">
+            {/* Spinner */}
+            <div className="h-10 w-10 animate-spin rounded-full border-4 border-gray-200 border-t-[#b07208]" />
+
+            <div className="text-center">
+              <p className="text-sm font-semibold text-gray-800">
+                Preparing secure payment
+              </p>
+              <p className="text-xs text-gray-500 mt-1">Please wait…</p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {revolutOrderId && (
         <div className="fixed inset-0 z-100 bg-black/50 flex items-center justify-center">
-          <div className="bg-white w-full max-w-lg rounded-2xl p-4">
+          <div className="bg-white w-full max-w-lg rounded-2xl p-4 relative">
+            {/* ❌ CLOSE BUTTON */}
+            <button
+              onClick={onPaymentCancel}
+              className="absolute top-3 right-3 text-gray-500 hover:text-red-500 cursor-pointer"
+              aria-label="Close payment"
+            >
+              ✕
+            </button>
+
             <div id="revolut-checkout" />
           </div>
         </div>

@@ -8,18 +8,16 @@ declare module "@revolut/checkout" {
     environment: "sandbox" | "prod";
     target: HTMLElement;
     createOrder: () => Promise<{ publicId: string }>;
-
     onSuccess?: () => void;
     onError?: (error: unknown) => void;
     onCancel?: () => void;
   };
 
-  interface RevolutCheckoutLoader {
+  interface RevolutInstance {
     embeddedCheckout(
       options: EmbeddedCheckoutOptions
     ): Promise<EmbeddedCheckoutResult>;
   }
 
-  const RevolutCheckout: RevolutCheckoutLoader;
-  export default RevolutCheckout;
+  export default function RevolutCheckout(): Promise<RevolutInstance>;
 }
