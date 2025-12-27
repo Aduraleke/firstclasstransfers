@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo } from "react";
+import React, { useMemo, useEffect } from "react";
 import type { BookingDraft } from "@/lib/booking/types";
 import {
   BAGGAGE_OPTIONS,
@@ -18,6 +18,11 @@ type Props = {
   ) => void;
   onBack: () => void;
   onConfirm: () => void;
+  // 🔐 NEW (from Booking.tsx)
+  revolutOrderId?: string | null;
+  paymentLoading: boolean;
+  onPaymentSuccess: () => void;
+  onPaymentCancel: () => void;
 };
 
 const BRAND_PRIMARY = "#162c4b";
@@ -69,6 +74,10 @@ export default function Step2Details({
   onChange,
   onBack,
   onConfirm,
+  revolutOrderId,
+  paymentLoading,
+  onPaymentSuccess,
+  onPaymentCancel,
 }: Props) {
   // ---------------------------------------
   // FIXED: These must come BEFORE any usage
@@ -94,6 +103,18 @@ export default function Step2Details({
     data.vehicleTypeId,
     totalPassengers
   );
+
+  useEffect(() => {
+    if (revolutOrderId) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [revolutOrderId]);
 
   React.useEffect(() => {
     if (exceedsCapacity && upgradeVehicleId) {
@@ -151,34 +172,59 @@ export default function Step2Details({
 const isReturn = data.tripType === "return";
 const legs = isReturn ? 2 : 1;
 
-const subtotal =
-  perLegPriceNumber != null ? perLegPriceNumber * legs : null;
+  const subtotal = perLegPriceNumber != null ? perLegPriceNumber * legs : null;
 
-// ❌ 10% discount removed
-// const discount =
-//   isReturn && subtotal != null ? Math.round(subtotal * 0.1) : 0;
+  const total = subtotal != null ? Math.round(subtotal) : null;
 
-const total =
-  subtotal != null
-    ? Math.round(
-        subtotal
-        // - discount
-      )
-    : null;
+  const perLegDisplay = formatEuro(perLegPriceNumber);
+  const subtotalDisplay = formatEuro(subtotal);
+  const totalDisplay = formatEuro(total);
 
-const perLegDisplay = formatEuro(perLegPriceNumber);
-const subtotalDisplay = formatEuro(subtotal);
+  useEffect(() => {
+    if (!revolutOrderId) return;
 
-// ❌ Discount display removed
-// const discountDisplay = discount ? formatEuro(discount) : null;
+    let destroy: (() => void) | undefined;
+    let cancelled = false;
 
-const totalDisplay = formatEuro(total);
+    (async () => {
+      const target = document.getElementById("revolut-checkout");
+      if (!target) return;
 
-// ❌ Discount explanatory text removed
-// const discountText = isReturn
-//   ? "10% discount applied for booking return together."
-//   : "Return trips booked together receive a 10% discount.";
+      const { default: RevolutCheckout } = await import("@revolut/checkout");
+      const revolut = await RevolutCheckout();
+      
 
+      const result = await revolut.embeddedCheckout({
+        publicToken: process.env.NEXT_PUBLIC_REVOLUT_PUBLIC_KEY!,
+        environment:
+          process.env.NEXT_PUBLIC_REVOLUT_ENV === "sandbox"
+            ? "sandbox"
+            : "prod",
+        target,
+        createOrder: async () => ({ publicId: revolutOrderId }),
+
+        onSuccess() {
+          if (!cancelled) onPaymentSuccess();
+        },
+
+        onError(err) {
+          console.error("Revolut error:", err);
+          if (!cancelled) onPaymentCancel(); // ✅ CLOSE
+        },
+
+        onCancel() {
+          if (!cancelled) onPaymentCancel(); // ✅ CLOSE
+        },
+      });
+
+      destroy = result.destroy;
+    })();
+
+    return () => {
+      cancelled = true;
+      destroy?.();
+    };
+  }, [revolutOrderId, onPaymentSuccess, onPaymentCancel]);
 
   return (
     <div className="bg-white rounded-3xl border border-gray-100 shadow-lg shadow-gray-100/70 p-5 sm:p-6 lg:p-7 space-y-6">
@@ -211,11 +257,6 @@ const totalDisplay = formatEuro(total);
               <div className="text-[11px] opacity-85 mt-1">
                 {perLegDisplay} {isReturn ? "· per leg" : "· per vehicle"}
               </div>
-              {/* {isReturn && discount > 0 && (
-                <div className="mt-2 text-[11px] text-emerald-100/90">
-                  −{discountDisplay} discount
-                </div>
-              )} */}
             </div>
           </div>
         </div>
@@ -238,7 +279,6 @@ const totalDisplay = formatEuro(total);
             <p className="text-sm font-semibold text-gray-900 capitalize">
               {data.tripType === "return" ? "Return (round trip)" : "One-way"}
             </p>
-            {/* <p className="text-[11px] text-emerald-700">{discountText}</p> */}
           </div>
 
           {/* Route */}
@@ -460,29 +500,6 @@ const totalDisplay = formatEuro(total);
               </div>
               <span className="font-semibold">{subtotalDisplay}</span>
             </div>
-
-            {/* Discount
-            {isReturn && discount > 0 && (
-              <div className="flex items-center justify-between text-emerald-700">
-                <div className="flex items-center gap-2">
-                  <svg
-                    className="w-4 h-4 text-emerald-600"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="1.7"
-                    viewBox="0 0 24 24"
-                  >
-                    <path d="M3 12l5 5L21 4" />
-                  </svg>
-                  <span className="text-[13px] font-medium">
-                    Return discount (10%)
-                  </span>
-                </div>
-                <span className="font-semibold transition-all duration-300 text-emerald-700">
-                  -{discountDisplay}
-                </span>
-              </div>
-            )} */}
 
             {/* Total */}
             <div className="flex items-center justify-between pt-2">
@@ -861,6 +878,39 @@ const totalDisplay = formatEuro(total);
                 Upgrade vehicle
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {paymentLoading && !revolutOrderId && (
+        <div className="fixed inset-0 z-90 bg-black/40 flex items-center justify-center">
+          <div className="bg-white rounded-2xl px-6 py-5 shadow-xl flex flex-col items-center gap-4">
+            {/* Spinner */}
+            <div className="h-10 w-10 animate-spin rounded-full border-4 border-gray-200 border-t-[#b07208]" />
+
+            <div className="text-center">
+              <p className="text-sm font-semibold text-gray-800">
+                Preparing secure payment
+              </p>
+              <p className="text-xs text-gray-500 mt-1">Please wait…</p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {revolutOrderId && (
+        <div className="fixed inset-0 z-100 bg-black/50 flex items-center justify-center">
+          <div className="bg-white w-full max-w-lg rounded-2xl p-4 relative">
+            {/* ❌ CLOSE BUTTON */}
+            <button
+              onClick={onPaymentCancel}
+              className="absolute top-3 right-3 text-gray-500 hover:text-red-500 cursor-pointer"
+              aria-label="Close payment"
+            >
+              ✕
+            </button>
+
+            <div id="revolut-checkout" />
           </div>
         </div>
       )}
