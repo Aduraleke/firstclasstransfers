@@ -98,6 +98,7 @@ export default function Step2Details({
   );
 
   const [showUpgradeModal, setShowUpgradeModal] = React.useState(false);
+  const [checkoutMounted, setCheckoutMounted] = React.useState(false);
 
   const upgradeVehicleId = getUpgradeVehicle(
     data.vehicleTypeId,
@@ -169,8 +170,8 @@ export default function Step2Details({
     const priceStr = routeDetail.vehicleOptions?.[idx]?.fixedPrice;
     return parsePriceToNumber(priceStr ?? undefined);
   }, [routeDetail, data.vehicleTypeId]);
-const isReturn = data.tripType === "return";
-const legs = isReturn ? 2 : 1;
+  const isReturn = data.tripType === "return";
+  const legs = isReturn ? 2 : 1;
 
   const subtotal = perLegPriceNumber != null ? perLegPriceNumber * legs : null;
 
@@ -181,19 +182,22 @@ const legs = isReturn ? 2 : 1;
   const totalDisplay = formatEuro(total);
 
   useEffect(() => {
-    if (!revolutOrderId) return;
+    if (!paymentLoading || data.paymentMethod !== "card") return;
 
     let destroy: (() => void) | undefined;
     let cancelled = false;
 
+    document.body.style.overflow = "hidden";
+
     (async () => {
       const target = document.getElementById("revolut-checkout");
-      if (!target) return;
+      if (!target) {
+        console.error("Revolut target not found");
+        return;
+      }
 
       const { default: RevolutCheckout } = await import("@revolut/checkout");
       const revolut = await RevolutCheckout();
-      
-
       const result = await revolut.embeddedCheckout({
         publicToken: process.env.NEXT_PUBLIC_REVOLUT_PUBLIC_KEY!,
         environment:
@@ -201,30 +205,43 @@ const legs = isReturn ? 2 : 1;
             ? "sandbox"
             : "prod",
         target,
-        createOrder: async () => ({ publicId: revolutOrderId }),
+
+        createOrder: async () => {
+          const res = await fetch("/api/payments/revolut/checkout-order", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data),
+          });
+
+          if (!res.ok) {
+            throw new Error("Failed to create Revolut order");
+          }
+
+          return await res.json(); // { publicId }
+        },
 
         onSuccess() {
           if (!cancelled) onPaymentSuccess();
         },
 
-        onError(err) {
-          console.error("Revolut error:", err);
-          if (!cancelled) onPaymentCancel(); // ✅ CLOSE
-        },
-
         onCancel() {
-          if (!cancelled) onPaymentCancel(); // ✅ CLOSE
+          if (!cancelled) onPaymentCancel();
         },
       });
+
+      /* ✅ THIS LINE IS THE KEY */
+      setCheckoutMounted(true);
 
       destroy = result.destroy;
     })();
 
     return () => {
       cancelled = true;
+      document.body.style.overflow = "";
       destroy?.();
+      setCheckoutMounted(false); // ✅ reset for next open
     };
-  }, [revolutOrderId, onPaymentSuccess, onPaymentCancel]);
+  }, [paymentLoading, data, onPaymentCancel, onPaymentSuccess]);
 
   return (
     <div className="bg-white rounded-3xl border border-gray-100 shadow-lg shadow-gray-100/70 p-5 sm:p-6 lg:p-7 space-y-6">
@@ -882,35 +899,34 @@ const legs = isReturn ? 2 : 1;
         </div>
       )}
 
-      {paymentLoading && !revolutOrderId && (
-        <div className="fixed inset-0 z-90 bg-black/40 flex items-center justify-center">
-          <div className="bg-white rounded-2xl px-6 py-5 shadow-xl flex flex-col items-center gap-4">
-            {/* Spinner */}
-            <div className="h-10 w-10 animate-spin rounded-full border-4 border-gray-200 border-t-[#b07208]" />
-
-            <div className="text-center">
-              <p className="text-sm font-semibold text-gray-800">
-                Preparing secure payment
-              </p>
-              <p className="text-xs text-gray-500 mt-1">Please wait…</p>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {revolutOrderId && (
-        <div className="fixed inset-0 z-100 bg-black/50 flex items-center justify-center">
-          <div className="bg-white w-full max-w-lg rounded-2xl p-4 relative">
-            {/* ❌ CLOSE BUTTON */}
+      {/* PAYMENT MODAL */}
+      {paymentLoading && (
+        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center">
+          <div className="bg-white w-full max-w-lg rounded-2xl min-h-lg p-4 relative">
+            {/* CLOSE */}
             <button
               onClick={onPaymentCancel}
-              className="absolute top-3 right-3 text-gray-500 hover:text-red-500 cursor-pointer"
+              className="absolute top-3 right-3 text-gray-500 hover:text-red-600"
               aria-label="Close payment"
             >
               ✕
             </button>
 
+            {/* CHECKOUT TARGET (ALWAYS PRESENT) */}
             <div id="revolut-checkout" />
+
+            {/* FALLBACK SPINNER (brief only) */}
+            {!checkoutMounted && (
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                <div className="h-10 w-10 animate-spin rounded-full border-4 border-gray-200 border-t-[#b07208]" />
+                <div className="text-center">
+                  <p className="text-sm font-semibold text-gray-800">
+                    Preparing secure payment
+                  </p>
+                  <p className="text-xs text-gray-500 mt-1">Please wait…</p>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}
