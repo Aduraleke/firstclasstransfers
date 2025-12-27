@@ -6,7 +6,6 @@ import { BookingBaseSchema, type BookingBase } from "@/lib/booking/schema";
 import { createBooking } from "@/lib/booking/createBooking";
 
 // myPOS helpers
-import { buildMyPOSFormHTML } from "@/lib/payments/mypos-form";
 import { signOrder } from "@/lib/payments/order-token";
 
 /* ---------- rate limiting ---------- */
@@ -87,18 +86,8 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const html = buildMyPOSFormHTML({
-      orderId,
-      amount,
-      currency: "EUR",
-      customerEmail: parsed.email,
-      customerPhone: parsed.phone,
-      udf1: token,
-    });
+   
 
-    return new NextResponse(html, {
-      headers: { "Content-Type": "text/html; charset=utf-8" },
-    });
   } catch (err) {
     console.error("Booking route failed:", err);
     return NextResponse.json(

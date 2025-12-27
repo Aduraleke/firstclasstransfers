@@ -68,33 +68,31 @@ export default function Step1Trip({ data, onChange, onNext }: Props) {
 
   // CLOSE DROPDOWN WHEN CLICKING OUTSIDE
   useEffect(() => {
-  function handleClickOutside(event: MouseEvent) {
-    // MAIN TIME
-    if (
-      timeDropdownRef.current &&
-      !timeDropdownRef.current.contains(event.target as Node) &&
-      timeInputRef.current &&
-      !timeInputRef.current.contains(event.target as Node)
-    ) {
-      setTimeOpen(false);
+    function handleClickOutside(event: MouseEvent) {
+      // MAIN TIME
+      if (
+        timeDropdownRef.current &&
+        !timeDropdownRef.current.contains(event.target as Node) &&
+        timeInputRef.current &&
+        !timeInputRef.current.contains(event.target as Node)
+      ) {
+        setTimeOpen(false);
+      }
+
+      // RETURN TIME
+      if (
+        returnTimeDropdownRef.current &&
+        !returnTimeDropdownRef.current.contains(event.target as Node) &&
+        returnTimeInputRef.current &&
+        !returnTimeInputRef.current.contains(event.target as Node)
+      ) {
+        setReturnTimeOpen(false);
+      }
     }
 
-    // RETURN TIME
-    if (
-      returnTimeDropdownRef.current &&
-      !returnTimeDropdownRef.current.contains(event.target as Node) &&
-      returnTimeInputRef.current &&
-      !returnTimeInputRef.current.contains(event.target as Node)
-    ) {
-      setReturnTimeOpen(false);
-    }
-  }
-
-  document.addEventListener("mousedown", handleClickOutside);
-  return () =>
-    document.removeEventListener("mousedown", handleClickOutside);
-}, []);
-
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   // Highlight vehicle on load (deep link)
   useEffect(() => {
@@ -500,8 +498,8 @@ export default function Step1Trip({ data, onChange, onNext }: Props) {
 
       {/* Return Trip */}
       {data.tripType === "return" && (
-        <section className="space-y-3 rounded-2xl border border-dashed border-emerald-200 bg-emerald-50 p-4">
-          <h2 className="text-sm font-semibold text-emerald-900">
+        <section className="space-y-3 rounded-2xl border border-dashed border-gray-200 bg-gray-50 p-4">
+          <h2 className="text-sm font-semibold text-gray-800">
             Return trip details
           </h2>
 

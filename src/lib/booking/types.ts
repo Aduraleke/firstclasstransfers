@@ -5,6 +5,10 @@ export type TripType = "one-way" | "return";
 export type PaymentMethod = "cash" | "card";
 export type BaggageType = "hand" | "medium" | "large" | "extra_large";
 
+export const VEHICLE_TYPES = ["sedan", "vclass"] as const;
+export type VehicleTypeId = (typeof VEHICLE_TYPES)[number];
+
+
 export type BookingDraft = {
   // main route
   routeId: string;
@@ -34,3 +38,4 @@ export type BookingDraft = {
   // payment
   paymentMethod: PaymentMethod;
 };
+

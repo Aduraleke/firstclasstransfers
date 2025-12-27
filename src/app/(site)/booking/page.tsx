@@ -12,8 +12,13 @@ export const metadata: Metadata = {
 
 type RawSearchParams = Record<string, string | string[] | undefined>;
 
-export default async function BookingPage({ searchParams }: { searchParams?: RawSearchParams | Promise<RawSearchParams>; }) {
+export default async function BookingPage({
+  searchParams,
+}: {
+  searchParams?: RawSearchParams | Promise<RawSearchParams>;
+}) {
   const sp = (await searchParams) ?? {};
+
   const rawRoute = sp.routeId;
   const rawVehicle = sp.vehicleTypeId;
 
