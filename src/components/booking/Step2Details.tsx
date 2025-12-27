@@ -198,34 +198,47 @@ export default function Step2Details({
 
       const { default: RevolutCheckout } = await import("@revolut/checkout");
       const revolut = await RevolutCheckout();
+
       const result = await revolut.embeddedCheckout({
-        publicToken: process.env.NEXT_PUBLIC_REVOLUT_PUBLIC_KEY!,
         environment:
           process.env.NEXT_PUBLIC_REVOLUT_ENV === "sandbox"
             ? "sandbox"
             : "prod",
+
         target,
 
         createOrder: async () => {
+          console.log("[REVOLUT] Creating order with payload:", data);
+
           const res = await fetch("/api/payments/revolut/checkout-order", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(data),
           });
 
-          if (!res.ok) {
-            throw new Error("Failed to create Revolut order");
+          const json = await res.json();
+          console.log("[REVOLUT] createOrder response:", json);
+
+          if (!res.ok || !json?.token) {
+            throw new Error("Invalid Revolut order response");
           }
 
-          return await res.json(); // { publicId }
+          // ✅ REQUIRED SHAPE
+          return { token: json.token };
         },
 
         onSuccess() {
-          if (!cancelled) onPaymentSuccess();
+          console.log("[REVOLUT] Payment success");
+          onPaymentSuccess();
         },
 
         onCancel() {
-          if (!cancelled) onPaymentCancel();
+          console.log("[REVOLUT] Payment cancelled");
+          onPaymentCancel();
+        },
+
+        onError(err) {
+          console.error("[REVOLUT] Checkout error:", err);
         },
       });
 
