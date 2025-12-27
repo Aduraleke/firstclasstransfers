@@ -30,10 +30,13 @@ export async function POST(req: Request) {
 
     console.log("[REVOLUT] Computed amount (EUR):", amount)
 
+    // Revolut expects amount in minor units (cents)
+    const amountMinor = Math.round(amount * 100)
+    console.log("[REVOLUT] Computed amount (cents):", amountMinor)
 
     // 1️⃣ Create order
     const orderPayload = {
-      amount: amount,
+      amount: amountMinor,
       currency: "EUR",
       capture_mode: "automatic",
       customer: { email: booking.email },
