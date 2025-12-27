@@ -142,10 +142,13 @@ export default function Booking({
         body: JSON.stringify(draft),
       });
 
-      if (!res.ok) throw new Error();
+      if (!res.ok) {
+        throw new Error(`Booking failed: ${res.status} ${res.statusText}`);
+      }
       setSubmitted(true);
-    } catch {
-      setSubmitError("Booking failed");
+    } catch (error) {
+      console.error("Error while submitting booking:", error);
+      setSubmitError("Booking failed. Please try again or contact support.");
     } finally {
       setSubmitting(false);
     }
