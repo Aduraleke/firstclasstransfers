@@ -13,7 +13,7 @@ function requireEnv(name: string): string {
 }
 
 export async function createRevolutOrder(params: {
-  amount: number; // MAJOR units (EUR)
+  amount: number; // Amount in euros (will be converted to cents for Revolut API)
   currency: "EUR";
   orderId: string;
   email: string;
