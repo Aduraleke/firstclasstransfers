@@ -146,6 +146,23 @@ export async function POST(req: Request) {
     })
   } catch (err) {
     console.error("[REVOLUT] Checkout failed:", err)
-    return NextResponse.json({ error: "Invalid order request" }, { status: 400 })
+
+    const isProd = process.env.NODE_ENV === "production"
+    const defaultMessage = "Invalid order request"
+    const errorMessage =
+      !isProd && err instanceof Error ? err.message : defaultMessage
+
+    const responseBody: any = {
+      error: errorMessage,
+      code: "REVOLUT_CHECKOUT_ERROR",
+    }
+
+    if (!isProd && err instanceof Error) {
+      responseBody.details = {
+        stack: err.stack,
+      }
+    }
+
+    return NextResponse.json(responseBody, { status: 400 })
   }
 }
