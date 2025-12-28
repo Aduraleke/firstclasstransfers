@@ -152,7 +152,11 @@ export async function POST(req: Request) {
     const errorMessage =
       !isProd && err instanceof Error ? err.message : defaultMessage
 
-    const responseBody: any = {
+    const responseBody: {
+      error: string;
+      code: string;
+      details?: { stack?: string };
+    } = {
       error: errorMessage,
       code: "REVOLUT_CHECKOUT_ERROR",
     }
