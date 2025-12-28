@@ -12,7 +12,7 @@ function requireEnv(name: string): string {
 }
 
 export async function createRevolutOrder(params: {
-  amount: number;
+  amount: number; // MAJOR units
   currency: "EUR";
   orderId: string;
   email: string;
@@ -22,31 +22,22 @@ export async function createRevolutOrder(params: {
     headers: {
       Authorization: `Bearer ${requireEnv("REVOLUT_SECRET_KEY")}`,
       "Content-Type": "application/json",
-            "Revolut-Api-Version": "2025-12-04",
-
+      "Revolut-Api-Version": "2025-12-04",
     },
     body: JSON.stringify({
-      amount: params.amount * 100, // minor units
+      amount: params.amount * 100, // 🔐 ONLY PLACE
       currency: params.currency,
       merchant_order_ext_ref: params.orderId,
       capture_mode: "automatic",
-      customer: {
-        email: params.email,
-      },
+      customer: { email: params.email },
     }),
   });
 
   const text = await res.text();
-
-  if (!res.ok) {
-    throw new Error(`Revolut order failed: ${text}`);
-    console.log("Error")
-  }
+  if (!res.ok) throw new Error(text);
 
   return JSON.parse(text);
 }
-
-/* ---------------- WEBHOOK VERIFICATION ---------------- */
 
 export function verifyRevolutWebhook(
   payload: string,

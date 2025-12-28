@@ -7,9 +7,9 @@ declare module "@revolut/checkout" {
     publicToken: string;
     environment: "sandbox" | "prod";
     target: HTMLElement;
-    createOrder: () => Promise<{ publicId: string }>;
+    createOrder: () => Promise<{ publicId?: string }>;
     onSuccess?: () => void;
-    onError?: (error: unknown) => void;
+    onError?: () => void;
     onCancel?: () => void;
   };
 

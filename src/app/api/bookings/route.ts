@@ -1,12 +1,7 @@
-export const runtime = "nodejs";
-
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { BookingBaseSchema, type BookingBase } from "@/lib/booking/schema";
 import { createBooking } from "@/lib/booking/createBooking";
-
-// myPOS helpers
-import { signOrder } from "@/lib/payments/order-token";
 
 /* ---------- rate limiting ---------- */
 const RATE_LIMIT_WINDOW_MS = 60_000;
@@ -29,12 +24,10 @@ function getClientIp(req: NextRequest) {
   );
 }
 
-/* ---------- POST ---------- */
 export async function POST(req: NextRequest) {
   const ip = getClientIp(req);
 
   try {
-    // 1️⃣ Rate limit
     const recent = cleanUpIp(ip);
     if (recent.length >= RATE_LIMIT_MAX) {
       return NextResponse.json(
@@ -44,10 +37,8 @@ export async function POST(req: NextRequest) {
     }
     recent.push(Date.now());
 
-    // 2️⃣ Parse body
     const raw = await req.json();
 
-    // 3️⃣ Validate booking (FULL booking only)
     let parsed: BookingBase;
     try {
       parsed = BookingBaseSchema.parse(raw);
@@ -58,36 +49,9 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const url = new URL(req.url);
-    const payByCard = url.searchParams.get("pay") === "true";
+    await createBooking(parsed, false);
 
-    // 4️⃣ CREATE BOOKING + SEND EMAILS (ALWAYS)
-    const { amount } = await createBooking(parsed, payByCard);
-
-    // 5️⃣ CASH FLOW — DONE
-    if (!payByCard) {
-      return NextResponse.json({ ok: true, amount });
-    }
-
-    // 6️⃣ CARD FLOW — REDIRECT AFTER EMAILS
-    const orderId = `BKG-${Date.now()}`;
-
-    const token = signOrder({
-      orderId,
-      amount,
-      currency: "EUR",
-      createdAt: Date.now(),
-    });
-
-    if (!token) {
-      return NextResponse.json(
-        { error: "Failed to sign order" },
-        { status: 500 }
-      );
-    }
-
-   
-
+    return NextResponse.json({ ok: true });
   } catch (err) {
     console.error("Booking route failed:", err);
     return NextResponse.json(
