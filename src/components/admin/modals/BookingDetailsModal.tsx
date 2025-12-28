@@ -49,6 +49,26 @@ export const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({ open, 
             <p className="font-semibold">{booking.price}</p>
           </div>
           <div>
+            <p className="text-slate-400">Payment Method</p>
+            <p className="font-semibold capitalize">{booking.paymentMethod || "Not specified"}</p>
+          </div>
+          <div>
+            <p className="text-slate-400">Payment Status</p>
+            <p className="font-semibold">{booking.paymentStatus}</p>
+          </div>
+          {booking.revolutOrderId && (
+            <div>
+              <p className="text-slate-400">Revolut Order ID</p>
+              <p className="font-mono text-xs">{booking.revolutOrderId}</p>
+            </div>
+          )}
+          {booking.stripeRef && !booking.revolutOrderId && (
+            <div>
+              <p className="text-slate-400">Stripe Reference</p>
+              <p className="font-mono text-xs">{booking.stripeRef}</p>
+            </div>
+          )}
+          <div>
             <p className="text-slate-400">Notes</p>
             <p className="font-semibold">{booking.notes || "None"}</p>
           </div>
