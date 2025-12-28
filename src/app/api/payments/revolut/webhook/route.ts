@@ -3,9 +3,6 @@ import { verifyRevolutWebhook } from "@/lib/payments/revolut";
 import { connectDB } from "@/lib/db/mongo";
 import { Booking } from "@/lib/db/models/Booking";
 
-// Track processed webhook events to ensure idempotency
-const processedEvents = new Set<string>();
-
 export async function POST(req: Request) {
   const signature = req.headers.get("revolut-signature");
   const body = await req.text();
@@ -26,12 +23,6 @@ export async function POST(req: Request) {
 
   const eventId = event.id || `${event.event}-${event.timestamp || Date.now()}`;
   
-  // Idempotency check - prevent duplicate processing
-  if (processedEvents.has(eventId)) {
-    console.log(`[REVOLUT WEBHOOK] Event ${eventId} already processed`);
-    return NextResponse.json({ received: true, note: "Already processed" });
-  }
-
   console.log("[REVOLUT WEBHOOK] Received event:", event.event, "ID:", eventId);
 
   // Handle ORDER_COMPLETED event
@@ -50,9 +41,13 @@ export async function POST(req: Request) {
 
       console.log(`[REVOLUT WEBHOOK] Processing payment for orderId: ${orderId}`);
 
-      // Find and update the booking
+      // Find and update the booking (using findOneAndUpdate for atomicity)
+      // This prevents duplicate processing even across multiple server instances
       const booking = await Booking.findOneAndUpdate(
-        { orderId },
+        { 
+          orderId,
+          paymentStatus: { $ne: "paid" } // Only update if not already paid
+        },
         {
           $set: {
             paymentStatus: "paid",
@@ -64,8 +59,16 @@ export async function POST(req: Request) {
       );
 
       if (!booking) {
+        // Either booking not found or already marked as paid (idempotency)
+        const existingBooking = await Booking.findOne({ orderId });
+        if (existingBooking) {
+          console.log(`[REVOLUT WEBHOOK] Booking ${orderId} already marked as paid (idempotent)`);
+          return NextResponse.json({ 
+            received: true, 
+            note: "Already processed" 
+          });
+        }
         console.error(`[REVOLUT WEBHOOK] Booking not found for orderId: ${orderId}`);
-        // Still return 200 to acknowledge receipt, but log the error
         return NextResponse.json({ 
           received: true, 
           warning: "Booking not found" 
@@ -73,9 +76,6 @@ export async function POST(req: Request) {
       }
 
       console.log(`[REVOLUT WEBHOOK] Successfully marked booking ${orderId} as paid`);
-
-      // Mark event as processed
-      processedEvents.add(eventId);
 
       // TODO: Send confirmation email to customer
       // TODO: Send notification to admin
