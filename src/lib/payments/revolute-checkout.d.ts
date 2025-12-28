@@ -4,12 +4,12 @@ declare module "@revolut/checkout" {
   };
 
   type EmbeddedCheckoutOptions = {
-    publicToken: string;
+    publicToken?: string;
     environment: "sandbox" | "prod";
     target: HTMLElement;
-    createOrder: () => Promise<{ publicId?: string }>;
+    createOrder: () => Promise<{ token: string }>;
     onSuccess?: () => void;
-    onError?: () => void;
+    onError?: (error: unknown) => void;
     onCancel?: () => void;
   };
 

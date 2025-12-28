@@ -200,10 +200,7 @@ export default function Step2Details({
       const revolut = await RevolutCheckout();
 
       const result = await revolut.embeddedCheckout({
-        environment:
-          process.env.NEXT_PUBLIC_REVOLUT_ENV === "sandbox"
-            ? "sandbox"
-            : "prod",
+        environment: "prod", // Always use production
 
         target,
 

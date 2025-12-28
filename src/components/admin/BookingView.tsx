@@ -96,21 +96,38 @@ export const BookingsView: React.FC<Props> = ({
                     <p className="text-slate-100">{booking.date}</p>
                     <p className="text-xs text-slate-400">{booking.time}</p>
                   </td>
-                  <td className="px-4 py-3 font-semibold text-slate-100">{booking.price}</td>
                   <td className="px-4 py-3">
-                    <span
-                      className={`rounded-full px-3 py-1 text-xs font-medium ${
-                        booking.status === "Pending"
-                          ? "bg-yellow-100 text-yellow-800"
-                          : booking.status === "Assigned"
-                          ? "bg-blue-100 text-blue-800"
-                          : booking.status === "Completed"
-                          ? "bg-green-100 text-green-800"
-                          : "bg-red-100 text-red-800"
-                      }`}
-                    >
-                      {booking.status}
-                    </span>
+                    <p className="font-semibold text-slate-100">{booking.price}</p>
+                    <p className="text-xs text-slate-400 capitalize">{booking.paymentMethod || "cash"}</p>
+                  </td>
+                  <td className="px-4 py-3">
+                    <div className="space-y-1">
+                      <span
+                        className={`inline-block rounded-full px-3 py-1 text-xs font-medium ${
+                          booking.status === "Pending"
+                            ? "bg-yellow-100 text-yellow-800"
+                            : booking.status === "Assigned"
+                            ? "bg-blue-100 text-blue-800"
+                            : booking.status === "Completed"
+                            ? "bg-green-100 text-green-800"
+                            : "bg-red-100 text-red-800"
+                        }`}
+                      >
+                        {booking.status}
+                      </span>
+                      <br />
+                      <span
+                        className={`inline-block rounded-full px-3 py-1 text-xs font-medium ${
+                          booking.paymentStatus === "Paid"
+                            ? "bg-green-100 text-green-800"
+                            : booking.paymentStatus === "Refunded"
+                            ? "bg-gray-100 text-gray-800"
+                            : "bg-orange-100 text-orange-800"
+                        }`}
+                      >
+                        {booking.paymentStatus}
+                      </span>
+                    </div>
                   </td>
                   <td className="px-4 py-3 text-slate-100">{booking.driver || "Unassigned"}</td>
                   <td className="px-4 py-3">
