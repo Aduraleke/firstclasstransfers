@@ -2,16 +2,30 @@
 import { NextResponse } from "next/server"
 import { BookingBaseSchema } from "@/lib/booking/schema"
 import { computePriceOrThrow } from "@/lib/payments/pricing"
+import { connectDB } from "@/lib/db/mongo"
+import { Booking } from "@/lib/db/models/Booking"
 
-const BASE_URL =
-  process.env.REVOLUT_ENV === "sandbox"
-    ? "https://sandbox-merchant.revolut.com"
-    : "https://merchant.revolut.com"
+// Production-only Revolut API base URL
+const BASE_URL = "https://merchant.revolut.com"
+
+// Consistent API version across all Revolut endpoints
+const API_VERSION = "2025-12-04"
 
 function requireEnv(name: string): string {
   const v = process.env[name]
   if (!v) throw new Error(`Missing env var: ${name}`)
   return v
+}
+
+function getBaseUrl(): string {
+  // In production, use the production URL
+  if (process.env.NEXT_PUBLIC_BASE_URL) {
+    return process.env.NEXT_PUBLIC_BASE_URL
+  }
+  // Fallback for development
+  return process.env.NODE_ENV === "production"
+    ? "https://firstclasstransfers.eu"
+    : "http://localhost:3000"
 }
 
 export async function POST(req: Request) {
@@ -34,24 +48,42 @@ export async function POST(req: Request) {
     const amountMinor = Math.round(amount * 100)
     console.log("[REVOLUT] Computed amount (cents):", amountMinor)
 
-    // 1️⃣ Create order
+    const baseUrl = getBaseUrl()
+    const orderId = `BKG-${Date.now()}`
+
+    // Create booking record in database
+    await connectDB()
+    await Booking.create({
+      orderId,
+      routeId: booking.routeId,
+      vehicleTypeId: booking.vehicleTypeId,
+      tripType: booking.tripType,
+      expectedAmount: amount,
+      currency: "EUR",
+      paymentMethod: "card",
+      paymentStatus: "pending_payment",
+      customer: {
+        name: booking.name,
+        email: booking.email,
+        phone: booking.phone,
+      },
+    })
+
+    console.log(`[REVOLUT] Created booking record: ${orderId}`)
+
+    // 1️⃣ Create order with redirect URLs
     const orderPayload = {
       amount: amountMinor,
       currency: "EUR",
       capture_mode: "automatic",
       customer: { email: booking.email },
-      merchant_order_ext_ref: `BKG-${Date.now()}`,
-      success_url: "../../../../(site)/payment/success",
-      cancel_url: "../../../../(site)/payment/cancelled",
+      merchant_order_ext_ref: orderId,
+      success_url: `${baseUrl}/payment/success?orderId=${orderId}`,
+      failure_url: `${baseUrl}/payment/failed?orderId=${orderId}`,
+      cancel_url: `${baseUrl}/payment/cancelled?orderId=${orderId}`,
     }
 
     console.log("[REVOLUT] Order payload:", orderPayload)
-    console.log("[REVOLUT ENV CHECK]", {
-  REVOLUT_ENV: process.env.REVOLUT_ENV,
-  SECRET_KEY_PRESENT: !!process.env.REVOLUT_SECRET_KEY,
-  SECRET_KEY_PREFIX: process.env.REVOLUT_SECRET_KEY?.slice(0, 10),
-});
-
 
     const orderRes = await fetch(`${BASE_URL}/api/checkout/orders`, {
       method: "POST",
@@ -59,7 +91,7 @@ export async function POST(req: Request) {
         Authorization: `Bearer ${requireEnv("REVOLUT_SECRET_KEY")}`,
         "Content-Type": "application/json",
         Accept: "application/json",
-        "Revolut-Api-Version": "2023-09-01",
+        "Revolut-Api-Version": API_VERSION,
       },
       body: JSON.stringify(orderPayload),
     })
@@ -80,7 +112,7 @@ export async function POST(req: Request) {
         headers: {
           Authorization: `Bearer ${requireEnv("REVOLUT_SECRET_KEY")}`,
           Accept: "application/json",
-          "Revolut-Api-Version": "2023-09-01",
+          "Revolut-Api-Version": API_VERSION,
         },
       }
     )
@@ -100,7 +132,11 @@ export async function POST(req: Request) {
 
     console.log("[REVOLUT] Final public token:", token.token)
 
-    return NextResponse.json({ token: token.token })
+    return NextResponse.json({ 
+      token: token.token,
+      orderId: orderId,
+      revolutOrderId: order.id
+    })
   } catch (err) {
     console.error("[REVOLUT] Checkout failed:", err)
     return NextResponse.json({ error: "Invalid order request" }, { status: 400 })

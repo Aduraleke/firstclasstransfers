@@ -14,6 +14,8 @@ export interface Booking {
   price: string // e.g. "€45"
   status: BookingStatus
   paymentStatus: "Paid" | "Unpaid" | "Refunded"
+  paymentMethod?: "card" | "cash"
+  revolutOrderId?: string
   driver: string | null
   notes: string
   stripeRef: string

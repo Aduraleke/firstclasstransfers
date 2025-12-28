@@ -1,9 +1,10 @@
 import crypto from "crypto";
 
-const BASE_URL =
-  process.env.REVOLUT_ENV === "sandbox"
-    ? "https://sandbox.merchant.revolut.com"
-    : "https://merchant.revolut.com";
+// Production-only Revolut API base URL
+const BASE_URL = "https://merchant.revolut.com";
+
+// Consistent API version across all Revolut endpoints
+const API_VERSION = "2025-12-04";
 
 function requireEnv(name: string): string {
   const v = process.env[name];
@@ -12,24 +13,30 @@ function requireEnv(name: string): string {
 }
 
 export async function createRevolutOrder(params: {
-  amount: number; // MAJOR units
+  amount: number; // MAJOR units (EUR)
   currency: "EUR";
   orderId: string;
   email: string;
+  successUrl?: string;
+  failureUrl?: string;
+  cancelUrl?: string;
 }) {
   const res = await fetch(`${BASE_URL}/api/orders`, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${requireEnv("REVOLUT_SECRET_KEY")}`,
       "Content-Type": "application/json",
-      "Revolut-Api-Version": "2025-12-04",
+      "Revolut-Api-Version": API_VERSION,
     },
     body: JSON.stringify({
-      amount: params.amount * 100, // 🔐 ONLY PLACE
+      amount: params.amount * 100, // Convert to minor units (cents)
       currency: params.currency,
       merchant_order_ext_ref: params.orderId,
       capture_mode: "automatic",
       customer: { email: params.email },
+      ...(params.successUrl && { success_url: params.successUrl }),
+      ...(params.failureUrl && { failure_url: params.failureUrl }),
+      ...(params.cancelUrl && { cancel_url: params.cancelUrl }),
     }),
   });
 

@@ -16,6 +16,8 @@ export interface BookingDoc extends Document {
   paymentMethod: "card" | "cash";
   paymentStatus: PaymentStatus;
   myposTrxId?: string;
+  revolutOrderId?: string; // Revolut order ID
+  revolutPublicId?: string; // Revolut public order ID for reference
   customer: {
     name: string;
     email: string;
@@ -42,6 +44,8 @@ const BookingSchema = new Schema<BookingDoc>(
     },
 
     myposTrxId: { type: String },
+    revolutOrderId: { type: String },
+    revolutPublicId: { type: String },
 
     customer: {
       name: String,

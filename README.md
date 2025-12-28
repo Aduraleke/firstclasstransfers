@@ -1,5 +1,39 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+## Environment Setup
+
+1. **Copy the example environment file:**
+   ```bash
+   cp .env.example .env.local
+   ```
+
+2. **Configure required environment variables:**
+   - `MONGODB_URI` - MongoDB connection string
+   - `REVOLUT_SECRET_KEY` - Revolut API secret key (production only)
+   - `REVOLUT_WEBHOOK_SECRET` - Revolut webhook signing secret
+   - `NEXT_PUBLIC_BASE_URL` - Your application's base URL for payment redirects
+   - Email configuration (SMTP settings)
+
+### Revolut Payment Integration
+
+This application uses **Revolut for Business** payment processing in **production mode only**.
+
+**Required Environment Variables:**
+- `REVOLUT_SECRET_KEY` - Your Revolut API secret key (starts with `sk_prod_`)
+- `REVOLUT_WEBHOOK_SECRET` - Secret for validating webhook signatures (starts with `whsec_`)
+- `NEXT_PUBLIC_BASE_URL` - Base URL for payment redirect URLs (success/failure/cancel)
+
+**Getting Revolut API Keys:**
+1. Log in to your [Revolut Business account](https://business.revolut.com/merchant)
+2. Navigate to Developer API settings
+3. Generate API keys for production environment
+4. Set up webhook endpoint: `https://your-domain.com/api/payments/revolut/webhook`
+
+**API Version:** All Revolut API calls use version `2025-12-04` consistently.
+
+**Webhook Events Handled:**
+- `ORDER_COMPLETED` - Marks booking as paid in database
+
 ## Getting Started
 
 First, run the development server:
