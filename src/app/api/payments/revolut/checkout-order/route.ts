@@ -18,14 +18,21 @@ function requireEnv(name: string): string {
 }
 
 function getBaseUrl(): string {
-  // In production, use the production URL
+  // Prefer explicit base URL from environment
   if (process.env.NEXT_PUBLIC_BASE_URL) {
     return process.env.NEXT_PUBLIC_BASE_URL
   }
-  // Fallback for development
-  return process.env.NODE_ENV === "production"
-    ? "https://firstclasstransfers.eu"
-    : "http://localhost:3000"
+
+  // In production, fail fast if misconfigured instead of using a hardcoded fallback
+  if (process.env.NODE_ENV === "production") {
+    throw new Error("NEXT_PUBLIC_BASE_URL must be set in production")
+  }
+
+  // Fallback for development / non-production
+  console.warn(
+    "[REVOLUT] NEXT_PUBLIC_BASE_URL not set; using development fallback http://localhost:3000",
+  )
+  return "http://localhost:3000"
 }
 
 export async function POST(req: Request) {
