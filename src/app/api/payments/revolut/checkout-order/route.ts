@@ -4,7 +4,7 @@ import { BookingBaseSchema } from "@/lib/booking/schema"
 import { computePriceOrThrow } from "@/lib/payments/pricing"
 import { connectDB } from "@/lib/db/mongo"
 import { Booking } from "@/lib/db/models/Booking"
-
+console.log('[REVOLUT] Env var starts with:', process.env.REVOLUT_SECRET_KEY?.slice(0, 8));
 // Production-only Revolut API base URL
 const BASE_URL = "https://merchant.revolut.com"
 
@@ -16,6 +16,7 @@ function requireEnv(name: string): string {
   if (!v) throw new Error(`Missing env var: ${name}`)
   return v
 }
+console.log('[REVOLUT] Env var starts with:', process.env.REVOLUT_SECRET_KEY?.slice(0, 8));
 
 function getBaseUrl(): string {
   // Prefer explicit base URL from environment
@@ -30,9 +31,9 @@ function getBaseUrl(): string {
 
   // Fallback for development / non-production
   console.warn(
-    "[REVOLUT] NEXT_PUBLIC_BASE_URL not set; using development fallback http://localhost:3000",
+    "[REVOLUT] NEXT_PUBLIC_BASE_URL not set; using development fallback http://localhost:3005",
   )
-  return "http://localhost:3000"
+  return "http://localhost:3005"
 }
 
 export async function POST(req: Request) {
