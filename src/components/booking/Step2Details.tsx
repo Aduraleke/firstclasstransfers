@@ -222,7 +222,7 @@ export default function Step2Details({
 
           // ✅ REQUIRED SHAPE
           console.log("[REVOLUT] returning token:", json.token);
-          return { token: json.token };
+          return { publicId: json.token };
         },
 
         onSuccess() {
