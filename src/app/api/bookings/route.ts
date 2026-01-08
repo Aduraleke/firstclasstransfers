@@ -49,7 +49,8 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    await createBooking(parsed, false);
+    const payByCard = raw.paymentMethod === "card";
+    await createBooking(parsed, payByCard);
 
     return NextResponse.json({ ok: true });
   } catch (err) {
