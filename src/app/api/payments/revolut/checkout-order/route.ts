@@ -93,7 +93,7 @@ export async function POST(req: Request) {
 
     console.log("[REVOLUT] Order payload:", orderPayload)
 
-    const orderRes = await fetch(`${BASE_URL}/api/checkout/orders`, {
+    const orderRes = await fetch(`${BASE_URL}/api/orders`, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${requireEnv("REVOLUT_SECRET_KEY")}`,
@@ -115,7 +115,7 @@ export async function POST(req: Request) {
 
     // 2️⃣ Exchange for token
     const tokenRes = await fetch(
-      `${BASE_URL}/api/checkout/orders/${order.id}/token`,
+      `${BASE_URL}/api/orders/${order.id}/token`,
       {
         headers: {
           Authorization: `Bearer ${requireEnv("REVOLUT_SECRET_KEY")}`,
