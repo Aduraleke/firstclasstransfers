@@ -200,6 +200,7 @@ export default function Step2Details({
       const revolut = await RevolutCheckout();
 
       const result = await revolut.embeddedCheckout({
+        publicToken: process.env.NEXT_PUBLIC_REVOLUT_PUBLIC_KEY,
         environment: "prod", // Always use production
 
         target,
