@@ -120,6 +120,7 @@ export async function POST(req: Request) {
   
   return NextResponse.json({ 
     token: order.token,
+    checkoutUrl: order.checkout_url,
     orderId: orderId,
     revolutOrderId: order.id
   });
