@@ -86,7 +86,9 @@ export default function Booking({
         const res = await fetch("/api/routes");
         const json = await res.json();
         if (!res.ok || !json?.ok) {
-          throw new Error(`Failed to load routes: ${res.status} ${res.statusText}`);
+          throw new Error(
+            `Failed to load routes: ${res.status} ${res.statusText}`
+          );
         }
         if (mounted) setRouteList(json.routes || []);
       } catch (error) {
@@ -199,7 +201,31 @@ export default function Booking({
             onBack={() => setStep(1)}
             onConfirm={handleConfirm}
             paymentLoading={paymentLoading}
-            onPaymentSuccess={() => setSubmitted(true)}
+            onPaymentSuccess={async () => {
+              try {
+                const res = await fetch("/api/bookings", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({
+                    ...draft,
+                    paymentMethod: "card",
+                  }),
+                });
+
+                if (!res.ok) {
+                  throw new Error("Booking creation failed after payment");
+                }
+
+                setSubmitted(true);
+              } catch (err) {
+                console.error("Card booking finalization failed:", err);
+                setSubmitError(
+                  "Payment succeeded but booking failed. Contact support."
+                );
+              } finally {
+                setPaymentLoading(false);
+              }
+            }}
             onPaymentCancel={() => setPaymentLoading(false)}
           />
         )}
