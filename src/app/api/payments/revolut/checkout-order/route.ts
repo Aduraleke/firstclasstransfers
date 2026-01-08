@@ -113,38 +113,17 @@ export async function POST(req: Request) {
 
     const order = JSON.parse(orderText)
 
-    // 2️⃣ Exchange for token
-    const tokenRes = await fetch(
-      `${BASE_URL}/api/orders/${order.id}/token`,
-      {
-        headers: {
-          Authorization: `Bearer ${requireEnv("REVOLUT_SECRET_KEY")}`,
-          Accept: "application/json",
-          "Revolut-Api-Version": API_VERSION,
-        },
-      }
-    )
-
-    const tokenText = await tokenRes.text()
-    console.log("[REVOLUT] Token response:", tokenText)
-
-    if (!tokenRes.ok) {
-      return NextResponse.json({ error: tokenText }, { status: 500 })
-    }
-
-    const token = JSON.parse(tokenText)
-
-    if (!token?.token) {
-      throw new Error("Missing token in Revolut response")
-    }
-
-    console.log("[REVOLUT] Final public token:", token.token)
-
-    return NextResponse.json({ 
-      token: token.token,
-      orderId: orderId,
-      revolutOrderId: order.id
-    })
+  if (!order?.token) {
+    throw new Error("Missing token in Revolut response");
+  }
+  console.log("[REVOLUT] Final public token:", order.token);
+  
+  return NextResponse.json({ 
+    token: order.token,
+    orderId: orderId,
+    revolutOrderId: order.id
+  });
+    
   } catch (err) {
     console.error("[REVOLUT] Checkout failed:", err)
 
