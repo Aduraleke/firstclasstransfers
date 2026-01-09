@@ -292,9 +292,9 @@ export function officeCashBooking(data: BookingData) {
 ===================================================== */
 export function officeCardPending(data: BookingData) {
   return {
-    subject: "New Card Booking – Payment Pending",
+    subject: "New Card Booking – Payment Confirmed",
     html: emailLayout(
-      "Card Booking Pending",
+      "Card Booking Confirmed",
       `
 <h2>New Card Booking (Confirmed Payment)</h2>
 <hr/>
