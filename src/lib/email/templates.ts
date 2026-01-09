@@ -183,15 +183,15 @@ export function customerCashConfirmed(data: BookingData) {
 ===================================================== */
 export function customerCardPending(data: BookingData) {
   return {
-    subject: "Booking Received – Payment Required",
+    subject: "Booking Received – Payment Confirmed",
     html: emailLayout(
-      "Payment Pending",
+      "Payment Confirmed",
       `
 <p>Dear <strong>${data.name}</strong>,</p>
 
 <p>
-  Your booking has been received and is
-  <strong>pending payment</strong>.
+  Your booking has been received and
+  <strong>your payment is confirmed</strong>.
 </p>
 
 <hr />
@@ -216,10 +216,6 @@ export function customerCardPending(data: BookingData) {
   <li><strong>Amount:</strong> €${data.amount}</li>
 </ul>
 
-<p>
-  You will now be redirected to our secure payment provider (myPOS)
-  to complete payment.
-</p>
 `
     ),
   };
@@ -300,7 +296,7 @@ export function officeCardPending(data: BookingData) {
     html: emailLayout(
       "Card Booking Pending",
       `
-<h2>New Card Booking (Pending Payment)</h2>
+<h2>New Card Booking (Confirmed Payment)</h2>
 <hr/>
 
 <h3>Customer</h3>
@@ -335,13 +331,10 @@ export function officeCardPending(data: BookingData) {
 
 <h3>Payment</h3>
 <ul>
-  <li><strong>Status:</strong> Awaiting myPOS confirmation</li>
+  <li><strong>Status:</strong> Payment Confirmed</li>
   <li><strong>Amount:</strong> €${data.amount}</li>
 </ul>
 
-<p style="color:#92400e;font-weight:bold;">
-  Do NOT assign driver until payment is confirmed.
-</p>
 `
     ),
   };
