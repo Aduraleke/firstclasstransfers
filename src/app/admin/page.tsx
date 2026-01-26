@@ -1,6 +1,6 @@
-// app/admin/page.tsx
-import { redirect } from "next/navigation";
+// src/app/(site)/admin/page.tsx
+import AdminDashboard from "@/components/admin/AdminDashboard"
 
-export default function AdminIndexPage() {
-  redirect("/admin/login");
+export default function AdminPage() {
+  return <AdminDashboard />
 }

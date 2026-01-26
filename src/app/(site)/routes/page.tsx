@@ -1,7 +1,7 @@
 // app/routes/page.tsx
 
 import type { Metadata } from "next";
-import { ROUTE_DETAILS } from "@/lib/routes";
+import { fetchAllRoutes } from "@/lib/api/routes";
 import RouteCard from "./RouteCard";
 
 export const metadata: Metadata = {
@@ -13,10 +13,14 @@ export const metadata: Metadata = {
   },
 };
 
+export default async function RoutesIndexPage() {
+  // ✅ FETCH FROM BACKEND (SERVER-SIDE, ISR)
+  const routes = await fetchAllRoutes();
 
-export default function RoutesIndexPage() {
-  // Group by `from` so every origin gets its own section
-  const origins = Array.from(new Set(ROUTE_DETAILS.map((r) => r.from)));
+  // ✅ GROUP BY ORIGIN (fromLocation)
+  const origins = Array.from(
+    new Set(routes.map((r) => r.fromLocation))
+  );
 
   return (
     <main className="bg-[#f5f7fb]">
@@ -45,13 +49,15 @@ export default function RoutesIndexPage() {
         {/* SECTIONS BY ORIGIN */}
         <div className="space-y-12">
           {origins.map((origin) => {
-            const routesFromOrigin = ROUTE_DETAILS.filter(
-              (route) => route.from === origin
+            const routesFromOrigin = routes.filter(
+              (route) => route.fromLocation === origin
             );
 
             if (routesFromOrigin.length === 0) return null;
 
-            const isAirport = origin.toLowerCase().includes("airport");
+            const isAirport = origin
+              .toLowerCase()
+              .includes("airport");
 
             return (
               <section key={origin} className="space-y-4">
@@ -73,7 +79,10 @@ export default function RoutesIndexPage() {
 
                 <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
                   {routesFromOrigin.map((route) => (
-                    <RouteCard key={route.slug} route={route} />
+                    <RouteCard
+                      key={route.slug}
+                      route={route}
+                    />
                   ))}
                 </div>
               </section>

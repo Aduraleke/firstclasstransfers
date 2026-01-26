@@ -6,17 +6,13 @@ import Link from "next/link";
 import BookingStepper from "@/components/booking/BookingStepper";
 import Step1Trip from "@/components/booking/Step1Trip";
 import Step2Details from "@/components/booking/Step2Details";
+import type { BookingRoute } from "@/lib/booking/bookingRoute";
 
 import type { BookingDraft } from "@/lib/booking/types";
 
 type BookingProps = {
   initialRouteId?: string;
   initialVehicleTypeId?: string;
-};
-
-type ApiRoute = {
-  id: string;
-  title: string;
 };
 
 function createInitialDraft(initialRouteId?: string): BookingDraft {
@@ -61,7 +57,7 @@ export default function Booking({
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
-  const [routeList, setRouteList] = useState<ApiRoute[]>([]);
+  const [routeList, setRouteList] = useState<BookingRoute[]>([]);
   const [routesLoading, setRoutesLoading] = useState(true);
   const [routeFetchError, setRouteFetchError] = useState<string | null>(null);
 
@@ -83,17 +79,17 @@ export default function Booking({
 
     (async () => {
       try {
-        const res = await fetch("/api/routes");
-        const json = await res.json();
-        if (!res.ok || !json?.ok) {
-          throw new Error(
-            `Failed to load routes: ${res.status} ${res.statusText}`
-          );
-        }
-        if (mounted) setRouteList(json.routes || []);
-      } catch (error) {
-        console.error("Error while loading routes:", error);
-        setRouteFetchError("Failed to load routes");
+        const res = await fetch("http://92.113.29.160:1805/routes/");
+        if (!res.ok) throw new Error("Failed to load routes");
+        const routes = await res.json();
+
+        console.log("BOOKING: raw API response", routes);
+        console.log("BOOKING: route count", routes.length);
+
+        if (mounted) setRouteList(routes);
+      } catch (err) {
+        console.error(err);
+        if (mounted) setRouteFetchError("Failed to load routes");
       } finally {
         if (mounted) setRoutesLoading(false);
       }
@@ -109,7 +105,7 @@ export default function Booking({
     <K extends keyof BookingDraft>(key: K, value: BookingDraft[K]) => {
       setDraft((prev) => ({ ...prev, [key]: value }));
     },
-    []
+    [],
   );
 
   /* ---------- confirm ---------- */
@@ -197,6 +193,7 @@ export default function Booking({
         {step === 2 && (
           <Step2Details
             data={draft}
+            routeList={routeList} // ✅ THIS WAS MISSING
             onChange={updateDraft}
             onBack={() => setStep(1)}
             onConfirm={handleConfirm}
@@ -220,7 +217,7 @@ export default function Booking({
               } catch (err) {
                 console.error("Card booking finalization failed:", err);
                 setSubmitError(
-                  "Payment succeeded but booking failed. Contact support."
+                  "Payment succeeded but booking failed. Contact support.",
                 );
               } finally {
                 setPaymentLoading(false);

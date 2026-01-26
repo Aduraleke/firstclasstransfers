@@ -20,7 +20,7 @@ const REVIEWS = [
   },
   {
     text:
-      "Professional service from Larnaca to Nicosia. On time, Wi-Fi in the car, and an invoice for my company. Very easy to deal with.",
+      "Professional service from Larnaka to Nicosia. On time, Wi-Fi in the car, and an invoice for my company. Very easy to deal with.",
     name: "Michael S.",
     location: "United Kingdom",
   },

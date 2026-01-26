@@ -9,14 +9,14 @@ import FleetSection from "@/components/Home/FleetSection";
 import FaqTeaser from "@/components/Home/FaqTeaser";
 
 export const metadata: Metadata = {
-  title: "Cyprus Airport Taxi Transfers – Fixed Price Larnaca & Paphos",
+  title: "Cyprus Airport Taxi Transfers – Fixed Price Larnaka & Paphos",
   description:
-    "Book private, fixed-price Cyprus airport transfers from Larnaca and Paphos Airports to Ayia Napa, Protaras, Nicosia, Limassol and more. Modern vehicles, licensed English-speaking drivers, 24/7 support, child seats on request.",
+    "Book private, fixed-price Cyprus airport transfers from Larnaka and Paphos Airports to Ayia Napa, Protaras, Nicosia, Limassol and more. Modern vehicles, licensed English-speaking drivers, 24/7 support, child seats on request.",
   alternates: {
     canonical: "https://firstclasstransfers.eu/",
   },
   openGraph: {
-    title: "Cyprus Airport Taxi Transfers – Fixed Price Larnaca & Paphos",
+    title: "Cyprus Airport Taxi Transfers – Fixed Price Larnaka & Paphos",
     description:
       "Private Cyprus airport transfers with fixed prices, sedans and Mercedes V-Class minivans, free water & Wi-Fi, and 24/7 service.",
     url: "https://firstclasstransfers.eu/",

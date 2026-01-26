@@ -224,10 +224,10 @@ export default function Contact() {
                 </span>
                 <div>
                   <p className="font-semibold text-slate-900">
-                    Larnaca &amp; Paphos Airports
+                    Larnaka &amp; Paphos Airports
                   </p>
                   <p className="text-slate-600">
-                    Fixed-price private transfers from Larnaca (LCA) and Paphos
+                    Fixed-price private transfers from Larnaka (LCA) and Paphos
                     (PFO) to major resorts, cities and selected cross-border
                     destinations.
                   </p>

@@ -1,3 +1,5 @@
+import { DriverStatus } from "./driverUsers"
+
 export type BookingStatus = "Pending" | "Assigned" | "Completed" | "Cancelled"
 
 export interface Booking {
@@ -24,10 +26,15 @@ export interface Booking {
 export interface Driver {
   id: string
   name: string
+  email: string
   phone: string
-  vehicle: string
-  status: "Active" | "Suspended"
+  licenseNumber: string
+  profilePicture: string
+  status: DriverStatus
+  createdAt: string
+  isActive: boolean
 }
+
 
 export interface PriceRule {
   id: number
@@ -39,13 +46,39 @@ export interface PriceRule {
 }
 
 export interface Route {
-  id: number
-  origin: string
-  destination: string
+  id?: string
+  routeId: string
+  slug: string
+
+  fromLocation: string
+  toLocation: string
+
   distance: string
   time: string
-  price: number
+
+  sedanPrice: number
+  vanPrice: number
+
+  metaTitle: string
+  metaDescription: string
+  heroTitle: string
+  subHeadline: string
+  body: string
+
+  whatMakesBetter: string[]
+  whatsIncluded: string[]
+  destinationHighlights: string[]
+  idealFor: string[]
+
+  vehicleOptions: VehicleOption[]
+  faqs: FAQItem[]
+
+  image: string
+  bookCtaLabel: string
+  bookCtaSupport: string
 }
+
+
 
 export type PaymentStatus = "pending" | "completed" | "failed"
 
@@ -77,6 +110,7 @@ export interface AdminUser {
   name: string
   email: string
   role: "super_admin" | "admin"
+  dp: string | null
   createdAt: string
   lastLogin: string
   status: "active" | "inactive"
@@ -84,11 +118,8 @@ export interface AdminUser {
   permissions: {
     bookings: boolean
     drivers: boolean
-    payments: boolean
     routes: boolean
-    pricing: boolean
     adminUsers: boolean
-    settings: boolean
   }
   loginHistory: { date: string; ip: string; device: string; location: string }[]
   activityLog: { date: string; action: string; type: string }[]
@@ -109,3 +140,60 @@ export interface DashboardStats {
   completedToday: number
   revenue: string
 }
+
+export interface AuthAdmin {
+  email: string;
+  isSuperuser: boolean;
+  permissions: {
+    bookings: boolean;
+    drivers: boolean;
+    routes: boolean;
+    adminUsers: boolean;
+  };
+}
+
+// src/components/admin/routes/types.ts
+
+export interface VehicleOption {
+  id?: number;
+  vehicleType: string;
+  maxPassengers: number;
+  idealFor: string;
+  fixedPrice: number;
+}
+
+
+export type FAQItem = {
+  question: string;
+  answer: string;
+};
+
+export type RouteFormInput = {
+  fromLocation: string;
+  toLocation: string;
+
+  metaTitle: string;
+  metaDescription: string;
+  heroTitle: string;
+  subHeadline: string;
+  body: string;
+
+  distance: string;
+  time: string;
+
+  sedanPrice: number;
+  vanPrice: number;
+
+  whatMakesBetter: string[];
+  whatsIncluded: string[];
+  destinationHighlights: string[];
+  idealFor: string[];
+
+  vehicleOptions: VehicleOption[];
+  faqs: FAQItem[];
+
+  image: File | null;
+  bookCtaLabel: string;
+  bookCtaSupport: string;
+};
+

@@ -7,8 +7,13 @@ import { motion } from "framer-motion";
 export default function FloatingBookNowButton() {
   const pathname = usePathname();
 
-  // ❌ Hide on booking page if you want
-  if (pathname?.startsWith("/booking")) return null;
+  // ❌ Hide on booking pages and admin pages
+  if (
+    pathname?.startsWith("/booking") ||
+    pathname?.startsWith("/admin")
+  ) {
+    return null;
+  }
 
   return (
     <motion.div
@@ -23,9 +28,7 @@ export default function FloatingBookNowButton() {
                    flex items-center gap-2 transition-all duration-300 bg-linear-to-br 
                    from-[#b07208] to-[#162c4b]
                    hover:shadow-2xl hover:scale-[1.05] active:scale-[0.97]"
-        style={{
-          backdropFilter: "blur(4px)",
-        }}
+        style={{ backdropFilter: "blur(4px)" }}
       >
         Book Now
       </Link>

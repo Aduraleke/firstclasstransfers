@@ -9,9 +9,9 @@ import type { RouteId, VehicleId } from "@/lib/pricing";
  */
 
 export const ROUTE_IDS = [
-  "larnaca-airport-nicosia",
-  "larnaca-airport-limassol",
-  "larnaca-airport-paphos",
+  "Larnaka-airport-nicosia",
+  "Larnaka-airport-limassol",
+  "Larnaka-airport-paphos",
   "paphos-airport-nicosia",
   "paphos-airport-limassol",
   // add all supported routes here

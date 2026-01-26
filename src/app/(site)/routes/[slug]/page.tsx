@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getRouteDetailBySlug, ROUTE_DETAILS } from "@/lib/routes";
+import { fetchAllRoutes, fetchRouteBySlug } from "@/lib/api/routes";
 
 const BRAND = {
   primary: "#162c4b",
@@ -17,17 +17,23 @@ type RouteParams = {
    STATIC PARAMS (SSG)
 ========================================================= */
 export async function generateStaticParams() {
-  return ROUTE_DETAILS.map((r) => ({ slug: r.slug }));
+  const routes = await fetchAllRoutes();
+
+  return routes.map((r) => ({
+    slug: r.slug,
+  }));
 }
 
 /* =========================================================
    PER-ROUTE SEO (THIS IS THE KEY PART)
 ========================================================= */
-export async function generateMetadata(
-  { params }: { params: Promise<RouteParams> }
-): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<RouteParams>;
+}): Promise<Metadata> {
   const { slug } = await params;
-  const route = getRouteDetailBySlug(slug);
+  const route = await fetchRouteBySlug(slug);
 
   if (!route) {
     return {};
@@ -35,11 +41,11 @@ export async function generateMetadata(
 
   const title =
     route.metaTitle ||
-    `${route.from} to ${route.to} Taxi Transfer | Fixed Price`;
+    `${route.fromLocation} to ${route.toLocation} Taxi Transfer | Fixed Price`;
 
   const description =
     route.metaDescription ||
-    `Book a private taxi from ${route.from} to ${route.to} with a fixed price per vehicle. 24/7 service, no hidden fees, professional drivers.`;
+    `Book a private taxi from ${route.fromLocation} to ${route.toLocation} with a fixed price per vehicle. 24/7 service, no hidden fees, professional drivers.`;
 
   const canonical = `https://firstclasstransfers.eu/routes/${route.slug}`;
 
@@ -59,7 +65,7 @@ export async function generateMetadata(
           url: route.image,
           width: 1200,
           height: 630,
-          alt: `${route.from} to ${route.to} private transfer`,
+          alt: `${route.fromLocation} to ${route.toLocation} private transfer`,
         },
       ],
       type: "website",
@@ -82,52 +88,66 @@ export default async function RouteDetailsPage({
   params: Promise<RouteParams>;
 }) {
   const { slug } = await params;
-  const route = getRouteDetailBySlug(slug);
+  const route = await fetchRouteBySlug(slug);
 
   if (!route) {
     return notFound();
   }
 
   const VEHICLE_IMAGE_MAP: Record<string, string> = {
-  "Standard Car": "/ford-carpri.jpg",
-  Sedan: "/ford-carpri.jpg",
-  Minivan: "/mercedesVclass.jpg",
-  "V-Class": "/mercedesVclass.jpg",
-};
+    "Standard Car": "/ford-carpri.jpg",
+    Sedan: "/ford-carpri.jpg",
+    Minivan: "/mercedesVclass.jpg",
+    "V-Class": "/mercedesVclass.jpg",
+  };
 
-function getVehicleImage(type: string): string | null {
-  if (VEHICLE_IMAGE_MAP[type]) return VEHICLE_IMAGE_MAP[type];
+  function getVehicleImage(type: string): string | null {
+    if (VEHICLE_IMAGE_MAP[type]) return VEHICLE_IMAGE_MAP[type];
 
-  const lower = type.toLowerCase();
-  if (
-    lower.includes("minivan") ||
-    lower.includes("v-class") ||
-    lower.includes("van")
-  ) {
-    return "/mercedesVclass.jpg";
+    const lower = type.toLowerCase();
+    if (
+      lower.includes("minivan") ||
+      lower.includes("v-class") ||
+      lower.includes("van")
+    ) {
+      return "/mercedesVclass.jpg";
+    }
+    if (lower.includes("car") || lower.includes("sedan")) {
+      return "/capri.jpg";
+    }
+    return null;
   }
-  if (lower.includes("car") || lower.includes("sedan")) {
-    return "/capri.jpg";
-  }
-  return null;
-}
+
+  const sedanPrice = route.vehicleOptions?.[0]?.fixedPrice ?? route.sedanPrice;
+
+  const vanPrice = route.vehicleOptions?.[1]?.fixedPrice ?? route.vanPrice;
+
+  const vehicleOptions = route.vehicleOptions ?? [];
+
+const sortedVehicleOptions = [...vehicleOptions].sort(
+  (a, b) => Number(a.fixedPrice) - Number(b.fixedPrice)
+);
+
 
   /* -----------------------------
      helpers
   ------------------------------ */
-  const subheadlineLines = route.subheadline.split("\n").filter(Boolean);
+  const subheadlineLines = route.subheadline
+    ? route.subheadline.split("\n").filter(Boolean)
+    : [];
+
   const bodyParagraphs = route.body
-    .split(/\n{2,}/)
-    .filter((p) => p.trim().length);
+    ? route.body.split(/\n{2,}/).filter((p) => p.trim().length)
+    : [];
 
-  const recommendedRoutes = ROUTE_DETAILS.filter(
-    (r) => r.slug !== slug
-  ).slice(0, 3);
+  const allRoutes = await fetchAllRoutes();
 
-  const bookingRouteId = route.bookingRouteId ?? route.slug;
+  const recommendedRoutes = allRoutes
+    .filter((r) => r.slug !== slug)
+    .slice(0, 3);
+
+  const bookingRouteId = route.slug ?? route.slug;
   const bookingHref = `/booking?routeId=${encodeURIComponent(bookingRouteId)}`;
-
-
 
   return (
     <main className="relative mx-auto mt-24 max-w-6xl px-4 pb-20 pt-10 sm:px-6 lg:px-8">
@@ -161,7 +181,7 @@ function getVehicleImage(type: string): string | null {
         </Link>
         <span className="mx-1 text-slate-400">/</span>
         <span className="max-w-[150px] truncate font-medium text-slate-700 sm:max-w-xs">
-          {route.to}
+          {route.toLocation}
         </span>
       </nav>
 
@@ -190,10 +210,10 @@ function getVehicleImage(type: string): string | null {
             <div className="inline-flex flex-wrap items-center gap-2 rounded-full bg-slate-50/10 px-3 py-1.5 text-[11px] text-slate-100">
               <span className="inline-flex items-center gap-1">
                 <span className="h-1.5 w-1.5 rounded-full bg-[#b07208]" />
-                {route.from}
+                {route.fromLocation}
               </span>
               <span className="text-slate-400">→</span>
-              <span className="font-semibold">{route.to}</span>
+              <span className="font-semibold">{route.toLocation}</span>
             </div>
 
             {/* TITLE + SUBHEADLINE */}
@@ -232,7 +252,7 @@ function getVehicleImage(type: string): string | null {
                       From · Sedan
                     </span>
                     <span className="text-[20px] sm:text-[22px] font-extrabold">
-                      {route.sedanPrice}
+                      €{sedanPrice}
                     </span>
                   </div>
 
@@ -243,7 +263,7 @@ function getVehicleImage(type: string): string | null {
                       Mercedes V-Class
                     </span>
                     <span className="text-[20px] sm:text-[22px] font-extrabold">
-                      {route.vanPrice}
+                      €{vanPrice}
                     </span>
                   </div>
                 </div>
@@ -255,7 +275,7 @@ function getVehicleImage(type: string): string | null {
               <div className="rounded-2xl bg-slate-900/60 px-3 py-2 ring-1 ring-slate-800/80">
                 <dt className="text-slate-400 text-[10px]">Distance</dt>
                 <dd className="mt-0.5 text-sm font-semibold text-slate-50 wrap-break-word">
-                  {route.distance}
+                  ~{route.distance}
                 </dd>
               </div>
 
@@ -265,8 +285,6 @@ function getVehicleImage(type: string): string | null {
                   {route.time}
                 </dd>
               </div>
-
-              
             </dl>
 
             {/* POPULAR WITH CHIPS */}
@@ -308,16 +326,17 @@ function getVehicleImage(type: string): string | null {
           <div className="relative min-h-[260px] overflow-hidden bg-slate-950">
             <Image
               src={route.image}
-              alt={`${route.from} to ${route.to}`}
+              alt={`${route.fromLocation} to ${route.toLocation}`}
               fill
               className="object-cover"
+              unoptimized
               priority
             />
             <div className="pointer-events-none absolute inset-0 bg-linear-to-t from-slate-950/85 via-slate-950/20 to-transparent" />
             <div className="pointer-events-none absolute bottom-4 left-4 right-4 flex items-center justify-between rounded-2xl bg-slate-950/75 px-3 py-2 text-[11px] text-slate-100 backdrop-blur">
               <div>
                 <p className="font-medium">
-                  {route.from} → {route.to}
+                  {route.fromLocation} → {route.toLocation}
                 </p>
                 <p className="text-[10px] text-slate-300">
                   Private airport transfer · {route.time}
@@ -425,7 +444,7 @@ function getVehicleImage(type: string): string | null {
                 </span>
                 <span className="mx-2 h-3 w-px bg-slate-900/20" />
                 <span className="text-[12px] font-extrabold">
-                  {route.sedanPrice}
+                  €{sedanPrice}
                 </span>
                 <span className="ml-2 text-[10px] uppercase tracking-[0.16em] text-slate-900/75">
                   Sedan · Per vehicle
@@ -448,20 +467,26 @@ function getVehicleImage(type: string): string | null {
               </div>
 
               <div className="relative mt-4 space-y-2 rounded-2xl bg-slate-900/80 px-3 py-3 text-[12px] ring-1 ring-slate-800">
-                <div className="flex items-center justify-between">
-                  <span className="text-slate-300">Sedan · up to 4</span>
-                  <span className="text-sm font-extrabold text-[#fbbf24]">
-                    {route.sedanPrice}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between border-t border-slate-800 pt-2">
-                  <span className="text-slate-300">
-                    V-Class / Minivan · up to 6
-                  </span>
-                  <span className="text-sm font-extrabold text-[#fbbf24]">
-                    {route.vanPrice}
-                  </span>
-                </div>
+                {sortedVehicleOptions.map((vehicle, idx) => (
+                  <div
+                    key={vehicle.vehicleType}
+                    className={[
+                      "flex items-center justify-between",
+                      idx > 0 ? "border-t border-slate-800 pt-2" : "",
+                    ].join(" ")}
+                  >
+                    <span className="text-slate-300">
+                      {vehicle.vehicleType}
+                      {vehicle.maxPassengers
+                        ? ` · up to ${vehicle.maxPassengers} Passengers`
+                        : ""}
+                    </span>
+
+                    <span className="text-sm font-extrabold text-[#fbbf24]">
+                      €{vehicle.fixedPrice}
+                    </span>
+                  </div>
+                ))}
               </div>
 
               <Link
@@ -523,7 +548,7 @@ function getVehicleImage(type: string): string | null {
 
           <div className="mt-5 grid gap-5 sm:grid-cols-2 lg:grid-cols-2">
             {route.vehicleOptions.map((vehicle, idx) => {
-              const imgSrc = getVehicleImage(vehicle.type);
+              const imgSrc = getVehicleImage(vehicle.vehicleType);
               const isPrimary = idx === 0;
 
               // --- NEW: map displayed type → booking vehicleTypeId
@@ -539,12 +564,12 @@ function getVehicleImage(type: string): string | null {
                 return "sedan";
               }
 
-              const vehicleTypeId = mapVehicleTypeToId(vehicle.type);
+              const vehicleTypeId = mapVehicleTypeToId(vehicle.vehicleType);
               const bookingHref = `/booking?routeId=${route.slug}&vehicleTypeId=${vehicleTypeId}`;
 
               return (
                 <Link
-                  key={vehicle.type}
+                  key={vehicle.vehicleType}
                   href={bookingHref}
                   className={[
                     "group flex flex-col overflow-hidden rounded-2xl border backdrop-blur-sm transition cursor-pointer",
@@ -563,8 +588,9 @@ function getVehicleImage(type: string): string | null {
                     {imgSrc ? (
                       <Image
                         src={imgSrc}
-                        alt={vehicle.type}
+                        alt={vehicle.vehicleType}
                         fill
+                        unoptimized
                         className="relative z-10 object-cover object-center transition-transform duration-500 group-hover:scale-105"
                         priority={isPrimary}
                       />
@@ -585,7 +611,7 @@ function getVehicleImage(type: string): string | null {
                         Fixed fare
                       </span>
                       <span className="text-sm font-extrabold text-[#fbbf24]">
-                        {vehicle.fixedPrice}
+                        €{vehicle.fixedPrice}
                       </span>
                     </div>
                   </div>
@@ -594,7 +620,7 @@ function getVehicleImage(type: string): string | null {
                   <div className="flex flex-col flex-1 px-3.5 pb-3.5 pt-3 space-y-3">
                     <div className="flex items-center justify-between gap-2">
                       <p className="line-clamp-1 text-[14px] font-semibold text-slate-50">
-                        {vehicle.type}
+                        {vehicle.vehicleType}
                       </p>
                       {!isPrimary && (
                         <span className="rounded-full bg-slate-800/90 px-2 py-0.5 text-[10px] uppercase tracking-[0.16em] text-slate-300">
@@ -606,7 +632,7 @@ function getVehicleImage(type: string): string | null {
                     <div className="flex flex-wrap gap-2 text-[11px]">
                       <span className="inline-flex items-center rounded-full bg-slate-800/80 px-2 py-1 text-slate-200">
                         <span className="mr-1.5 inline-block h-1.5 w-1.5 rounded-full bg-[#b07208]" />
-                        {vehicle.maxPassengers}
+                        Up to {vehicle.maxPassengers} Passengers
                       </span>
                       {vehicle.idealFor && (
                         <span className="inline-flex items-center rounded-full bg-slate-800/80 px-2 py-1 text-slate-300">
@@ -686,14 +712,14 @@ function getVehicleImage(type: string): string | null {
                 <div className="relative h-32 w-full overflow-hidden bg-slate-100">
                   <Image
                     src={r.image}
-                    alt={`${r.from} to ${r.to}`}
+                    alt={`${r.fromLocation} to ${r.toLocation}`}
                     fill
                     className="object-cover transition-transform duration-300 group-hover:scale-105"
                   />
                 </div>
                 <div className="flex flex-1 flex-col gap-1 px-3.5 py-3">
                   <p className="text-[11px] uppercase tracking-[0.16em] text-slate-500">
-                    {r.from} → {r.to}
+                    {r.fromLocation} → {r.toLocation}
                   </p>
                   <p className="truncate text-sm font-semibold text-slate-900">
                     {r.heroTitle}
@@ -701,7 +727,7 @@ function getVehicleImage(type: string): string | null {
                   <p className="text-[12px] text-slate-600">
                     From{" "}
                     <span className="text-[13px] font-extrabold text-[#b07208]">
-                      {r.sedanPrice}
+                      €{r.sedanPrice}
                     </span>
                   </p>
                 </div>

@@ -2,7 +2,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { PriceRule } from "@/lib/admin/types";
+import { PriceRule } from "@/lib/api/admin/types";
 
 interface PriceRuleFormModalProps {
   open: boolean;

@@ -1,3 +1,5 @@
+// src/lib/admin/mockApi.ts
+
 import {
   AdminUser,
   AuditLog,
@@ -20,14 +22,14 @@ import {
   mockRoutes,
 } from "./mocData"
 
-const bookings = [...mockBookings]
-let drivers = [...mockDrivers]
-let prices = [...mockPrices]
-let routes = [...mockRoutes]
-let payments = [...mockPayments]
-let emails = [...mockEmailNotifications]
-const admins = [...mockAdminUsers]
-let audits = [...mockAuditLogs]
+const bookings: Booking[] = [...mockBookings]
+let drivers: Driver[] = [...mockDrivers]
+let prices: PriceRule[] = [...mockPrices]
+let routes: Route[] = [...mockRoutes]
+let payments: PaymentSession[] = [...mockPayments]
+let emails: EmailNotification[] = [...mockEmailNotifications]
+const admins: AdminUser[] = [...mockAdminUsers]
+let audits: AuditLog[] = [...mockAuditLogs]
 
 const delay = (ms = 150) => new Promise((resolve) => setTimeout(resolve, ms))
 
@@ -36,6 +38,7 @@ const delay = (ms = 150) => new Promise((resolve) => setTimeout(resolve, ms))
 export async function getBookings(): Promise<Booking[]> {
   await delay()
   return [...bookings]
+  
 }
 
 export async function assignDriverToBooking(bookingId: string, driverName: string): Promise<Booking | null> {
@@ -56,7 +59,7 @@ export async function updateBookingStatus(id: string, status: BookingStatus): Pr
 
 /* DRIVERS */
 
-export async function getDrivers(): Promise<Driver[]> {
+export async function getDrivers(p0: { status: string | undefined; search: string | undefined }): Promise<Driver[]> {
   await delay()
   return [...drivers]
 }
@@ -179,10 +182,7 @@ export async function getEmailNotifications(): Promise<EmailNotification[]> {
   return [...emails]
 }
 
-export async function sendCustomEmail(
-  to: string,
-  subject: string,
-): Promise<EmailNotification> {
+export async function sendCustomEmail(to: string, subject: string): Promise<EmailNotification> {
   await delay()
   const email: EmailNotification = {
     id: `EMAIL${String(emails.length + 1).padStart(3, "0")}`,
@@ -193,7 +193,6 @@ export async function sendCustomEmail(
     timestamp: new Date().toISOString(),
   }
   emails = [email, ...emails]
-  // message is ignored here but you'll use it in your real API
   return email
 }
 
@@ -224,10 +223,7 @@ export async function getAdminUsers(): Promise<AdminUser[]> {
 }
 
 export async function createAdminUser(
-  input: Omit<
-    AdminUser,
-    "id" | "createdAt" | "lastLogin" | "status" | "loginHistory" | "activityLog"
-  >,
+  input: Omit<AdminUser, "id" | "createdAt" | "lastLogin" | "status" | "loginHistory" | "activityLog">,
 ): Promise<AdminUser> {
   await delay()
   const admin: AdminUser = {

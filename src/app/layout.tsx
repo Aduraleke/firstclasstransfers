@@ -28,7 +28,7 @@ export const metadata: Metadata = {
     template: "%s | First Class Transfers Cyprus",
   },
   description:
-    "Fixed-price private airport transfers in Cyprus. Reliable taxi and minivan services from Larnaca and Paphos Airports, available 24/7.",
+    "Fixed-price private airport transfers in Cyprus. Reliable taxi and minivan services from Larnaka and Paphos Airports, available 24/7.",
   icons: {
     icon: "/favicon.ico",
   },
@@ -37,7 +37,7 @@ export const metadata: Metadata = {
     url: "https://firstclasstransfers.eu/",
     title: "First Class Transfers Cyprus",
     description:
-      "Book fixed-price private Cyprus airport transfers from Larnaca and Paphos Airports. Sedans and Mercedes V-Class available 24/7.",
+      "Book fixed-price private Cyprus airport transfers from Larnaka and Paphos Airports. Sedans and Mercedes V-Class available 24/7.",
     siteName: "First Class Transfers Cyprus",
     images: [
       {
@@ -52,7 +52,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "First Class Transfers Cyprus",
     description:
-      "Private, fixed-price Cyprus airport transfers from Larnaca and Paphos.",
+      "Private, fixed-price Cyprus airport transfers from Larnaka and Paphos.",
     images: ["/og-home.jpg"],
   },
   robots: {

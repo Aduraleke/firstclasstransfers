@@ -1,7 +1,7 @@
 // src/components/admin/modals/AssignDriverModal.tsx
 "use client";
 
-import { Booking, Driver } from "@/lib/admin/types";
+import { Booking, Driver } from "@/lib/api/admin/types";
 
 interface AssignDriverModalProps {
   open: boolean;

@@ -325,7 +325,7 @@ export default function NavBar() {
                           Active route
                         </span>
                         <span className="text-[11px] font-medium">
-                          City ↔ Larnaca Airport
+                          City ↔ Larnaka Airport
                         </span>
                       </div>
                       <div className="flex items-center gap-2 text-[10px]">

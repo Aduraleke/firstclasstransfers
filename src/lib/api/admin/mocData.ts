@@ -61,10 +61,10 @@ export const mockPrices: PriceRule[] = [
 ]
 
 export const mockRoutes: Route[] = [
-  { id: 1, origin: "Larnaca Airport", destination: "Larnaca City / Finikoudes", distance: "6-10 km", time: "10-15 min", price: 25 },
-  { id: 2, origin: "Larnaca Airport", destination: "Ayia Napa", distance: "~45 km", time: "35-45 min", price: 54 },
-  { id: 3, origin: "Nicosia", destination: "Larnaca Airport (LCA)", distance: "52-60 km", time: "40-50 min", price: 65 },
-  { id: 4, origin: "Limassol", destination: "Larnaca Airport (LCA)", distance: "67-72 km", time: "50-60 min", price: 64 },
+  { id: 1, origin: "Larnaka Airport", destination: "Larnaka City / Finikoudes", distance: "6-10 km", time: "10-15 min", price: 25 },
+  { id: 2, origin: "Larnaka Airport", destination: "Ayia Napa", distance: "~45 km", time: "35-45 min", price: 54 },
+  { id: 3, origin: "Nicosia", destination: "Larnaka Airport (LCA)", distance: "52-60 km", time: "40-50 min", price: 65 },
+  { id: 4, origin: "Limassol", destination: "Larnaka Airport (LCA)", distance: "67-72 km", time: "50-60 min", price: 64 },
   { id: 5, origin: "Paphos Airport", destination: "Limassol", distance: "~60 km", time: "45-55 min", price: 60 },
 ]
 

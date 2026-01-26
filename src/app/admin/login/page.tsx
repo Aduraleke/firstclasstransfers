@@ -9,19 +9,71 @@ import lockIcon from "@iconify/icons-mdi/lock-outline";
 import emailIcon from "@iconify/icons-mdi/email-outline";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
+import { loginAdmin } from "@/lib/api/admin/auth";
+import { useAuthStore } from "@/lib/api/admin/auth/authStore";
 
 export default function AdminLoginPage() {
   const [loading, setLoading] = useState(false);
-  const router = useRouter()
+  const [error, setError] = useState<string | null>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    // Dec 3: UI only. Connect to Admin Login API later in the sprint.
-    setLoading(true);
-    setTimeout(() => setLoading(false), 800);
-        router.push("/admin/dashboard");
+  const router = useRouter();
+  const login = useAuthStore((s) => s.login);
 
-  };
+const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  e.preventDefault();
+  setLoading(true);
+  setError(null);
+
+  const form = new FormData(e.currentTarget);
+  const email = form.get("email") as string;
+  const password = form.get("password") as string;
+
+  try {
+    const res = await loginAdmin({ email, password });
+    console.log("LOGIN RESPONSE:", res);
+
+    const accessToken = res.tokens?.access;
+    if (!accessToken) {
+      throw new Error("Invalid login response from server.");
+    }
+
+    // ✅ DECLARE admin FIRST
+    const mapPermissions = (
+  perms: string[] = [],
+  isSuperuser: boolean,
+) => ({
+  bookings: isSuperuser || perms.includes("booking"),
+  drivers: isSuperuser || perms.includes("drivers"),
+  routes: isSuperuser || perms.includes("routes"),
+  adminUsers: isSuperuser || perms.includes("adminUsers"),
+});
+
+
+const admin = {
+  email,
+  isSuperuser: res.isSuperuser,
+  permissions: mapPermissions(res.permissions, res.isSuperuser),
+};
+
+login({
+  token: accessToken,
+  admin,
+});
+
+
+    router.push("/admin");
+  } catch (err) {
+    if (err instanceof Error) {
+      setError(err.message || "The email or password you entered is incorrect.");
+    } else {
+      setError("Unable to sign in right now. Please try again.");
+    }
+  } finally {
+    setLoading(false);
+  }
+};
+
+
 
   return (
     <div className="min-h-screen bg-[#020513] text-white flex items-center justify-center px-4">
@@ -54,7 +106,7 @@ export default function AdminLoginPage() {
               </p>
               <p className="text-xs text-white/60 max-w-xs">
                 Admin control center for fixed-price airport transfers across
-                Cyprus. Larnaca (LCA) &amp; Paphos (PFO).
+                Cyprus. Larnaka (LCA) &amp; Paphos (PFO).
               </p>
             </div>
           </div>
@@ -109,6 +161,7 @@ export default function AdminLoginPage() {
                   id="email"
                   name="email"
                   type="email"
+                  onChange={() => error && setError(null)}
                   required
                   className="w-full rounded-2xl border border-white/15 bg-black/50 px-3 py-2.5 text-sm text-white placeholder:text-white/35 focus:outline-none focus:ring-2 focus:ring-[#b07208] focus:ring-offset-2 focus:ring-offset-[#020513]"
                   placeholder="admin@firstclasstransfers.eu"
@@ -127,6 +180,7 @@ export default function AdminLoginPage() {
                   id="password"
                   name="password"
                   type="password"
+                  onChange={() => error && setError(null)}
                   required
                   className="w-full rounded-2xl border border-white/15 bg-black/50 px-3 py-2.5 text-sm text-white placeholder:text-white/35 focus:outline-none focus:ring-2 focus:ring-[#b07208] focus:ring-offset-2 focus:ring-offset-[#020513]"
                   placeholder="••••••••"
@@ -149,6 +203,15 @@ export default function AdminLoginPage() {
                 Forgot password?
               </button>
             </div>
+            {error && (
+              <motion.div
+                initial={{ opacity: 0, y: -4 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="rounded-2xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-xs text-red-300"
+              >
+                {error}
+              </motion.div>
+            )}
 
             <motion.button
               type="submit"

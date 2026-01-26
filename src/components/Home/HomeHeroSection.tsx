@@ -110,7 +110,7 @@ export default function HeroSection() {
             <span className="h-0.5 w-5 rounded-full bg-white/50" />
             <span className="flex items-center gap-1">
               <Icon icon={planeIcon} width={14} height={14} />
-              Larnaca &amp; Paphos
+              Larnaka &amp; Paphos
             </span>
           </div>
 
@@ -129,7 +129,7 @@ export default function HeroSection() {
 
           {/* Subheadline */}
           <p className="max-w-xl text-sm text-white/80 sm:text-base">
-            Fixed-price private taxis from Larnaca and Paphos Airports to Ayia
+            Fixed-price private taxis from Larnaka and Paphos Airports to Ayia
             Napa, Protaras, Limassol, Nicosia, Paphos, Famagusta and more.
             Modern sedans and Mercedes V-Class minivans, 24/7,
             and no hidden extras.

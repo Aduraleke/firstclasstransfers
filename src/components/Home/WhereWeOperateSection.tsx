@@ -18,23 +18,23 @@ type DestLink = {
   slug: string; // ✅ NEW
 };
 
-const LARNACA_DESTINATIONS: DestLink[] = [
-  { label: "Larnaca City & Mackenzie Beach", slug: "paphos-airport-larnaca" },
+const Larnaka_DESTINATIONS: DestLink[] = [
+  { label: "Larnaka City & Mackenzie Beach", slug: "paphos-airport-Larnaka" },
   { label: "Ayia Napa, Nissi Beach & Makronissos", slug: "paphos-airport-ayia-napa" },
-  // { label: "Protaras, Pernera, Paralimni & Kapparis", slug: "larnaca-airport-protaras" },
-  { label: "Nicosia (Lefkosia)", slug: "larnaca-airport-nicosia" },
-  { label: "Limassol & Limassol Marina", slug: "larnaca-airport-limassol" },
-  { label: "Pissouri, Paphos, Coral Bay, Polis & Latchi", slug: "larnaca-airport-paphos" },
+  // { label: "Protaras, Pernera, Paralimni & Kapparis", slug: "Larnaka-airport-protaras" },
+  { label: "Nicosia (Lefkosia)", slug: "Larnaka-airport-nicosia" },
+  { label: "Limassol & Limassol Marina", slug: "Larnaka-airport-limassol" },
+  { label: "Pissouri, Paphos, Coral Bay, Polis & Latchi", slug: "Larnaka-airport-paphos" },
   {
     label: "Kyrenia & Famagusta (selected cross-border routes)",
-    slug: "larnaca-airport-kyrenia",
+    slug: "Larnaka-airport-kyrenia",
   },
 ];
 
 const PAPHOS_DESTINATIONS: DestLink[] = [
   { label: "Limassol & Amathus seafront", slug: "paphos-airport-limassol" },
   { label: "Nicosia (capital)", slug: "paphos-airport-nicosia" },
-  { label: "Larnaca City & Larnaca Airport", slug: "paphos-airport-larnaca" },
+  { label: "Larnaka City & Larnaka Airport", slug: "paphos-airport-Larnaka" },
   {
     label: "Ayia Napa, Protaras & Famagusta (long-distance)",
     slug: "paphos-airport-ayia-napa",
@@ -117,7 +117,7 @@ export default function WhereWeOperateSection() {
             Where We Operate in Cyprus
           </h2>
           <p className="text-sm leading-relaxed text-slate-600 sm:text-[15px]">
-            From Larnaca and Paphos Airports we provide fixed-price taxi
+            From Larnaka and Paphos Airports we provide fixed-price taxi
             transfers to all major cities and resorts across Cyprus.
           </p>
         </div>
@@ -156,7 +156,7 @@ export default function WhereWeOperateSection() {
                       </p>
                     </div>
                     <div className="rounded-full bg-black/40 px-3 py-1 text-[11px] text-slate-100 ring-1 ring-white/20">
-                      From Larnaca &amp; Paphos
+                      From Larnaka &amp; Paphos
                     </div>
                   </div>
                 </div>
@@ -219,7 +219,7 @@ export default function WhereWeOperateSection() {
           {/* RIGHT – destinations with links */}
           <div className="space-y-7">
 
-            {/* Larnaca belt */}
+            {/* Larnaka belt */}
             <div className="rounded-3xl border border-slate-200 bg-white/90 px-4 py-5 shadow-[0_14px_40px_rgba(15,23,42,0.08)] sm:px-5 sm:py-6">
               <div className="mb-4 flex items-center gap-2">
                 <div
@@ -231,7 +231,7 @@ export default function WhereWeOperateSection() {
 
                 <div className="flex flex-col">
                   <span className="text-[11px] uppercase tracking-[0.18em] text-slate-500">
-                    From Larnaca Airport (LCA)
+                    From Larnaka Airport (LCA)
                   </span>
                   <p className="text-[12px] text-slate-500">
                     East coast, capital and cross-island routes.
@@ -240,7 +240,7 @@ export default function WhereWeOperateSection() {
               </div>
 
               <div className="grid gap-2 sm:grid-cols-2">
-                {LARNACA_DESTINATIONS.map((d) => (
+                {Larnaka_DESTINATIONS.map((d) => (
                   <Link
                     key={d.label}
                     href={`/routes/${d.slug}`}

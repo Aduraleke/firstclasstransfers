@@ -2,23 +2,21 @@
 
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
-import {
-  TRANSFER_ROUTES,
-  VEHICLE_TYPES,
-  TIME_PERIODS,
-} from "@/lib/booking/options";
-import type { BookingDraft } from "@/lib/booking/types";
-import { getRouteDetailBySlug } from "@/lib/routes";
+import { TIME_PERIODS } from "@/lib/booking/options";
+import { BookingDraft } from "@/lib/booking/types";
+import type { BookingRoute } from "@/lib/booking/bookingRoute";
+
 
 type Props = {
   data: BookingDraft;
   onChange: <K extends keyof BookingDraft>(
     key: K,
-    value: BookingDraft[K]
+    value: BookingDraft[K],
   ) => void;
   onNext: () => void;
-  routeList: Array<{ id: string; title: string }>;
+  routeList: BookingRoute[];
 };
+
 
 const BRAND_PRIMARY = "#162c4b";
 const BRAND_ACCENT = "#b07208";
@@ -46,13 +44,9 @@ const VEHICLE_IMAGE_MAP: Record<VehicleId, string> = {
   vclass: "/mercedesVclass.jpg",
 };
 
-// Map vehicle ids to route.vehicleOptions index
-const VEHICLE_TO_ROUTE_INDEX: Record<VehicleId, number> = {
-  sedan: 0,
-  vclass: 1,
-};
 
-export default function Step1Trip({ data, onChange, onNext }: Props) {
+
+export default function Step1Trip({ data, onChange, onNext, routeList }: Props) {
   const timeSectionRef = React.useRef<HTMLDivElement | null>(null);
 
   const [timeOpen, setTimeOpen] = useState(false);
@@ -95,14 +89,7 @@ export default function Step1Trip({ data, onChange, onNext }: Props) {
   }, []);
 
   // Highlight vehicle on load (deep link)
-  useEffect(() => {
-    if (
-      data.vehicleTypeId &&
-      VEHICLE_TYPES.some((v) => v.id === data.vehicleTypeId)
-    ) {
-      onChange("vehicleTypeId", data.vehicleTypeId);
-    }
-  }, [data.vehicleTypeId, onChange]);
+
 
   // Auto-scroll to time section
   useEffect(() => {
@@ -191,9 +178,12 @@ export default function Step1Trip({ data, onChange, onNext }: Props) {
 
   const canContinue = hasMainTrip && hasReturnTrip;
 
-  const routeDetail = data.routeId
-    ? getRouteDetailBySlug(data.routeId)
-    : undefined;
+
+ const routeDetail = React.useMemo(
+  () => routeList.find((r) => r.slug === data.routeId),
+  [data.routeId, routeList]
+);
+
 
   return (
     <div className="bg-white rounded-3xl border border-gray-100 shadow-lg shadow-gray-100/70 p-5 sm:p-6 lg:p-7 space-y-6">
@@ -247,57 +237,16 @@ export default function Step1Trip({ data, onChange, onNext }: Props) {
         <select
           value={data.routeId}
           onChange={handleRouteChange}
-          className="mt-1 block w-full rounded-2xl border border-gray-300 bg-white px-3 py-2.5 text-sm shadow-sm focus:border-[#b07208] focus:ring-[#b07208]"
+          className="mt-1 block w-full rounded-2xl border border-gray-300 bg-white px-3 py-2.5 text-sm shadow-sm focus:border-[#b07208]"
         >
           <option value="">Select your route</option>
 
-          <optgroup label="Larnaca">
-            {TRANSFER_ROUTES.filter((r) => r.category === "Larnaca").map(
-              (r) => (
-                <option key={r.id} value={r.id}>
-                  {r.label}
-                </option>
-              )
-            )}
-          </optgroup>
-
-          <optgroup label="Ayia Napa">
-            {TRANSFER_ROUTES.filter((r) => r.category === "Ayia Napa").map(
-              (r) => (
-                <option key={r.id} value={r.id}>
-                  {r.label}
-                </option>
-              )
-            )}
-          </optgroup>
-
-          <optgroup label="Limassol">
-            {TRANSFER_ROUTES.filter((r) => r.category === "Limassol").map(
-              (r) => (
-                <option key={r.id} value={r.id}>
-                  {r.label}
-                </option>
-              )
-            )}
-          </optgroup>
-
-          <optgroup label="Paphos">
-            {TRANSFER_ROUTES.filter((r) => r.category === "Paphos").map((r) => (
-              <option key={r.id} value={r.id}>
-                {r.label}
-              </option>
-            ))}
-          </optgroup>
-
-          <optgroup label="Special services">
-            {TRANSFER_ROUTES.filter((r) => r.category === "Special").map(
-              (r) => (
-                <option key={r.id} value={r.id}>
-                  {r.label}
-                </option>
-              )
-            )}
-          </optgroup>
+          {routeList.map((route) => (
+            
+            <option key={route.slug} value={route.slug}>
+              {route.fromLocation} → {route.toLocation}
+            </option>
+          ))}
         </select>
       </section>
 
@@ -308,19 +257,17 @@ export default function Step1Trip({ data, onChange, onNext }: Props) {
         </h2>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {VEHICLE_TYPES.map((vehicle) => {
-            const active = data.vehicleTypeId === vehicle.id;
-            const imgSrc = VEHICLE_IMAGE_MAP[vehicle.id as VehicleId];
-            const price =
-              routeDetail?.vehicleOptions?.[
-                VEHICLE_TO_ROUTE_INDEX[vehicle.id as VehicleId]
-              ]?.fixedPrice;
+          {routeDetail?.vehicleOptions?.map((vehicleOption, index) => {
+            const vehicleId: VehicleId = index === 0 ? "sedan" : "vclass";
+            const active = data.vehicleTypeId === vehicleId;
+            const imgSrc = VEHICLE_IMAGE_MAP[vehicleId];
+            const price = vehicleOption.fixedPrice;
 
             return (
               <button
-                key={vehicle.id}
+                key={vehicleOption.vehicleType}
                 type="button"
-                onClick={() => handleVehicleChange(vehicle.id as VehicleId)}
+                onClick={() => handleVehicleChange(vehicleId)}
                 className={`group relative overflow-hidden rounded-2xl border shadow-sm transition-all ${
                   active
                     ? "border-[#b07208] shadow-[0_12px_30px_rgba(176,114,8,0.35)] scale-[1.01]"
@@ -336,10 +283,11 @@ export default function Step1Trip({ data, onChange, onNext }: Props) {
                 <div className="relative w-full h-36 sm:h-60 overflow-hidden">
                   <Image
                     src={imgSrc}
-                    alt={vehicle.name}
+                    alt={vehicleOption.vehicleType}
                     fill
                     className="object-cover transition-transform duration-500 group-hover:scale-105"
                   />
+
                   {price && (
                     <div
                       className="absolute top-3 right-3 rounded-xl px-4 py-2 shadow-lg text-white"
@@ -354,35 +302,28 @@ export default function Step1Trip({ data, onChange, onNext }: Props) {
                           Selected
                         </div>
                       )}
-                      <div className="text-xl font-extrabold">{price}</div>
+                      <div className="text-xl font-extrabold">€{price}</div>
                       <div className="text-[10px] opacity-80">per vehicle</div>
                     </div>
                   )}
                 </div>
 
                 <div className="p-4 text-left">
-                  <p className="text-sm font-semibold">{vehicle.name}</p>
-                  <p
-                    className={`text-xs ${
-                      active ? "text-white/80" : "text-gray-600"
-                    }`}
-                  >
-                    {vehicle.subtitle}
+                  <p className="text-sm font-semibold">
+                    {vehicleOption.vehicleType}
                   </p>
                   <p
-                    className={`text-[11px] ${
-                      active ? "text-white/70" : "text-gray-500"
-                    }`}
+                    className={`text-[11px] ${active ? "text-white/80" : "text-gray-600"}`}
                   >
-                    {vehicle.luggage}
+                    Up to {vehicleOption.maxPassengers} passengers
                   </p>
-                  <p
-                    className={`text-[11px] ${
-                      active ? "text-white/85" : "text-gray-500"
-                    }`}
-                  >
-                    {vehicle.recommendedFor}
-                  </p>
+                  {vehicleOption.idealFor && (
+                    <p
+                      className={`text-[11px] ${active ? "text-white/85" : "text-gray-500"}`}
+                    >
+                      {vehicleOption.idealFor}
+                    </p>
+                  )}
                 </div>
               </button>
             );
@@ -454,7 +395,7 @@ export default function Step1Trip({ data, onChange, onNext }: Props) {
                         {t}
                       </button>
                     );
-                  })
+                  }),
                 )}
               </div>
             )}
@@ -564,7 +505,7 @@ export default function Step1Trip({ data, onChange, onNext }: Props) {
                           {t}
                         </button>
                       );
-                    })
+                    }),
                   )}
                 </div>
               )}

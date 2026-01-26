@@ -113,7 +113,7 @@ export default function ServiceGuide() {
               <div className="rounded-2xl bg-white/5 p-3 backdrop-blur-sm">
                 <p className="text-slate-200">Coverage</p>
                 <p className="text-sm font-semibold text-white">
-                  Larnaca &amp; Paphos
+                  Larnaka &amp; Paphos
                 </p>
                 <p className="mt-1 text-[11px] text-slate-200/80">
                   Plus major resorts &amp; city-to-city.
@@ -221,7 +221,7 @@ export default function ServiceGuide() {
                 right vehicle and a realistic timing plan.
               </p>
               <ul className="mt-3 space-y-2 text-[13px] sm:text-[14px]">
-                <li>• Arrival airport (Larnaca or Paphos) and final address</li>
+                <li>• Arrival airport (Larnaka or Paphos) and final address</li>
                 <li>• Date, preferred pickup time and flight number</li>
                 <li>
                   • Number of passengers, luggage and any sports equipment

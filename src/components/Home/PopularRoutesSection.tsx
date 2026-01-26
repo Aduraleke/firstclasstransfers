@@ -10,55 +10,50 @@ import mapMarkerIcon from "@iconify/icons-mdi/map-marker";
 import carIcon from "@iconify/icons-mdi/car-sports";
 import arrowRightIcon from "@iconify/icons-mdi/arrow-right";
 import airplaneTakeoff from "@iconify/icons-mdi/airplane-takeoff";
+import { fetchAllRoutes } from "@/lib/api/routes"; // adjust path if needed
 
 // 🔑 Import your shared route data
-import { ROUTE_DETAILS, RouteDetailSlug, RouteDetail } from "@/lib/routes";
 
 const BRAND = {
   primary: "#162c4b",
   accent: "#b07208",
 };
 
+type ApiRoute = {
+  bookingRouteId: string;
+  slug: string;
+  fromLocation: string;
+  toLocation: string;
+  metaDescription?: string;
+  body: string;
+  image: string;
+  sedanPrice: number;
+  vanPrice: number;
+};
+
 type RouteCard = {
-  id: RouteDetailSlug;
+  id: string;
   from: string;
   to: string;
-  sedanPrice: string;
-  vanPrice: string;
+  sedanPrice: number;
+  vanPrice: number;
   description: string;
   href: string;
   tag?: string;
   image: string;
 };
 
-// Pick which detailed routes to feature in the slider
-const POPULAR_ROUTE_SLUGS: RouteDetailSlug[] = [
-  "larnaca-airport-nicosia",
-  "larnaca-airport-limassol",
-  "larnaca-airport-paphos",
-  "paphos-airport-nicosia",
-  "paphos-airport-limassol",
-  "paphos-airport-larnaca",
-  "limassol-nicosia",
-  "limassol-paphos",
-  "nicosia-larnaca-airport",
-  "nicosia-limassol",
-  "nicosia-paphos-airport",
-  "larnaca-airport-famagusta",
-];
-
-
-const POPULAR_ROUTE_TAGS: Partial<Record<RouteDetailSlug, string>> = {
-  "larnaca-airport-nicosia": "Most booked",
-  "larnaca-airport-limassol": "Business favourite",
+const POPULAR_ROUTE_TAGS: Record<string, string> = {
+  "Larnaka-airport-nicosia": "Most booked",
+  "Larnaka-airport-limassol": "Business favourite",
   "limassol-paphos": "Coastal favourite",
 };
 
-function buildDescription(route: RouteDetail): string {
+function buildDescription(route: ApiRoute): string {
   const base =
     route.metaDescription ||
     route.body.split("\n\n")[0] ||
-    `${route.from} to ${route.to} – fixed-price private transfer.`;
+    `${route.fromLocation} to ${route.toLocation} – fixed-price private transfer.`;
 
   if (base.length <= 180) return base;
 
@@ -67,47 +62,102 @@ function buildDescription(route: RouteDetail): string {
 }
 
 // ✅ Build POPULAR_ROUTES without nulls
-const POPULAR_ROUTES: RouteCard[] = POPULAR_ROUTE_SLUGS.reduce<RouteCard[]>(
-  (acc, slug) => {
-    const route = ROUTE_DETAILS.find((r) => r.slug === slug);
-    if (!route) return acc;
-
-    acc.push({
-      id: route.slug,
-      from: route.from,
-      to: route.to,
-      sedanPrice: route.sedanPrice,
-      vanPrice: route.vanPrice,
-      description: buildDescription(route),
-      href: `/routes/${route.slug}`,
-      tag: POPULAR_ROUTE_TAGS[route.slug],
-      image: route.image,
-    });
-
-    return acc;
-  },
-  []
-);
 
 export default function PopularRoutesShowcase() {
   const [activeIndex, setActiveIndex] = useState<number>(-1);
+  const [routes, setRoutes] = useState<ApiRoute[]>([]);
+  const [loading, setLoading] = useState(true);
+
   const router = useRouter();
 
+  const POPULAR_ROUTES: RouteCard[] = routes.map((route) => ({
+    id: route.slug,
+    from: route.fromLocation,
+    to: route.toLocation,
+    sedanPrice: route.sedanPrice,
+    vanPrice: route.vanPrice,
+    description: buildDescription(route),
+    href: `/routes/${route.slug}`,
+    tag: POPULAR_ROUTE_TAGS[route.slug],
+    image: route.image,
+  }));
+
   useEffect(() => {
-    const timer = setTimeout(() => setActiveIndex(0), 2000);
-    return () => clearTimeout(timer);
+    let mounted = true;
+
+    (async () => {
+      try {
+        const allRoutes = await fetchAllRoutes();
+        console.log("RAW routes from backend:", allRoutes);
+
+        if (!mounted) return;
+
+        const popular = allRoutes.slice(0, 12).map<ApiRoute>((r) => ({
+          bookingRouteId: r.bookingRouteId,
+          slug: r.slug,
+          fromLocation: r.fromLocation,
+          toLocation: r.toLocation,
+          metaDescription: r.metaDescription,
+          body: r.body,
+          image: r.image,
+
+          sedanPrice:
+            typeof r.sedanPrice === "number"
+              ? r.sedanPrice
+              : typeof r.vehicleOptions?.[0]?.fixedPrice === "number"
+                ? r.vehicleOptions[0].fixedPrice
+                : 0,
+
+          vanPrice:
+            typeof r.vanPrice === "number"
+              ? r.vanPrice
+              : typeof r.vehicleOptions?.[1]?.fixedPrice === "number"
+                ? r.vehicleOptions[1].fixedPrice
+                : 0,
+        }));
+
+
+
+        setRoutes(popular);
+      } catch (err) {
+        console.error("Failed to load popular routes", err);
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    })();
+
+    return () => {
+      mounted = false;
+    };
   }, []);
 
   useEffect(() => {
-    if (activeIndex < 0) return;
+    if (!POPULAR_ROUTES.length) return;
+
+    const timer = setTimeout(() => setActiveIndex(0), 2000);
+    return () => clearTimeout(timer);
+  }, [POPULAR_ROUTES.length]);
+
+  useEffect(() => {
+    if (activeIndex < 0 || POPULAR_ROUTES.length === 0) return;
+
     const interval = setInterval(
       () => setActiveIndex((prev) => (prev + 1) % POPULAR_ROUTES.length),
-      7000
+      7000,
     );
+
     return () => clearInterval(interval);
-  }, [activeIndex]);
+  }, [activeIndex, POPULAR_ROUTES.length]);
 
   const active = activeIndex >= 0 ? POPULAR_ROUTES[activeIndex] : null;
+
+  if (loading) {
+    return (
+      <section className="py-16 text-center text-slate-500">
+        Loading popular routes…
+      </section>
+    );
+  }
 
   return (
     <section className="relative py-12 sm:py-16 px-4 sm:px-6 lg:px-8 bg-white">
@@ -132,7 +182,7 @@ export default function PopularRoutesShowcase() {
             <span style={{ color: BRAND.accent }}>no surprises</span>
           </h2>
           <p className="text-sm sm:text-[15px] max-w-2xl mx-auto text-slate-600">
-            Our most-booked routes between Larnaca, Paphos, Limassol and
+            Our most-booked routes between Larnaka, Paphos, Limassol and
             Nicosia. Prices are{" "}
             <span className="font-semibold text-slate-900">per vehicle</span>,
             day and night, for modern sedans (up to 4 passengers) and minivans
@@ -298,7 +348,7 @@ export default function PopularRoutesShowcase() {
                                 </div>
                                 <div className="text-right leading-none">
                                   <div className="text-2xl md:text-[26px] font-extrabold text-slate-900">
-                                    {active?.sedanPrice}
+                                    €{active?.sedanPrice}
                                   </div>
                                   <div className="mt-0.5 text-[11px] text-slate-900/85">
                                     per trip
@@ -332,7 +382,7 @@ export default function PopularRoutesShowcase() {
                                 </div>
                                 <div className="text-right leading-none">
                                   <div className="text-2xl md:text-[26px] font-extrabold text-slate-50">
-                                    {active?.vanPrice}
+                                    €{active?.vanPrice}
                                   </div>
                                   <div className="mt-0.5 text-[11px] text-slate-100/90">
                                     per trip
@@ -463,13 +513,13 @@ export default function PopularRoutesShowcase() {
                       className="truncate"
                       style={{ color: isActive ? "#fefce8" : "#64748b" }}
                     >
-                      Sedan {route.sedanPrice}
+                      Sedan €{route.sedanPrice}
                     </span>
                     <span
                       className="truncate"
                       style={{ color: isActive ? "#fefce8" : "#64748b" }}
                     >
-                      V-Class {route.vanPrice}
+                      V-Class €{route.vanPrice}
                     </span>
                   </div>
                 </button>

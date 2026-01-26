@@ -18,7 +18,7 @@ export default function BookingStepper({ currentStep }: Props) {
   ];
 
   return (
-    <div className="mb-6">
+    <div className="mb-6 md:mt-10">
       <div className="flex items-center justify-between">
         {steps.map((step, index) => {
           const active = currentStep === step.id;

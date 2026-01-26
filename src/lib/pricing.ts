@@ -4,10 +4,10 @@ export type VehicleId = "sedan" | "vclass";
 
 /**
  * RouteId = EXACT slug from ROUTE_DETAILS
- * Example: "nicosia-larnaca-airport"
+ * Example: "nicosia-Larnaka-airport"
  */
 export type RouteId =
-  | "nicosia-larnaca-airport"
+  | "nicosia-Larnaka-airport"
   | "nicosia-limassol"
   | "nicosia-test-destination"
   |"nicosia-troodos"
@@ -15,14 +15,14 @@ export type RouteId =
   | "nicosia-ercan-airport"
   | "paphos-airport-nicosia"
   | "paphos-airport-limassol"
-  | "paphos-airport-larnaca"
+  | "paphos-airport-Larnaka"
   | "paphos-airport-ayia-napa"
   | "paphos-airport-ercan-airport"
-  | "larnaca-airport-famagusta"
-  | "larnaca-airport-kyrenia"
-  | "larnaca-airport-limassol"
-  | "larnaca-airport-nicosia"
-  | "larnaca-airport-paphos"
+  | "Larnaka-airport-famagusta"
+  | "Larnaka-airport-kyrenia"
+  | "Larnaka-airport-limassol"
+  | "Larnaka-airport-nicosia"
+  | "Larnaka-airport-paphos"
   | "limassol-ercan-airport"
   | "limassol-nicosia"
   | "limassol-paphos-airport"
@@ -50,9 +50,9 @@ const toNum = (price: string) => Number(price.replace("€", "").trim());
 // ---------------------------------------------------------
 export const ROUTE_PRICING: RoutePricing[] = [
   {
-    id: "nicosia-larnaca-airport",
+    id: "nicosia-Larnaka-airport",
     from: "Nicosia",
-    to: "Larnaca Airport",
+    to: "Larnaka Airport",
     vehicleOptions: [
       { vehicleId: "sedan", pricePerLegEUR: toNum("€55") },
       { vehicleId: "vclass", pricePerLegEUR: toNum("€80") },
@@ -122,9 +122,9 @@ export const ROUTE_PRICING: RoutePricing[] = [
     ],
   },
   {
-    id: "paphos-airport-larnaca",
+    id: "paphos-airport-Larnaka",
     from: "Paphos Airport",
-    to: "Larnaca",
+    to: "Larnaka",
     vehicleOptions: [
       { vehicleId: "sedan", pricePerLegEUR: toNum("€135") },
       { vehicleId: "vclass", pricePerLegEUR: toNum("€175") },
@@ -149,8 +149,8 @@ export const ROUTE_PRICING: RoutePricing[] = [
     ],
   },
   {
-    id: "larnaca-airport-famagusta",
-    from: "Larnaca Airport",
+    id: "Larnaka-airport-famagusta",
+    from: "Larnaka Airport",
     to: "Famagusta",
     vehicleOptions: [
       { vehicleId: "sedan", pricePerLegEUR: toNum("€90") },
@@ -158,8 +158,8 @@ export const ROUTE_PRICING: RoutePricing[] = [
     ],
   },
   {
-    id: "larnaca-airport-kyrenia",
-    from: "Larnaca Airport",
+    id: "Larnaka-airport-kyrenia",
+    from: "Larnaka Airport",
     to: "Kyrenia",
     vehicleOptions: [
       { vehicleId: "sedan", pricePerLegEUR: toNum("€120") },
@@ -167,8 +167,8 @@ export const ROUTE_PRICING: RoutePricing[] = [
     ],
   },
   {
-    id: "larnaca-airport-limassol",
-    from: "Larnaca Airport",
+    id: "Larnaka-airport-limassol",
+    from: "Larnaka Airport",
     to: "Limassol",
     vehicleOptions: [
       { vehicleId: "sedan", pricePerLegEUR: toNum("€70") },
@@ -176,8 +176,8 @@ export const ROUTE_PRICING: RoutePricing[] = [
     ],
   },
   {
-    id: "larnaca-airport-nicosia",
-    from: "Larnaca Airport",
+    id: "Larnaka-airport-nicosia",
+    from: "Larnaka Airport",
     to: "Nicosia",
     vehicleOptions: [
       { vehicleId: "sedan", pricePerLegEUR: toNum("€55") },
@@ -185,8 +185,8 @@ export const ROUTE_PRICING: RoutePricing[] = [
     ],
   },
   {
-    id: "larnaca-airport-paphos",
-    from: "Larnaca Airport",
+    id: "Larnaka-airport-paphos",
+    from: "Larnaka Airport",
     to: "Paphos",
     vehicleOptions: [
       { vehicleId: "sedan", pricePerLegEUR: toNum("€130") },

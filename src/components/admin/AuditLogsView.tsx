@@ -1,7 +1,7 @@
 "use client"
 
 import { Icon } from "@iconify/react"
-import { AuditLog } from "@/lib/admin/types"
+import { AuditLog } from "@/lib/api/admin/types"
 
 interface Props {
   logs: AuditLog[]

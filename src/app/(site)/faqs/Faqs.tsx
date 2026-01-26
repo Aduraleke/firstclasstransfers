@@ -89,7 +89,7 @@ const FAQ_GROUPS: FAQGroup[] = [
     title: "At the Airport & Meet & Greet",
     items: [
       {
-        question: "Where will I meet my driver at Larnaca or Paphos Airport?",
+        question: "Where will I meet my driver at Larnaka or Paphos Airport?",
         answer:
           "Your driver will be waiting inside the arrivals hall, after baggage claim, holding a sign with your name or your company name. Exact details are included in your confirmation email.",
       },
@@ -177,19 +177,19 @@ const FAQ_GROUPS: FAQGroup[] = [
     title: "Routes & Destinations",
     items: [
       {
-        question: "Which areas do you serve from Larnaca Airport?",
+        question: "Which areas do you serve from Larnaka Airport?",
         answer:
-          "From Larnaca Airport (LCA) we cover most of Cyprus, including Larnaca City, Ayia Napa, Protaras, Pernera, Paralimni, Kapparis, Nicosia, Limassol, Pissouri, Paphos, Polis, Latchi and selected cross-border routes to Kyrenia, Famagusta and Ercan Airport (under legal and practical conditions).",
+          "From Larnaka Airport (LCA) we cover most of Cyprus, including Larnaka City, Ayia Napa, Protaras, Pernera, Paralimni, Kapparis, Nicosia, Limassol, Pissouri, Paphos, Polis, Latchi and selected cross-border routes to Kyrenia, Famagusta and Ercan Airport (under legal and practical conditions).",
       },
       {
         question: "Do you also operate from Paphos Airport?",
         answer:
-          "Yes. From Paphos Airport (PFO) we provide transfers to Limassol, Nicosia, Larnaca City, Larnaca Airport, Ayia Napa, Famagusta and other destinations on request.",
+          "Yes. From Paphos Airport (PFO) we provide transfers to Limassol, Nicosia, Larnaka City, Larnaka Airport, Ayia Napa, Famagusta and other destinations on request.",
       },
       {
         question: "Do you offer city-to-city transfers (not including the airport)?",
         answer:
-          "Yes. We offer many city-to-city routes, for example Nicosia ↔ Limassol, Nicosia ↔ Larnaca, Limassol ↔ Paphos and Limassol ↔ Troodos. Contact us with your pickup and drop-off locations and we will send you a quote if your route is not listed on the website.",
+          "Yes. We offer many city-to-city routes, for example Nicosia ↔ Limassol, Nicosia ↔ Larnaka, Limassol ↔ Paphos and Limassol ↔ Troodos. Contact us with your pickup and drop-off locations and we will send you a quote if your route is not listed on the website.",
       },
       {
         question: "Do you offer cross-border transfers to Northern Cyprus?",

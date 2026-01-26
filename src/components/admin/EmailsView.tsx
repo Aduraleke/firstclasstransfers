@@ -2,7 +2,7 @@
 
 import { Icon } from "@iconify/react"
 import { BRAND } from "./brand"
-import { Booking, EmailNotification } from "@/lib/admin/types"
+import { Booking, EmailNotification } from "@/lib/api/admin/types"
 
 interface ComposeEmailState {
   to: string

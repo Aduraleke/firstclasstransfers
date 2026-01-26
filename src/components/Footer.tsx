@@ -22,7 +22,7 @@ export default function Footer() {
   };
 
   const popularRoutes = [
-    { from: "Larnaca City", to: "LCA Airport", eta: "≈ 15–20 min" },
+    { from: "Larnaka City", to: "LCA Airport", eta: "≈ 15–20 min" },
     { from: "Ayia Napa", to: "LCA Airport", eta: "≈ 35–45 min" },
     { from: "Protaras", to: "LCA Airport", eta: "≈ 45–55 min" },
   ];

@@ -2,7 +2,7 @@
 
 import { Icon } from "@iconify/react"
 import { BRAND } from "./brand"
-import { PriceRule } from "@/lib/admin/types"
+import { PriceRule } from "@/lib/api/admin/types"
 
 interface Props {
   prices: PriceRule[]

@@ -2,7 +2,7 @@
 
 import { Icon } from "@iconify/react"
 import { BRAND } from "./brand"
-import { Booking, DashboardStats } from "@/lib/admin/types"
+import { Booking, DashboardStats } from "@/lib/api/admin/types"
 
 interface Props {
   stats: DashboardStats

@@ -2,7 +2,7 @@
 
 import { Icon } from "@iconify/react"
 import { BRAND } from "./brand"
-import { Booking, PaymentSession } from "@/lib/admin/types"
+import { Booking, PaymentSession } from "@/lib/api/admin/types"
 
 interface Props {
   bookings: Booking[]

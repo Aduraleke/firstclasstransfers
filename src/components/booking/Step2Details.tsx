@@ -2,23 +2,22 @@
 
 import React, { useMemo, useEffect } from "react";
 import type { BookingDraft } from "@/lib/booking/types";
+import type { BookingRoute } from "@/lib/booking/bookingRoute";
 import {
   BAGGAGE_OPTIONS,
-  TRANSFER_ROUTES,
   VEHICLE_TYPES,
   TIME_PERIODS,
 } from "@/lib/booking/options";
-import { getRouteDetailBySlug, RouteDetail } from "@/lib/routes";
 
 type Props = {
   data: BookingDraft;
+  routeList: BookingRoute[]; // ✅ NEW (same as Step 1)
   onChange: <K extends keyof BookingDraft>(
     key: K,
-    value: BookingDraft[K]
+    value: BookingDraft[K],
   ) => void;
   onBack: () => void;
   onConfirm: () => void;
-  // 🔐 NEW (from Booking.tsx)
   revolutOrderId?: string | null;
   paymentLoading: boolean;
   onPaymentSuccess: () => void;
@@ -38,7 +37,7 @@ const VEHICLE_ORDER = ["sedan", "vclass"] as const;
 
 function getUpgradeVehicle(current: string, passengers: number): string | null {
   const currentIndex = VEHICLE_ORDER.indexOf(
-    current as (typeof VEHICLE_ORDER)[number]
+    current as (typeof VEHICLE_ORDER)[number],
   );
 
   if (currentIndex === -1) return null;
@@ -71,6 +70,7 @@ const VEHICLE_TO_ROUTE_INDEX: Record<string, number> = {
 
 export default function Step2Details({
   data,
+  routeList, // ✅ ADD THIS
   onChange,
   onBack,
   onConfirm,
@@ -79,6 +79,7 @@ export default function Step2Details({
   onPaymentSuccess,
   onPaymentCancel,
 }: Props) {
+
   // ---------------------------------------
   // FIXED: These must come BEFORE any usage
   // ---------------------------------------
@@ -92,17 +93,14 @@ export default function Step2Details({
     Boolean(data.vehicleTypeId) && totalPassengers > maxCapacity;
   // ---------------------------------------
 
-  const route = useMemo(
-    () => TRANSFER_ROUTES.find((r) => r.id === data.routeId),
-    [data.routeId]
-  );
+ 
 
   const [showUpgradeModal, setShowUpgradeModal] = React.useState(false);
   const [checkoutMounted, setCheckoutMounted] = React.useState(false);
 
   const upgradeVehicleId = getUpgradeVehicle(
     data.vehicleTypeId,
-    totalPassengers
+    totalPassengers,
   );
 
   useEffect(() => {
@@ -123,24 +121,25 @@ export default function Step2Details({
     }
   }, [exceedsCapacity, upgradeVehicleId]);
 
-  const routeDetail: RouteDetail | undefined = useMemo(
-    () => (data.routeId ? getRouteDetailBySlug(data.routeId) : undefined),
-    [data.routeId]
-  );
+const routeDetail = useMemo(
+  () => routeList.find((r) => r.slug === data.routeId),
+  [routeList, data.routeId],
+);
+
 
   const vehicle = useMemo(
     () => VEHICLE_TYPES.find((v) => v.id === data.vehicleTypeId),
-    [data.vehicleTypeId]
+    [data.vehicleTypeId],
   );
 
   const timePeriod = useMemo(
     () => TIME_PERIODS.find((tp) => tp.id === data.timePeriod),
-    [data.timePeriod]
+    [data.timePeriod],
   );
 
   const returnTimePeriod = useMemo(
     () => TIME_PERIODS.find((tp) => tp.id === data.returnTimePeriod),
-    [data.returnTimePeriod]
+    [data.returnTimePeriod],
   );
 
   const emailValid = data.email.includes("@");
@@ -166,10 +165,13 @@ export default function Step2Details({
   // --- fare computation ---
   const perLegPriceNumber = useMemo(() => {
     if (!routeDetail || !data.vehicleTypeId) return null;
-    const idx = VEHICLE_TO_ROUTE_INDEX[data.vehicleTypeId] ?? 0;
+
+    const idx = VEHICLE_TO_ROUTE_INDEX[data.vehicleTypeId];
     const priceStr = routeDetail.vehicleOptions?.[idx]?.fixedPrice;
+
     return parsePriceToNumber(priceStr ?? undefined);
   }, [routeDetail, data.vehicleTypeId]);
+
   const isReturn = data.tripType === "return";
   const legs = isReturn ? 2 : 1;
 
@@ -182,78 +184,68 @@ export default function Step2Details({
   const totalDisplay = formatEuro(total);
 
   useEffect(() => {
-    if (!paymentLoading || data.paymentMethod !== "card") return;
+  if (!paymentLoading || data.paymentMethod !== "card") return;
 
-    let destroy: (() => void) | undefined;
-    let cancelled = false;
+  let destroy: (() => void) | undefined;
 
-    document.body.style.overflow = "hidden";
+  document.body.style.overflow = "hidden";
 
-    (async () => {
-      const target = document.getElementById("revolut-checkout");
-      if (!target) {
-        console.error("Revolut target not found");
-        return;
-      }
+  (async () => {
+    const target = document.getElementById("revolut-checkout");
+    if (!target) {
+      console.error("Revolut target not found");
+      return;
+    }
 
-      const { default: RevolutCheckout } = await import("@revolut/checkout");
-      const revolut = await RevolutCheckout();
+    const { default: RevolutCheckout } = await import("@revolut/checkout");
+    const revolut = await RevolutCheckout();
 
-      const result = await revolut.embeddedCheckout({
-        publicToken: process.env.NEXT_PUBLIC_REVOLUT_PUBLIC_KEY,
-        environment: "prod", // Always use production
+    const result = await revolut.embeddedCheckout({
+      publicToken: process.env.NEXT_PUBLIC_REVOLUT_PUBLIC_KEY,
+      environment: "prod",
+      target,
 
-        target,
+      createOrder: async () => {
+        const res = await fetch("/api/payments/revolut/checkout-order", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data),
+        });
 
-        createOrder: async () => {
-          console.log("[REVOLUT] Creating order with payload:", data);
+        const json = await res.json();
 
-          const res = await fetch("/api/payments/revolut/checkout-order", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(data),
-          });
+        if (!res.ok || !json?.token) {
+          throw new Error("Invalid Revolut order response");
+        }
 
-          const json = await res.json();
-          console.log("[REVOLUT] createOrder response:", json);
+        return { publicId: json.token };
+      },
 
-          if (!res.ok || !json?.token) {
-            throw new Error("Invalid Revolut order response");
-          }
+      onSuccess() {
+        onPaymentSuccess();
+      },
 
-          // ✅ REQUIRED SHAPE
-          console.log("[REVOLUT] returning token:", json.token);
-          return { publicId: json.token };
-        },
+      onCancel() {
+        onPaymentCancel();
+      },
 
-        onSuccess() {
-          console.log("[REVOLUT] Payment success");
-          onPaymentSuccess();
-        },
+      onError(err) {
+        console.error("[REVOLUT] Checkout error:", err);
+      },
+    });
 
-        onCancel() {
-          console.log("[REVOLUT] Payment cancelled");
-          onPaymentCancel();
-        },
+    setCheckoutMounted(true);
+    destroy = result.destroy;
+  })();
 
-        onError(err) {
-          console.error("[REVOLUT] Checkout error:", err);
-        },
-      });
+  return () => {
+    document.body.style.overflow = "";
+    destroy?.();
+    setCheckoutMounted(false);
+  };
+}, [paymentLoading, data, onPaymentCancel, onPaymentSuccess]);
 
-      /* ✅ THIS LINE IS THE KEY */
-      setCheckoutMounted(true);
 
-      destroy = result.destroy;
-    })();
-
-    return () => {
-      cancelled = true;
-      document.body.style.overflow = "";
-      destroy?.();
-      setCheckoutMounted(false); // ✅ reset for next open
-    };
-  }, [paymentLoading, data, onPaymentCancel, onPaymentSuccess]);
 
   return (
     <div className="bg-white rounded-3xl border border-gray-100 shadow-lg shadow-gray-100/70 p-5 sm:p-6 lg:p-7 space-y-6">
@@ -326,9 +318,7 @@ export default function Step2Details({
             </div>
             <p className="text-sm font-semibold text-gray-900">
               {routeDetail
-                ? `${routeDetail.from} → ${routeDetail.to}`
-                : route
-                ? `${route.origin} → ${route.destination}`
+                ? `${routeDetail.fromLocation} → ${routeDetail.toLocation}`
                 : "Route not selected"}
             </p>
           </div>

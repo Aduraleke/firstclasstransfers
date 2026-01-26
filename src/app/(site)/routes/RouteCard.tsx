@@ -2,16 +2,21 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { ROUTE_DETAILS } from "@/lib/routes";
-
-type Route = (typeof ROUTE_DETAILS)[number];
+import { RouteDetail } from "@/lib/routes/types";
 
 type RouteCardProps = {
-  route: Route;
+  route: RouteDetail;
 };
 
 export default function RouteCard({ route }: RouteCardProps) {
   const description = route.metaDescription || route.body;
+
+  // --- price helpers (safe, backend-driven) ---
+  const sedanPrice =
+    route.vehicleOptions?.[0]?.fixedPrice ?? route.sedanPrice ?? "—";
+
+  const vanPrice =
+    route.vehicleOptions?.[1]?.fixedPrice ?? route.vanPrice ?? "—";
 
   return (
     <Link
@@ -22,9 +27,9 @@ export default function RouteCard({ route }: RouteCardProps) {
       <div className="relative h-32 w-full overflow-hidden">
         <Image
           src={route.image}
-          alt={`${route.from} to ${route.to} taxi transfer`}
+          alt={`${route.fromLocation} to ${route.toLocation} taxi transfer`}
           fill
-          sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
+          unoptimized
           className="object-cover transition-transform duration-500 group-hover:scale-105"
         />
 
@@ -32,10 +37,10 @@ export default function RouteCard({ route }: RouteCardProps) {
 
         <div className="absolute inset-x-3 bottom-3 flex items-center justify-between text-[11px] text-white">
           <span className="rounded-full bg-black/55 px-2 py-0.5 backdrop-blur-sm">
-            From {route.from}
+            From {route.fromLocation}
           </span>
           <span className="rounded-full bg-black/45 px-2 py-0.5 text-[10px]">
-            To {route.to}
+            To {route.toLocation}
           </span>
         </div>
       </div>
@@ -45,7 +50,7 @@ export default function RouteCard({ route }: RouteCardProps) {
         {/* TITLE */}
         <div className="flex flex-col gap-1">
           <h2 className="text-base font-semibold text-slate-900 sm:text-[17px]">
-            {route.from} → {route.to}
+            {route.fromLocation} → {route.toLocation}
           </h2>
           <p className="text-[11px] uppercase tracking-[0.18em] text-slate-500">
             Private transfer · Fixed fare
@@ -70,7 +75,7 @@ export default function RouteCard({ route }: RouteCardProps) {
                   Sedan
                 </span>
                 <span className="text-[18px] font-extrabold sm:text-[20px]">
-                  {route.sedanPrice}
+                  €{sedanPrice}
                 </span>
               </div>
 
@@ -81,7 +86,7 @@ export default function RouteCard({ route }: RouteCardProps) {
                   Mercedes V-Class
                 </span>
                 <span className="text-[18px] font-extrabold sm:text-[20px]">
-                  {route.vanPrice}
+                  €{vanPrice}
                 </span>
               </div>
             </div>
@@ -97,9 +102,7 @@ export default function RouteCard({ route }: RouteCardProps) {
             <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
             No hidden fees
           </span>
-          <span className="group-hover:text-slate-900">
-            View route ↗
-          </span>
+          <span className="group-hover:text-slate-900">View route ↗</span>
         </div>
       </div>
     </Link>

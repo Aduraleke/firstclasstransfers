@@ -4,7 +4,7 @@ import { ROUTE_DETAILS, type RouteDetail } from "@/lib/routes";
 import { BaggageType } from "./types";
 
 export type TransferRouteCategory =
-  | "Larnaca"
+  | "Larnaka"
   | "Ayia Napa"
   | "Limassol"
   | "Paphos"
@@ -15,14 +15,14 @@ export type TransferRoute = {
   label: string; // what appears in the select
   category: TransferRouteCategory;
   origin: string; // e.g. "Nicosia"
-  destination: string; // e.g. "Larnaca Airport (LCA)"
+  destination: string; // e.g. "Larnaka Airport (LCA)"
 };
 
 function getCategory(route: RouteDetail): TransferRouteCategory {
   const from = route.from.toLowerCase();
   const to = route.to.toLowerCase();
 
-  if (from.includes("larnaca") || to.includes("larnaca")) return "Larnaca";
+  if (from.includes("Larnaka") || to.includes("Larnaka")) return "Larnaka";
   if (from.includes("ayia napa") || to.includes("ayia napa")) return "Ayia Napa";
   if (from.includes("limassol") || to.includes("limassol")) return "Limassol";
   if (from.includes("paphos") || to.includes("paphos")) return "Paphos";
