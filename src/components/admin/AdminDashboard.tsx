@@ -8,7 +8,6 @@ import { BookingsView } from "@/components/admin/BookingView";
 import { DriversView } from "@/components/admin/DriversView";
 import { RoutesView } from "@/components/admin/RouteView";
 
-import { EmailsView } from "@/components/admin/EmailsView";
 import { AdminUsersView } from "@/components/admin/AdminUserView";
 // import { AuditLogsView } from "@/components/admin/AuditLogsView";
 import { useRouter } from "next/navigation";
@@ -17,7 +16,7 @@ import type { RouteFormInput } from "@/components/admin/modals/RouteFormModal";
 
 import {
   Booking,
-  EmailNotification,
+
   // AuditLog,
   DashboardStats,
   AdminUser,
@@ -39,15 +38,19 @@ import {
 } from "@/lib/api/admin/routeDestination";
 
 import {
-  getBookings,
-  assignDriverToBooking,
-  deleteDriverById,
-  getEmailNotifications,
-  sendCustomEmail,
-  sendBookingEmail,
-  // getAuditLogs,
-  // addAuditLog,
-} from "@/lib/api/admin/mocApi";
+  getVehicles,
+  createVehicle,
+  deleteVehicle,
+  VehicleFormInput,
+  patchVehicle,
+  mapApiToVehicle,
+  Vehicle,
+} from "@/lib/api/admin/vehicles";
+
+import {
+  getActivityLogs,
+  downloadActivityLogs,
+} from "@/lib/api/admin/superAdmin";
 
 import { BookingDetailsModal } from "@/components/admin/modals/BookingDetailsModal";
 import { AssignDriverModal } from "@/components/admin/modals/AssignDriverModal";
@@ -60,14 +63,25 @@ import {
   createDriver,
   DriverFormInput,
   getDrivers,
+  updateDriver,
+  deleteDriver,
 } from "@/lib/api/admin/driverUsers";
+import { AdminHome } from "./AdminHome";
+import { VehiclesView } from "./VehiclesView";
+import { VehicleFormModal } from "./modals/VehicleFormModal";
+import { AuditLogsView } from "./AuditLogsView";
+import {
+  BookingApiResponse,
+  getBookings,
+} from "@/lib/api/admin/bookingDetails";
 
 type ActiveModal =
   | { type: "bookingDetails"; booking: Booking }
   | { type: "assignDriver"; booking: Booking }
-  | { type: "driverForm" }
+  | { type: "driverForm"; driver?: Driver }
   | { type: "routeForm"; route?: Route }
   | { type: "adminForm"; admin?: AdminUser }
+  | { type: "vehicleForm"; vehicle?: Vehicle }
   | { type: "viewAdmin" }
   | null;
 
@@ -83,6 +97,13 @@ export default function AdminDashboard() {
     available: 0,
     unavailable: 0,
   });
+  const [driverMeta, setDriverMeta] = useState<{
+    next: string | null;
+    previous: string | null;
+  }>({
+    next: null,
+    previous: null,
+  });
 
   const [driverTab, setDriverTab] = useState<
     "all" | "available" | "unavailable"
@@ -93,30 +114,33 @@ export default function AdminDashboard() {
 
   const [routes, setRoutes] = useState<Route[]>([]);
 
-  const [emails, setEmails] = useState<EmailNotification[]>([]);
   const [admins, setAdmins] = useState<AdminUser[]>([]);
   const [adminsLoading, setAdminsLoading] = useState(true);
   const [viewAdminLoading, setViewAdminLoading] = useState(false);
   const [adminSubmitting, setAdminSubmitting] = useState(false);
   const [selectedAdmin, setSelectedAdmin] = useState<AdminUser | null>(null);
 
-  // const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
+  const [auditLogs, setAuditLogs] = useState<string[]>([]);
 
   // Simple local-only UI state
-  const [bookingSearch, setBookingSearch] = useState("");
-  const [bookingStatusFilter, setBookingStatusFilter] = useState<string>("all");
-
-  const [composeEmail, setComposeEmail] = useState({
-    to: "",
-    subject: "",
-    message: "",
-    recipientName: "",
+  const [bookingFilters, setBookingFilters] = useState({
+    passenger_name: "",
+    from_location: "",
+    to_location: "",
+    pickup_date: "",
+    return_date: "",
+    vehicle_type: "",
+    status: "all",
   });
+
+  const [bookingsLoading, setBookingsLoading] = useState(false);
 
   const [activeModal, setActiveModal] = useState<ActiveModal>(null);
   const [routesLoading, setRoutesLoading] = useState(true);
 
   const [expandedRouteGroups, setExpandedRouteGroups] = useState<string[]>([]);
+  const [vehicles, setVehicles] = useState<Vehicle[]>([]);
+  const [vehiclesLoading, setVehiclesLoading] = useState(false);
 
   const router = useRouter();
   const logout = useAuthStore((s) => s.logout);
@@ -131,6 +155,65 @@ export default function AdminDashboard() {
     completedToday: 0, // you can compute this later based on date
     revenue: "€0", // you can compute from payments later
   };
+  function normalizeTripType(value: string): "One Way" | "Round Trip" {
+    return value.toLowerCase().includes("round") ? "Round Trip" : "One Way";
+  }
+
+  function normalizePaymentStatus(
+    value: string,
+  ): "Paid" | "Not Paid" | "Pending" {
+    switch (value.toLowerCase()) {
+      case "paid":
+        return "Paid";
+      case "not paid":
+      case "unpaid":
+        return "Not Paid";
+      default:
+        return "Pending";
+    }
+  }
+  function mapBookingApiToBooking(api: BookingApiResponse): Booking {
+    return {
+      id: api.bookingId,
+
+      customerName: api.passengerInformation.fullName,
+      email: api.passengerInformation.emailAddress,
+      phone: api.passengerInformation.phoneNumber,
+
+      airport: api.route.fromLocation,
+      destination: api.route.toLocation,
+
+      date: api.pickupDate,
+      time: api.pickupTime,
+
+      tripType: normalizeTripType(api.tripType),
+      timePeriod: api.timePeriod,
+
+      price: api.price ?? null,
+      paymentMethod: api.paymentType,
+      paymentStatus: normalizePaymentStatus(api.paymentStatus),
+
+      status: api.status,
+
+      driver: api.driver?.fullName ?? null,
+      vehicleType: api.vehicleType ?? null,
+
+      // ✅ REQUIRED FIELDS (now satisfied)
+      passengers:
+        (api.transferInformation?.adults ?? 0) +
+          (api.transferInformation?.children ?? 0) || null,
+
+      stripeRef: Boolean(api.paymentId),
+
+      notes:
+        api.passengerInformation.additionalInformation ??
+        "",
+
+
+      // ✅ keep raw API
+      raw: api,
+    };
+  }
 
   // Initial load from mock API
   useEffect(() => {
@@ -146,13 +229,9 @@ export default function AdminDashboard() {
         // BOOKINGS
         if (currentAdmin.permissions.bookings) {
           const bookingsData = await getBookings();
-          setBookings(bookingsData);
-
-          const emailsData = await getEmailNotifications();
-          setEmails(emailsData);
+          setBookings(bookingsData.map(mapBookingApiToBooking));
         } else {
           setBookings([]);
-          setEmails([]);
         }
 
         // ROUTES
@@ -175,6 +254,7 @@ export default function AdminDashboard() {
       } finally {
         setAdminsLoading(false);
         setRoutesLoading(false);
+        setBookingsLoading(false);
       }
     }
 
@@ -194,13 +274,20 @@ export default function AdminDashboard() {
             ? "available"
             : "unavailable";
 
-      const { drivers, counts } = await getDrivers({
+      const response = await getDrivers({
         status,
         search: driverSearch || undefined,
       });
 
-      setDrivers(drivers);
-      setDriverCounts(counts);
+      setDrivers(response.drivers);
+      setDriverCounts(response.counts);
+
+      // 🔥 NEW: keep the rest of the backend data
+      setDriverMeta({
+        next: response.next,
+        previous: response.previous,
+      });
+
       setDriversLoading(false);
     }
 
@@ -218,10 +305,45 @@ export default function AdminDashboard() {
   useEffect(() => {
     if (!admin) return;
 
+    if (admin.isSuperuser) {
+      setCurrentView("dashboard");
+      return;
+    }
+
     if (admin.permissions.bookings) setCurrentView("bookings");
     else if (admin.permissions.drivers) setCurrentView("drivers");
     else if (admin.permissions.routes) setCurrentView("routes");
-    else setCurrentView("dashboard");
+    else setCurrentView("home");
+  }, [admin]);
+
+  useEffect(() => {
+    if (!admin?.permissions.vehicles) return;
+
+    async function loadVehicles() {
+      setVehiclesLoading(true);
+
+      const apiData = await getVehicles();
+      setVehicles(apiData.map(mapApiToVehicle)); // 🔥 boundary conversion
+
+      setVehiclesLoading(false);
+    }
+
+    loadVehicles();
+  }, [admin]);
+
+  useEffect(() => {
+    if (!admin?.isSuperuser) return;
+
+    async function loadActivityLogs() {
+      try {
+        const res = await getActivityLogs();
+        setAuditLogs(res.logs);
+      } catch (err) {
+        console.error("Failed to load activity logs", err);
+      }
+    }
+
+    loadActivityLogs();
   }, [admin]);
 
   const activeRoute =
@@ -251,20 +373,6 @@ export default function AdminDashboard() {
     setActiveModal({ type: "assignDriver", booking });
   };
 
-  const handleAssignDriver = async (bookingId: string, driverName: string) => {
-    const updated = await assignDriverToBooking(bookingId, driverName);
-    if (!updated) return;
-    setBookings((prev) => prev.map((b) => (b.id === updated.id ? updated : b)));
-    // const log = await addAuditLog({
-    //   adminName: "Admin User",
-    //   action: "assign_driver",
-    //   details: `Assigned driver ${driverName} to booking ${bookingId}`,
-    //   ipAddress: "127.0.0.1",
-    // });
-    // setAuditLogs((prev) => [log, ...prev]);
-    closeModal();
-  };
-
   const handleExportBookings = () => {
     // you already have CSV logic; you can reuse it here or keep it simple for now
     // left empty so you can drop in your existing implementation
@@ -276,43 +384,64 @@ export default function AdminDashboard() {
     setActiveModal({ type: "driverForm" });
   };
 
-  
-  const handleCreateDriver = async (input: DriverFormInput) => {
-  await createDriver({
-    name: input.name,
-    email: input.email,
-    phone: input.phone,
-    licenseNumber: input.licenseNumber,
-    profilePicture: input.profilePicture,
-  })
+  const handleUpsertDriver = async (
+    input: DriverFormInput,
+    driverId?: string,
+  ) => {
+    if (driverId) {
+      await updateDriver(driverId, {
+        name: input.name,
+        email: input.email,
+        phone: input.phone,
+        licenseNumber: input.licenseNumber,
+        profilePicture: input.profilePicture,
+      });
+    } else {
+      await createDriver(input);
+    }
 
-  const status =
-    driverTab === "all"
-      ? undefined
-      : driverTab === "available"
-      ? "available"
-      : "unavailable"
+    const response = await getDrivers({
+      status:
+        driverTab === "all"
+          ? undefined
+          : driverTab === "available"
+            ? "available"
+            : "unavailable",
+      search: driverSearch || undefined,
+    });
 
-  const { drivers, counts } = await getDrivers({
-    status,
-    search: driverSearch || undefined,
-  })
+    setDrivers(response.drivers);
+    setDriverCounts(response.counts);
+    setDriverMeta({
+      next: response.next,
+      previous: response.previous,
+    });
 
-  setDrivers(drivers)
-  setDriverCounts(counts)
-}
+    closeModal();
+  };
 
-
+  const handleEditDriverClick = (driver: Driver) => {
+    setActiveModal({ type: "driverForm", driver });
+  };
   const handleDeleteDriver = async (id: string) => {
-    await deleteDriverById(id);
-    setDrivers((prev) => prev.filter((d) => d.id !== id));
-    // const log = await addAuditLog({
-    //   adminName: "Admin User",
-    //   action: "delete_driver",
-    //   details: `Deleted driver ${id}`,
-    //   ipAddress: "127.0.0.1",
-    // });
-    // setAuditLogs((prev) => [log, ...prev]);
+    await deleteDriver(id);
+
+    const response = await getDrivers({
+      status:
+        driverTab === "all"
+          ? undefined
+          : driverTab === "available"
+            ? "available"
+            : "unavailable",
+      search: driverSearch || undefined,
+    });
+
+    setDrivers(response.drivers);
+    setDriverCounts(response.counts);
+    setDriverMeta({
+      next: response.next,
+      previous: response.previous,
+    });
   };
 
   // ROUTES
@@ -442,40 +571,31 @@ export default function AdminDashboard() {
     setRoutes((prev) => prev.filter((r) => r.routeId !== routeId));
   };
 
-  // EMAILS
+  //VEHICLES
 
-  const handleSendCustomEmail = async () => {
-    if (!composeEmail.to || !composeEmail.subject || !composeEmail.message)
-      return;
-    const email = await sendCustomEmail(composeEmail.to, composeEmail.subject);
-    setEmails((prev) => [email, ...prev]);
-
-    // const log = await addAuditLog({
-    //   adminName: "Admin User",
-    //   action: "send_custom_email",
-    //   details: `Sent custom email to ${composeEmail.to}`,
-    //   ipAddress: "127.0.0.1",
-    // });
-    // setAuditLogs((prev) => [log, ...prev]);
-
-    setComposeEmail({ to: "", subject: "", message: "", recipientName: "" });
+  const handleAddVehicleClick = () => {
+    setActiveModal({ type: "vehicleForm" });
   };
 
-  const handleSendBookingEmail = async (
-    bookingId: string,
-    type: EmailNotification["type"],
-  ) => {
-    const email = await sendBookingEmail(bookingId, type);
-    if (!email) return;
-    setEmails((prev) => [email, ...prev]);
+  const handleEditVehicleClick = (vehicle: Vehicle) => {
+    setActiveModal({ type: "vehicleForm", vehicle });
+  };
 
-    // const log = await addAuditLog({
-    //   adminName: "Admin User",
-    //   action: "send_booking_email",
-    //   details: `Sent ${type} email for booking ${bookingId}`,
-    //   ipAddress: "127.0.0.1",
-    // });
-    // setAuditLogs((prev) => [log, ...prev]);
+  const handleUpsertVehicle = async (input: VehicleFormInput, id?: number) => {
+    if (id) {
+      await patchVehicle(id, input);
+    } else {
+      await createVehicle(input);
+    }
+
+    const apiData = await getVehicles();
+    setVehicles(apiData.map(mapApiToVehicle));
+    closeModal();
+  };
+
+  const handleDeleteVehicle = async (id: number) => {
+    await deleteVehicle(id);
+    setVehicles((prev) => prev.filter((v) => v.id !== id));
   };
 
   // ADMINS
@@ -528,8 +648,8 @@ export default function AdminDashboard() {
       await updateAdmin(adminId, input);
 
       const updatedAdmins = await getAdminUsers();
+      setAdminSubmitting(false);
       setAdmins(updatedAdmins);
-
       closeModal();
     } catch (err) {
       setAdminError(
@@ -552,6 +672,17 @@ export default function AdminDashboard() {
     await deleteAdmin(id);
     setAdmins((prev) => prev.filter((a) => a.id !== id));
     closeModal();
+  };
+
+  const VIEW_TITLES: Record<AdminViewId, string> = {
+    home: "Overview",
+    dashboard: "Dashboard",
+    bookings: "Bookings",
+    drivers: "Drivers",
+    routes: "Routes",
+    vehicles: "Vehicles",
+    admins: "Admin Users",
+    audit: "Audit Logs",
   };
 
   // ───────────────────────── UI ─────────────────────────
@@ -586,11 +717,14 @@ export default function AdminDashboard() {
       <main className="flex-1 flex flex-col overflow-hidden">
         <header className="border-b border-slate-800 bg-slate-900/80 px-6 py-4 flex items-center justify-between">
           <h1 className="text-xl font-semibold text-white">
-            {currentView.charAt(0).toUpperCase() + currentView.slice(1)}
+            {VIEW_TITLES[currentView]}
           </h1>
         </header>
 
         <section className="flex-1 overflow-y-auto px-6 py-6 bg-slate-950">
+          {/* 🏠 HOME */}
+          {currentView === "home" && <AdminHome />}
+
           {currentView === "dashboard" && (
             <DashboardView
               stats={stats}
@@ -602,10 +736,9 @@ export default function AdminDashboard() {
           {currentView === "bookings" && admin?.permissions.bookings && (
             <BookingsView
               bookings={bookings}
-              search={bookingSearch}
-              setSearch={setBookingSearch}
-              statusFilter={bookingStatusFilter}
-              setStatusFilter={setBookingStatusFilter}
+              loading={bookingsLoading}
+              filters={bookingFilters}
+              setFilters={setBookingFilters}
               onExport={handleExportBookings}
               onViewBooking={handleViewBooking}
               onAssignDriver={handleAssignDriverClick}
@@ -622,7 +755,9 @@ export default function AdminDashboard() {
               onSearchChange={setDriverSearch}
               onAddDriver={handleAddDriverClick}
               onDeleteDriver={handleDeleteDriver}
+              onEditDriver={handleEditDriverClick} // ✅
               loading={driversLoading}
+              pagination={driverMeta}
             />
           )}
 
@@ -638,14 +773,13 @@ export default function AdminDashboard() {
             />
           )}
 
-          {currentView === "emails" && (
-            <EmailsView
-              bookings={bookings}
-              emails={emails}
-              composeEmail={composeEmail}
-              setComposeEmail={setComposeEmail}
-              onSendCustom={handleSendCustomEmail}
-              onSendBookingEmail={handleSendBookingEmail}
+          {currentView === "vehicles" && admin.permissions.vehicles && (
+            <VehiclesView
+              vehicles={vehicles}
+              loading={vehiclesLoading}
+              onAdd={handleAddVehicleClick}
+              onEdit={handleEditVehicleClick}
+              onDelete={handleDeleteVehicle} // ✅ CORRECT
             />
           )}
 
@@ -658,7 +792,9 @@ export default function AdminDashboard() {
             />
           )}
 
-          {/* {currentView === "audit" && <AuditLogsView logs={auditLogs} />} */}
+          {currentView === "audit" && admin.isSuperuser && (
+            <AuditLogsView logs={auditLogs} onDownload={downloadActivityLogs} />
+          )}
         </section>
       </main>
 
@@ -675,8 +811,10 @@ export default function AdminDashboard() {
         <AssignDriverModal
           open
           booking={activeModal.booking}
-          drivers={drivers}
-          onAssign={handleAssignDriver}
+          onSuccess={() => {
+            // refresh bookings
+            setBookingFilters({ ...bookingFilters });
+          }}
           onClose={closeModal}
         />
       )}
@@ -684,7 +822,8 @@ export default function AdminDashboard() {
       {activeModal?.type === "driverForm" && (
         <DriverFormModal
           open
-          onSubmit={handleCreateDriver}
+          initialData={activeModal.driver ?? null}
+          onSubmit={handleUpsertDriver} // ✅ ONE handler
           onClose={closeModal}
         />
       )}
@@ -714,6 +853,15 @@ export default function AdminDashboard() {
               handleCreateAdmin(input);
             }
           }}
+        />
+      )}
+
+      {activeModal?.type === "vehicleForm" && (
+        <VehicleFormModal
+          open
+          initial={activeModal.vehicle ?? null}
+          onSubmit={handleUpsertVehicle}
+          onClose={closeModal}
         />
       )}
 

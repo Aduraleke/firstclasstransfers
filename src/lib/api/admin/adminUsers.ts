@@ -8,6 +8,7 @@ const permissionMap: Record<keyof AdminUser["permissions"], string> = {
   drivers: "drivers",
   routes: "routes",
   adminUsers: "adminUsers",
+  vehicles: "vehicles",
 }
 
 function mapPermissionsToBackend(
@@ -65,6 +66,7 @@ function mapCreateAdminToFrontend(
       drivers: admin.userPermissions?.includes("drivers") ?? false,
       routes: admin.userPermissions?.includes("routes") ?? false,
       adminUsers: admin.userPermissions?.includes("adminUsers") ?? false,
+      vehicles: admin.userPermissions?.includes("vehicles") ?? false,
     },
     loginHistory: [],
     activityLog: [],
@@ -154,6 +156,7 @@ function mapAdminToFrontend(admin: BackendAdmin): AdminUser {
       drivers: admin.userPermissions?.includes("drivers") ?? false,
       routes: admin.userPermissions?.includes("routes") ?? false,
       adminUsers: admin.userPermissions?.includes("adminUsers") ?? false,
+      vehicles: admin.userPermissions?.includes("vehicles") ?? false,
     },
     loginHistory: [],
     activityLog: [],
@@ -217,13 +220,18 @@ export async function updateAdmin(
     formData.append("dp", input.dp)
   }
 
-  if (input.permissions) {
-    const perms = mapPermissionsToBackend(input.permissions)
-    perms.forEach((p) => formData.append("permissions", p))
-  }
+if (input.permissions) {
+  const perms = mapPermissionsToBackend(input.permissions)
+
+  perms.forEach((perm) => {
+    formData.append("permissions", perm)
+  })
+}
+
+
 
   const response = await authFetch<BackendAdmin>(
-    `/account/users/${id}/`,
+    `/account/users/${id}/update/`,
     {
       method: "PATCH",
       body: formData,

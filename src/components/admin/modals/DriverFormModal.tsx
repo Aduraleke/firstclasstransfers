@@ -1,12 +1,15 @@
-// src/components/admin/modals/DriverFormModal.tsx
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { DriverFormInput } from "@/lib/api/admin/driverUsers";
+import { Icon } from "@iconify/react";
+import Image from "next/image";
+import { Driver } from "@/lib/api/admin/types";
 
 interface DriverFormModalProps {
   open: boolean;
-  onSubmit: (input: DriverFormInput) => Promise<void> | void;
+  initialData?: Driver | null;
+  onSubmit: (input: DriverFormInput, driverId?: string) => Promise<void>;
   onClose: () => void;
 }
 
@@ -14,9 +17,8 @@ export const DriverFormModal: React.FC<DriverFormModalProps> = ({
   open,
   onSubmit,
   onClose,
+  initialData,
 }) => {
-  const [error, setError] = useState<string | null>(null);
-
   const [form, setForm] = useState<Omit<DriverFormInput, "profilePicture">>({
     name: "",
     email: "",
@@ -24,122 +26,160 @@ export const DriverFormModal: React.FC<DriverFormModalProps> = ({
     licenseNumber: "",
   });
 
-  const [profilePicture, setProfilePicture] = useState<File | null>(null);
+  const [avatar, setAvatar] = useState<File | null>(null);
+  const [preview, setPreview] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const isEdit = Boolean(initialData);
+
+  /* ───────── PREFILL / RESET ───────── */
+  useEffect(() => {
+    if (!open) return;
+
+    if (initialData) {
+      setForm({
+        name: initialData.name,
+        email: initialData.email,
+        phone: initialData.phone,
+        licenseNumber: initialData.licenseNumber,
+      });
+      setPreview(initialData.profilePicture || null);
+    } else {
+      setForm({
+        name: "",
+        email: "",
+        phone: "",
+        licenseNumber: "",
+      });
+      setPreview(null);
+    }
+
+    setAvatar(null);
+    setError(null);
+  }, [open, initialData]);
 
   if (!open) return null;
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
+  /* ───────── SUBMIT ───────── */
+  const submit = async () => {
     if (!form.name || !form.email || !form.phone || !form.licenseNumber) {
-      setError("Please fill in all required fields.");
+      setError("Complete all required fields to continue.");
       return;
     }
 
     try {
-      setError(null);
       setSubmitting(true);
+      setError(null);
 
-      await onSubmit({
-        ...form,
-        profilePicture,
-      });
+      await onSubmit(
+        { ...form, profilePicture: avatar },
+        initialData?.id, // ✅ KEY FIX
+      );
 
-      // ✅ close only on success
       onClose();
-    } catch (err) {
+    } catch {
       setError(
-        err instanceof Error
-          ? err.message
-          : "Failed to save driver. Please try again.",
+        isEdit
+          ? "Failed to update driver. Try again."
+          : "Failed to create driver. Try again.",
       );
     } finally {
       setSubmitting(false);
     }
   };
 
+  const setImage = (file: File | null) => {
+    setAvatar(file);
+    setPreview(file ? URL.createObjectURL(file) : preview);
+  };
+
+  /* ───────── UI ───────── */
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4">
-      <div className="w-full max-w-md rounded-xl border border-slate-700 bg-slate-900 p-6 shadow-2xl">
-        <h2 className="mb-4 text-lg font-semibold text-white">
-          Add Driver
-        </h2>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70">
+      <div className="relative w-full max-w-3xl overflow-hidden rounded-3xl bg-[#0B0F1A] shadow-2xl">
+        {/* CLOSE */}
+        <button
+          onClick={onClose}
+          className="absolute right-4 top-4 z-10 rounded-full p-2 text-slate-400 hover:bg-white/10"
+        >
+          <Icon icon="mdi:close" />
+        </button>
 
-        <form onSubmit={handleSubmit} className="space-y-4 text-sm">
-          <Input
-            label="Full Name"
-            value={form.name}
-            onChange={(v) => setForm({ ...form, name: v })}
-          />
-
-          <Input
-            label="Email"
-            type="email"
-            value={form.email}
-            onChange={(v) => setForm({ ...form, email: v })}
-          />
-
-          <Input
-            label="Phone Number"
-            value={form.phone}
-            onChange={(v) => setForm({ ...form, phone: v })}
-          />
-
-          <Input
-            label="License Number"
-            value={form.licenseNumber}
-            onChange={(v) =>
-              setForm({ ...form, licenseNumber: v })
-            }
-          />
-
-          <div>
-            <label className="mb-1 block text-slate-300">
-              Profile Picture (optional)
-            </label>
-            <input
-              type="file"
-              accept="image/*"
-              onChange={(e) =>
-                setProfilePicture(e.target.files?.[0] ?? null)
-              }
-              className="text-slate-300"
-            />
-          </div>
-
-          {error && (
-            <div className="rounded-lg border border-red-700 bg-red-950/40 px-3 py-2 text-sm text-red-300">
-              {error}
+        <div className="grid md:grid-cols-[300px_1fr]">
+          {/* ───────── LEFT ───────── */}
+          <div className="flex flex-col items-center justify-center gap-6 bg-linear-to-b from-slate-900 to-black px-6 py-10">
+            <div className="relative h-32 w-32 overflow-hidden rounded-full border border-slate-700 bg-slate-800">
+              {preview ? (
+                <Image src={preview} alt="Avatar" fill className="object-cover" />
+              ) : (
+                <div className="flex h-full w-full items-center justify-center text-slate-500">
+                  <Icon icon="mdi:account" className="text-5xl" />
+                </div>
+              )}
             </div>
-          )}
 
-          <div className="mt-4 flex gap-3">
-            <button
-              type="button"
-              onClick={onClose}
-              className="flex-1 rounded-lg bg-slate-700 px-4 py-2 font-semibold text-slate-100 hover:bg-slate-600"
-            >
-              Cancel
-            </button>
+            <label className="cursor-pointer text-sm font-medium text-emerald-400 hover:underline">
+              Upload photo
+              <input
+                type="file"
+                accept="image/*"
+                hidden
+                onChange={(e) => setImage(e.target.files?.[0] ?? null)}
+              />
+            </label>
 
-            <button
-              type="submit"
-              disabled={submitting}
-              className="flex-1 rounded-lg bg-emerald-600 px-4 py-2 font-semibold text-white hover:bg-emerald-700 disabled:opacity-60"
-            >
-              {submitting ? "Saving…" : "Save Driver"}
-            </button>
+            <div className="text-center">
+              <p className="text-lg font-semibold text-white">
+                {form.name || "Driver Name"}
+              </p>
+              <p className="text-xs text-slate-400">
+                {form.email || "email@example.com"}
+              </p>
+            </div>
           </div>
-        </form>
+
+          {/* ───────── RIGHT ───────── */}
+          <div className="px-10 py-10">
+            <h2 className="text-xl font-semibold text-white">
+              {isEdit ? "Edit Driver" : "Create Driver"}
+            </h2>
+            <p className="mb-8 text-sm text-slate-400">
+              This information will be used across the system
+            </p>
+
+            <div className="grid gap-6">
+              <Field label="Full name" value={form.name} onChange={(v) => setForm({ ...form, name: v })} />
+              <Field label="Email address" type="email" value={form.email} onChange={(v) => setForm({ ...form, email: v })} />
+              <Field label="Phone number" value={form.phone} onChange={(v) => setForm({ ...form, phone: v })} />
+              <Field label="Driver's License number" value={form.licenseNumber} onChange={(v) => setForm({ ...form, licenseNumber: v })} />
+            </div>
+
+            {error && <p className="mt-6 text-sm text-red-400">{error}</p>}
+
+            <div className="mt-10 flex items-center justify-between">
+              <button onClick={onClose} className="text-sm text-slate-400 hover:text-white">
+                Cancel
+              </button>
+
+              <button
+                onClick={submit}
+                disabled={submitting}
+                className="rounded-xl bg-emerald-500 px-8 py-3 text-sm font-semibold text-black hover:bg-emerald-400 disabled:opacity-60"
+              >
+                {submitting ? "Saving…" : isEdit ? "Update Driver" : "Create Driver"}
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
 };
 
-/* ───────── SMALL INPUT COMPONENT ───────── */
+/* ───────────────── FIELD ───────────────── */
 
-function Input({
+function Field({
   label,
   value,
   onChange,
@@ -151,16 +191,47 @@ function Input({
   type?: string;
 }) {
   return (
-    <div>
-      <label className="mb-1 block text-slate-300">
-        {label}
-      </label>
+    <div className="relative">
       <input
         type={type}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full rounded-lg border border-slate-600 bg-slate-900 px-3 py-2 text-white outline-none focus:border-slate-400"
+        placeholder=" "
+        className="
+          peer
+          w-full
+          border-b border-slate-700
+          bg-transparent
+          py-3
+          text-white
+          outline-none
+          transition
+          focus:border-emerald-400
+        "
       />
+
+      <label
+        className="
+          pointer-events-none
+          absolute
+          left-0
+          top-1/2
+          -translate-y-1/2
+          text-sm
+          text-slate-400
+          transition-all
+
+          peer-focus:-top-2
+          peer-focus:text-xs
+          peer-focus:text-emerald-400
+
+          peer-not-placeholder-shown:-top-2
+          peer-not-placeholder-shown:text-xs
+        "
+      >
+        {label}
+      </label>
     </div>
   );
 }
+

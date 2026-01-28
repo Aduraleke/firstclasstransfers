@@ -1,27 +1,75 @@
+import { ReactNode } from "react";
 import { DriverStatus } from "./driverUsers"
+import { BookingApiResponse } from "./bookingDetails";
 
 export type BookingStatus = "Pending" | "Assigned" | "Completed" | "Cancelled"
 
 export interface Booking {
-  id: string
-  customerName: string
-  email: string
-  phone: string
-  airport: string
-  destination: string
-  vehicleType: string
-  passengers: number
-  date: string // YYYY-MM-DD
-  time: string // HH:mm
-  price: string // e.g. "€45"
-  status: BookingStatus
-  paymentStatus: "Paid" | "Unpaid" | "Refunded"
-  paymentMethod?: "card" | "cash"
-  revolutOrderId?: string
-  driver: string | null
-  notes: string
-  stripeRef: string
+  passengers: ReactNode;
+  revolutOrderId?: string;
+  stripeRef: boolean;
+  notes: string;
+  id: string;
+
+  customerName: string;
+  email: string;
+  phone?: string;
+
+  airport: string;
+  destination: string;
+
+  date: string;
+  time: string;
+
+  tripType: "One Way" | "Round Trip";
+  timePeriod?: string;
+
+  price: number | null;
+  paymentMethod: "Cash" | "Card";
+  paymentStatus: "Paid" | "Not Paid" | "Pending";
+
+  status: string
+
+  driver: string | null;
+  vehicleType: string | null;
+    raw: BookingApiResponse;
+
 }
+
+ export interface BookingApi {
+  bookingId: string;
+
+  passengerInformation: {
+    fullName: string;
+    emailAddress: string;
+    phoneNumber?: string;
+  };
+
+  route: {
+    fromLocation: string;
+    toLocation: string;
+  };
+
+  pickupDate: string;
+  pickupTime: string;
+
+  tripType: "One Way" | "Round Trip";
+  timePeriod?: string;
+
+  price?: number;
+  paymentType: "Cash" | "Card";
+  paymentStatus: "Paid" | "Not Paid" | "Pending";
+
+  driver?: {
+    fullName: string;
+  };
+
+  vehicleType?: string;
+
+  notes?: string;
+  stripeRef?: boolean;
+}
+
 
 export interface Driver {
   id: string
@@ -120,6 +168,7 @@ export interface AdminUser {
     drivers: boolean
     routes: boolean
     adminUsers: boolean
+    vehicles: boolean
   }
   loginHistory: { date: string; ip: string; device: string; location: string }[]
   activityLog: { date: string; action: string; type: string }[]
@@ -149,6 +198,7 @@ export interface AuthAdmin {
     drivers: boolean;
     routes: boolean;
     adminUsers: boolean;
+    vehicles: boolean;
   };
 }
 
@@ -196,4 +246,26 @@ export type RouteFormInput = {
   bookCtaLabel: string;
   bookCtaSupport: string;
 };
+
+export interface Vehicle {
+  id: number;
+  license_plate: string;
+  make: string;
+  model: string;
+  year?: string;
+  color?: string;
+  type: "Sedan" | "Minivan";
+  max_passengers: number;
+}
+
+/** Vehicle form input (frontend-friendly) */
+export interface VehicleFormInput {
+  licensePlate: string;
+  make: string;
+  model: string;
+  year?: string;
+  color?: string;
+  type: "Sedan" | "Minivan";
+  maxPassengers: number;
+}
 

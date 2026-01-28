@@ -1,4 +1,6 @@
 export type BookingRoute = {
+  routeId: string
+  code: string;
   slug: string;
   fromLocation: string;
   toLocation: string;

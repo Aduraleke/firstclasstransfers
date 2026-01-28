@@ -6,7 +6,6 @@ import { TIME_PERIODS } from "@/lib/booking/options";
 import { BookingDraft } from "@/lib/booking/types";
 import type { BookingRoute } from "@/lib/booking/bookingRoute";
 
-
 type Props = {
   data: BookingDraft;
   onChange: <K extends keyof BookingDraft>(
@@ -16,7 +15,6 @@ type Props = {
   onNext: () => void;
   routeList: BookingRoute[];
 };
-
 
 const BRAND_PRIMARY = "#162c4b";
 const BRAND_ACCENT = "#b07208";
@@ -44,9 +42,12 @@ const VEHICLE_IMAGE_MAP: Record<VehicleId, string> = {
   vclass: "/mercedesVclass.jpg",
 };
 
-
-
-export default function Step1Trip({ data, onChange, onNext, routeList }: Props) {
+export default function Step1Trip({
+  data,
+  onChange,
+  onNext,
+  routeList,
+}: Props) {
   const timeSectionRef = React.useRef<HTMLDivElement | null>(null);
 
   const [timeOpen, setTimeOpen] = useState(false);
@@ -90,7 +91,6 @@ export default function Step1Trip({ data, onChange, onNext, routeList }: Props) 
 
   // Highlight vehicle on load (deep link)
 
-
   // Auto-scroll to time section
   useEffect(() => {
     if (data.vehicleTypeId && timeSectionRef.current) {
@@ -101,24 +101,30 @@ export default function Step1Trip({ data, onChange, onNext, routeList }: Props) 
     }
   }, [data.vehicleTypeId]);
 
-  const handleRouteChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    onChange("routeId", e.target.value);
-  };
+const handleRouteChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+  const id = e.target.value;
+  const route = routeList.find(r => r.routeId === id);
+  if (!route) return;
+
+  onChange("routeId", route.routeId);
+  onChange("routeSlug", route.slug);
+};
+
 
   const handleVehicleChange = (id: VehicleId) => {
     onChange("vehicleTypeId", id);
   };
 
-  const handleTimePeriodChange = (id: "day" | "night") => {
+  const handleTimePeriodChange = (id: "Day Tariff" | "Night Tariff") => {
     onChange("timePeriod", id);
   };
 
-  const handleTripTypeChange = (tripType: "one-way" | "return") => {
+  const handleTripTypeChange = (tripType: "One Way" | "Return") => {
     onChange("tripType", tripType);
-    if (tripType === "one-way") {
+    if (tripType === "One Way") {
       onChange("returnDate", "");
       onChange("returnTime", "");
-      onChange("returnTimePeriod", "day");
+      onChange("returnTimePeriod", "Day Tariff");
     }
   };
 
@@ -142,7 +148,10 @@ export default function Step1Trip({ data, onChange, onNext, routeList }: Props) 
     onChange("time", value);
 
     const hour = Number(value.split(":")[0]);
-    onChange("timePeriod", hour >= 6 && hour < 22 ? "day" : "night");
+    onChange(
+      "timePeriod",
+      hour >= 6 && hour < 22 ? "Day Tariff" : "Night Tariff",
+    );
   };
 
   const handleReturnTimeChange = (value: string) => {
@@ -150,7 +159,7 @@ export default function Step1Trip({ data, onChange, onNext, routeList }: Props) 
 
     const baseDate = data.returnDate || data.date || getTodayISO();
 
-    // If return time is past on same day → move to tomorrow
+    // If return time is past on same Day Tariff → move to tomorrow
     if (isTimeInPast(baseDate, value)) {
       onChange("returnDate", getTomorrowISO());
     } else {
@@ -160,7 +169,10 @@ export default function Step1Trip({ data, onChange, onNext, routeList }: Props) 
     onChange("returnTime", value);
 
     const hour = Number(value.split(":")[0]);
-    onChange("returnTimePeriod", hour >= 6 && hour < 22 ? "day" : "night");
+    onChange(
+      "returnTimePeriod",
+      hour >= 6 && hour < 22 ? "Day Tariff" : "Night Tariff",
+    );
   };
 
   const hasMainTrip =
@@ -171,19 +183,17 @@ export default function Step1Trip({ data, onChange, onNext, routeList }: Props) 
     Boolean(data.timePeriod);
 
   const hasReturnTrip =
-    data.tripType === "one-way" ||
+    data.tripType === "One Way" ||
     (Boolean(data.returnDate) &&
       Boolean(data.returnTime) &&
       Boolean(data.returnTimePeriod));
 
   const canContinue = hasMainTrip && hasReturnTrip;
 
-
- const routeDetail = React.useMemo(
-  () => routeList.find((r) => r.slug === data.routeId),
-  [data.routeId, routeList]
+const routeDetail = React.useMemo(
+  () => routeList.find((r) => r.routeId === data.routeId),
+  [data.routeId, routeList],
 );
-
 
   return (
     <div className="bg-white rounded-3xl border border-gray-100 shadow-lg shadow-gray-100/70 p-5 sm:p-6 lg:p-7 space-y-6">
@@ -204,8 +214,8 @@ export default function Step1Trip({ data, onChange, onNext, routeList }: Props) 
         </h2>
         <div className="inline-flex gap-2 rounded-2xl bg-gray-50 p-1 border border-gray-200">
           {[
-            { id: "one-way" as const, label: "One-way" },
-            { id: "return" as const, label: "Return" },
+            { id: "One Way" as const, label: "One Way" },
+            { id: "Return" as const, label: "Return" },
           ].map((tp) => {
             const active = data.tripType === tp.id;
             return (
@@ -235,15 +245,16 @@ export default function Step1Trip({ data, onChange, onNext, routeList }: Props) 
         </h2>
 
         <select
-          value={data.routeId}
+          value={data.routeId || ""}
           onChange={handleRouteChange}
           className="mt-1 block w-full rounded-2xl border border-gray-300 bg-white px-3 py-2.5 text-sm shadow-sm focus:border-[#b07208]"
         >
-          <option value="">Select your route</option>
+          <option value="" disabled>
+            Select your route
+          </option>
 
           {routeList.map((route) => (
-            
-            <option key={route.slug} value={route.slug}>
+            <option key={route.routeId} value={route.routeId}>
               {route.fromLocation} → {route.toLocation}
             </option>
           ))}
@@ -438,7 +449,7 @@ export default function Step1Trip({ data, onChange, onNext, routeList }: Props) 
       </section>
 
       {/* Return Trip */}
-      {data.tripType === "return" && (
+      {data.tripType === "Return" && (
         <section className="space-y-3 rounded-2xl border border-dashed border-gray-200 bg-gray-50 p-4">
           <h2 className="text-sm font-semibold text-gray-800">
             Return trip details

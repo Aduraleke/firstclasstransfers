@@ -1,4 +1,5 @@
 import { authFetch } from "./auth/client"
+import { Driver } from "./types"
 
 /* ───────────────── FRONTEND TYPES ───────────────── */
 
@@ -22,11 +23,6 @@ export interface DriverCounts {
   unavailable: number
 }
 
-interface BackendDriverListResponse {
-  counts: DriverCounts
-  results: BackendDriver[]
-}
-
 export interface DriverFormInput {
   name: string
   email: string
@@ -35,6 +31,16 @@ export interface DriverFormInput {
   profilePicture?: File | null
 }
 
+
+interface BackendDriverListResponse {
+  count: number;
+  all: number;
+  available: number;
+  unavailable: number;
+  next: string | null;
+  previous: string | null;
+  results: BackendDriver[];
+}
 
 
 
@@ -47,13 +53,13 @@ export interface DriverFormInput {
 interface BackendDriver {
   id: number
   email: string
-  phone_number: string
+  phoneNumber: string
   dp: string | null
-  full_name: string
-  license_number: string
+  fullName: string
+  licenseNumber: string
   status: DriverStatus
-  date_joined: string
-  is_active: boolean
+  dateJoined: string
+  isActive: boolean
   disabled: boolean
 }
 
@@ -68,16 +74,20 @@ export interface GetDriversParams {
 function mapDriverToFrontend(driver: BackendDriver): DriverUser {
   return {
     id: String(driver.id),
-    name: driver.full_name,
+    name: driver.fullName,
     email: driver.email,
-    phone: driver.phone_number ?? "",
-    licenseNumber: driver.license_number,
+    phone: driver.phoneNumber ?? "",
+    licenseNumber: driver.licenseNumber,
     profilePicture: driver.dp ?? "",
     status: driver.status,
-    createdAt: driver.date_joined.split("T")[0],
-    isActive: driver.is_active && !driver.disabled,
+    createdAt: driver.dateJoined
+      ? driver.dateJoined.split("T")[0]
+      : "",
+    isActive: driver.isActive && !driver.disabled,
   }
 }
+
+
 
 /* ───────────────── CREATE DRIVER ───────────────── */
 
@@ -110,7 +120,7 @@ export async function createDriver(
   }
 
   const response = await authFetch<BackendDriver>(
-    "/account/signup/",
+    "/drivers/create/",
     {
       method: "POST",
       body: formData,
@@ -123,26 +133,53 @@ export async function createDriver(
 
 /* ───────────────── LIST DRIVERS ───────────────── */
 
+export interface DriverListResponse {
+  drivers: DriverUser[]
+  counts: DriverCounts
+  next: string | null
+  previous: string | null
+}
+
 export async function getDrivers(
   params: GetDriversParams = {},
-): Promise<{ drivers: DriverUser[]; counts: DriverCounts }> {
-  const query = new URLSearchParams()
+): Promise<{
+  drivers: Driver[];
+  counts: {
+    total: number;
+    available: number;
+    unavailable: number;
+  };
+  next: string | null;
+  previous: string | null;
+}> {
+  const query = new URLSearchParams();
 
-  if (params.status) query.append("status", params.status)
-  if (params.search) query.append("search", params.search)
+  if (params.status) query.append("status", params.status);
+  if (params.search) query.append("search", params.search);
 
   const response = await authFetch<BackendDriverListResponse>(
     `/drivers/?${query.toString()}`,
     { method: "GET" },
-  )
-  console.log("Existing Driver Details",response)
+  );
 
   return {
     drivers: response.results.map(mapDriverToFrontend),
-    counts: response.counts,
-    
-  }
+
+    counts: {
+      total: Number(
+        response.all ??
+        response.count ??
+        response.results.length
+      ),
+      available: Number(response.available ?? 0),
+      unavailable: Number(response.unavailable ?? 0),
+    },
+
+    next: response.next,
+    previous: response.previous,
+  };
 }
+
 
 
 /* ───────────────── GET DRIVER BY ID ───────────────── */

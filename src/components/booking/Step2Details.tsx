@@ -3,11 +3,7 @@
 import React, { useMemo, useEffect } from "react";
 import type { BookingDraft } from "@/lib/booking/types";
 import type { BookingRoute } from "@/lib/booking/bookingRoute";
-import {
-  BAGGAGE_OPTIONS,
-  VEHICLE_TYPES,
-  TIME_PERIODS,
-} from "@/lib/booking/options";
+import { BAGGAGE_OPTIONS, TIME_PERIODS } from "@/lib/booking/options";
 
 type Props = {
   data: BookingDraft;
@@ -27,46 +23,23 @@ type Props = {
 const BRAND_PRIMARY = "#162c4b";
 const BRAND_ACCENT = "#b07208";
 
-// Vehicle capacity rules
-const VEHICLE_CAPACITY: Record<string, number> = {
-  sedan: 4,
-  vclass: 6,
-};
+function parsePriceToNumber(price?: string | number | null): number | null {
+  if (price == null) return null;
 
-const VEHICLE_ORDER = ["sedan", "vclass"] as const;
-
-function getUpgradeVehicle(current: string, passengers: number): string | null {
-  const currentIndex = VEHICLE_ORDER.indexOf(
-    current as (typeof VEHICLE_ORDER)[number],
-  );
-
-  if (currentIndex === -1) return null;
-
-  for (let i = currentIndex + 1; i < VEHICLE_ORDER.length; i++) {
-    const candidate = VEHICLE_ORDER[i];
-    if (VEHICLE_CAPACITY[candidate] >= passengers) {
-      return candidate;
-    }
+  // Already a number → return directly
+  if (typeof price === "number") {
+    return Number.isFinite(price) ? price : null;
   }
-  return null;
-}
 
-function parsePriceToNumber(price?: string): number | null {
-  if (!price) return null;
-  const match = price.replace(",", ".").match(/(\d+(\.\d+)?)/);
+  // String → normalize and extract number
+  const normalized = price.replace(",", ".");
+  const match = normalized.match(/(\d+(\.\d+)?)/);
+
   if (!match) return null;
-  return Number(match[1]);
-}
 
-function formatEuro(n: number | null): string {
-  if (n == null || Number.isNaN(n)) return "—";
-  return `€${n.toFixed(0)}`;
+  const n = Number(match[1]);
+  return Number.isFinite(n) ? n : null;
 }
-
-const VEHICLE_TO_ROUTE_INDEX: Record<string, number> = {
-  sedan: 0,
-  vclass: 1,
-};
 
 export default function Step2Details({
   data,
@@ -79,29 +52,42 @@ export default function Step2Details({
   onPaymentSuccess,
   onPaymentCancel,
 }: Props) {
-
   // ---------------------------------------
   // FIXED: These must come BEFORE any usage
   // ---------------------------------------
-  const totalPassengers = (data.adults || 0) + (data.children || 0);
-  const maxCapacity =
-    data.vehicleTypeId && VEHICLE_CAPACITY[data.vehicleTypeId]
-      ? VEHICLE_CAPACITY[data.vehicleTypeId]
-      : 0;
-
-  const exceedsCapacity =
-    Boolean(data.vehicleTypeId) && totalPassengers > maxCapacity;
-  // ---------------------------------------
-
- 
 
   const [showUpgradeModal, setShowUpgradeModal] = React.useState(false);
   const [checkoutMounted, setCheckoutMounted] = React.useState(false);
 
-  const upgradeVehicleId = getUpgradeVehicle(
-    data.vehicleTypeId,
-    totalPassengers,
-  );
+const routeDetail = useMemo(
+  () => routeList.find((r) => r.routeId === data.routeId),
+  [routeList, data.routeId],
+);
+
+  const vehicleIndex = useMemo(() => {
+    if (!routeDetail) return -1;
+    return routeDetail.vehicleOptions.findIndex(
+      (v, idx) => (idx === 0 ? "sedan" : "vclass") === data.vehicleTypeId,
+    );
+  }, [routeDetail, data.vehicleTypeId]);
+
+  const vehicleOption =
+    vehicleIndex >= 0 ? routeDetail?.vehicleOptions[vehicleIndex] : null;
+
+  const totalPassengers = (data.adults || 0) + (data.children || 0);
+
+  const maxCapacity = vehicleOption?.maxPassengers ?? 0;
+
+  const exceedsCapacity =
+    Boolean(vehicleOption) && totalPassengers > maxCapacity;
+
+  const upgradeVehicleOption = useMemo(() => {
+    if (!routeDetail || vehicleIndex < 0) return null;
+
+    return routeDetail.vehicleOptions
+      .slice(vehicleIndex + 1)
+      .find((v) => v.maxPassengers >= totalPassengers);
+  }, [routeDetail, vehicleIndex, totalPassengers]);
 
   useEffect(() => {
     if (revolutOrderId) {
@@ -116,21 +102,10 @@ export default function Step2Details({
   }, [revolutOrderId]);
 
   React.useEffect(() => {
-    if (exceedsCapacity && upgradeVehicleId) {
+    if (exceedsCapacity && upgradeVehicleOption) {
       setShowUpgradeModal(true);
     }
-  }, [exceedsCapacity, upgradeVehicleId]);
-
-const routeDetail = useMemo(
-  () => routeList.find((r) => r.slug === data.routeId),
-  [routeList, data.routeId],
-);
-
-
-  const vehicle = useMemo(
-    () => VEHICLE_TYPES.find((v) => v.id === data.vehicleTypeId),
-    [data.vehicleTypeId],
-  );
+  }, [exceedsCapacity, upgradeVehicleOption]);
 
   const timePeriod = useMemo(
     () => TIME_PERIODS.find((tp) => tp.id === data.timePeriod),
@@ -145,7 +120,7 @@ const routeDetail = useMemo(
   const emailValid = data.email.includes("@");
 
   const hasReturnDetails =
-    data.tripType === "one-way" ||
+    data.tripType === "One Way" ||
     (Boolean(data.returnDate) &&
       Boolean(data.returnTime) &&
       Boolean(data.returnTimePeriod));
@@ -164,15 +139,11 @@ const routeDetail = useMemo(
 
   // --- fare computation ---
   const perLegPriceNumber = useMemo(() => {
-    if (!routeDetail || !data.vehicleTypeId) return null;
+    if (!vehicleOption) return null;
+    return parsePriceToNumber(vehicleOption.fixedPrice);
+  }, [vehicleOption]);
 
-    const idx = VEHICLE_TO_ROUTE_INDEX[data.vehicleTypeId];
-    const priceStr = routeDetail.vehicleOptions?.[idx]?.fixedPrice;
-
-    return parsePriceToNumber(priceStr ?? undefined);
-  }, [routeDetail, data.vehicleTypeId]);
-
-  const isReturn = data.tripType === "return";
+  const isReturn = data.tripType === "Return";
   const legs = isReturn ? 2 : 1;
 
   const subtotal = perLegPriceNumber != null ? perLegPriceNumber * legs : null;
@@ -184,67 +155,76 @@ const routeDetail = useMemo(
   const totalDisplay = formatEuro(total);
 
   useEffect(() => {
-  if (!paymentLoading || data.paymentMethod !== "card") return;
+    if (!paymentLoading || data.paymentMethod !== "Card") return;
 
-  let destroy: (() => void) | undefined;
+    let destroy: (() => void) | undefined;
 
-  document.body.style.overflow = "hidden";
+    document.body.style.overflow = "hidden";
 
-  (async () => {
-    const target = document.getElementById("revolut-checkout");
-    if (!target) {
-      console.error("Revolut target not found");
-      return;
-    }
+    (async () => {
+      const target = document.getElementById("revolut-checkout");
+      if (!target) {
+        console.error("Revolut target not found");
+        return;
+      }
 
-    const { default: RevolutCheckout } = await import("@revolut/checkout");
-    const revolut = await RevolutCheckout();
+      const { default: RevolutCheckout } = await import("@revolut/checkout");
+      const revolut = await RevolutCheckout();
 
-    const result = await revolut.embeddedCheckout({
-      publicToken: process.env.NEXT_PUBLIC_REVOLUT_PUBLIC_KEY,
-      environment: "prod",
-      target,
+      const result = await revolut.embeddedCheckout({
+        publicToken: process.env.NEXT_PUBLIC_REVOLUT_PUBLIC_KEY,
+        environment: "prod",
+        target,
 
-      createOrder: async () => {
-        const res = await fetch("/api/payments/revolut/checkout-order", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(data),
-        });
+        createOrder: async () => {
+          const res = await fetch("/api/payments/revolut/checkout-order", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data),
+          });
 
-        const json = await res.json();
+          const json = await res.json();
 
-        if (!res.ok || !json?.token) {
-          throw new Error("Invalid Revolut order response");
-        }
+          if (!res.ok || !json?.token) {
+            throw new Error("Invalid Revolut order response");
+          }
 
-        return { publicId: json.token };
-      },
+          return { publicId: json.token };
+        },
 
-      onSuccess() {
-        onPaymentSuccess();
-      },
+        onSuccess() {
+          onPaymentSuccess();
+        },
 
-      onCancel() {
-        onPaymentCancel();
-      },
+        onCancel() {
+          onPaymentCancel();
+        },
 
-      onError(err) {
-        console.error("[REVOLUT] Checkout error:", err);
-      },
-    });
+        onError(err) {
+          console.error("[REVOLUT] Checkout error:", err);
+        },
+      });
 
-    setCheckoutMounted(true);
-    destroy = result.destroy;
-  })();
+      setCheckoutMounted(true);
+      destroy = result.destroy;
+    })();
 
-  return () => {
-    document.body.style.overflow = "";
-    destroy?.();
-    setCheckoutMounted(false);
-  };
-}, [paymentLoading, data, onPaymentCancel, onPaymentSuccess]);
+    return () => {
+      document.body.style.overflow = "";
+      destroy?.();
+      setCheckoutMounted(false);
+    };
+  }, [paymentLoading, data, onPaymentCancel, onPaymentSuccess]);
 
+  function formatEuro(value: number | null) {
+    if (value == null) return "—";
+    return `€${value.toFixed(0)}`;
+  }
+  useEffect(() => {
+  if (total != null) {
+    onChange("totalPrice", total);
+  }
+}, [total, onChange]);
 
 
   return (
@@ -298,7 +278,7 @@ const routeDetail = useMemo(
               <p className="text-xs font-medium text-gray-600">Trip type</p>
             </div>
             <p className="text-sm font-semibold text-gray-900 capitalize">
-              {data.tripType === "return" ? "Return (round trip)" : "One-way"}
+              {data.tripType === "Return" ? "Return (round trip)" : "One Way"}
             </p>
           </div>
 
@@ -350,7 +330,7 @@ const routeDetail = useMemo(
           </div>
 
           {/* Return */}
-          {data.tripType === "return" && (
+          {data.tripType === "Return" && (
             <div className="space-y-1.5">
               <div className="flex items-center gap-1.5">
                 <svg
@@ -394,11 +374,11 @@ const routeDetail = useMemo(
               <p className="text-xs font-medium text-gray-600">Vehicle</p>
             </div>
             <p className="text-sm font-semibold text-gray-900">
-              {vehicle ? vehicle.name : "Not selected"}
+              {vehicleOption ? vehicleOption.vehicleType : "Not selected"}
             </p>
-            {vehicle && (
+            {vehicleOption && (
               <p className="text-[11px] text-gray-500">
-                {vehicle.subtitle} · {vehicle.luggage}
+                {vehicleOption.idealFor} · {vehicleOption.maxPassengers}
               </p>
             )}
           </div>
@@ -594,8 +574,9 @@ const routeDetail = useMemo(
             {/* Passenger capacity error (below adults/children) */}
             {exceedsCapacity && (
               <p className="mt-1 text-[11px] text-red-600">
-                {vehicle?.name} can take max {maxCapacity} passengers. You
-                currently selected {totalPassengers}.
+                {vehicleOption?.vehicleType} can take max{" "}
+                {vehicleOption?.maxPassengers} passengers. You currently
+                selected {totalPassengers}.
               </p>
             )}
           </div>
@@ -731,8 +712,8 @@ const routeDetail = useMemo(
 
         <div className="inline-flex gap-2 rounded-2xl bg-gray-50 p-1 border border-gray-200">
           {[
-            { id: "cash" as const, label: "Pay cash to driver" },
-            { id: "card" as const, label: "Pay now by card" },
+            { id: "Cash" as const, label: "Pay cash to driver" },
+            { id: "Card" as const, label: "Pay now by card" },
           ].map((method) => {
             const active = data.paymentMethod === method.id;
             return (
@@ -749,14 +730,14 @@ const routeDetail = useMemo(
                 }}
               >
                 <span className="font-semibold">
-                  {method.id === "cash" ? "Cash" : "Card"}
+                  {method.id === "Cash" ? "Cash" : "Card"}
                 </span>
                 <span
                   className={`text-[10px] ${
                     active ? "text-white/85" : "text-gray-500"
                   }`}
                 >
-                  {method.id === "cash"
+                  {method.id === "Cash"
                     ? "Pay the driver in EUR at the end of the trip."
                     : "We’ll send a secure payment link to confirm your booking."}
                 </span>
@@ -788,7 +769,8 @@ const routeDetail = useMemo(
           {exceedsCapacity && (
             <div className="rounded-md bg-red-50 border border-red-200 text-red-700 text-sm p-3 w-full sm:w-auto">
               Too many passengers for the selected vehicle.
-              {vehicle?.name} allows max {maxCapacity} passengers.
+              {vehicleOption?.vehicleType} allows max{" "}
+              {vehicleOption?.maxPassengers} passengers.
             </div>
           )}
 
@@ -851,7 +833,7 @@ const routeDetail = useMemo(
         </div>
       </div>
 
-      {showUpgradeModal && upgradeVehicleId && (
+      {showUpgradeModal && upgradeVehicleOption && (
         <div className="fixed inset-0 z-60 flex items-center justify-center bg-black/40 backdrop-blur-sm">
           <div className="w-full max-w-md rounded-3xl bg-white p-6 shadow-2xl">
             <h3 className="text-lg font-semibold text-gray-900">
@@ -860,7 +842,8 @@ const routeDetail = useMemo(
 
             <p className="mt-2 text-sm text-gray-600">
               You selected <strong>{totalPassengers}</strong> passengers, but
-              the <strong>{vehicle?.name}</strong> allows only {maxCapacity}.
+              the <strong>{vehicleOption?.vehicleType}</strong> allows only{" "}
+              {vehicleOption?.maxPassengers}.
             </p>
 
             <div className="mt-4 rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
@@ -869,9 +852,10 @@ const routeDetail = useMemo(
               </p>
               <p className="text-sm text-emerald-800">
                 Switch to{" "}
-                <strong>
-                  {VEHICLE_TYPES.find((v) => v.id === upgradeVehicleId)?.name}
-                </strong>{" "}
+                <p className="text-sm text-emerald-800">
+                  Switch to <strong>{upgradeVehicleOption.vehicleType}</strong>{" "}
+                  to fit your group comfortably.
+                </p>{" "}
                 to fit your group comfortably.
               </p>
             </div>
@@ -886,7 +870,13 @@ const routeDetail = useMemo(
 
               <button
                 onClick={() => {
-                  onChange("vehicleTypeId", upgradeVehicleId);
+                  onChange(
+                    "vehicleTypeId",
+                    upgradeVehicleOption === routeDetail?.vehicleOptions[0]
+                      ? "sedan"
+                      : "vclass",
+                  );
+
                   setShowUpgradeModal(false);
                 }}
                 className="flex-1 rounded-full px-4 py-2.5 text-sm font-semibold text-white shadow-md"

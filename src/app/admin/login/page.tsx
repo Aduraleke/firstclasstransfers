@@ -37,31 +37,35 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
       throw new Error("Invalid login response from server.");
     }
 
-    // ✅ DECLARE admin FIRST
     const mapPermissions = (
-  perms: string[] = [],
-  isSuperuser: boolean,
-) => ({
-  bookings: isSuperuser || perms.includes("booking"),
-  drivers: isSuperuser || perms.includes("drivers"),
-  routes: isSuperuser || perms.includes("routes"),
-  adminUsers: isSuperuser || perms.includes("adminUsers"),
-});
+      perms: string[] = [],
+      isSuperuser: boolean
+    ) => ({
+      bookings: isSuperuser || perms.includes("booking"),
+      drivers: isSuperuser || perms.includes("drivers"),
+      routes: isSuperuser || perms.includes("routes"),
+      adminUsers: isSuperuser || perms.includes("adminUsers"),
+      vehicles: isSuperuser || perms.includes("vehicles"),
+    });
 
+    const admin = {
+      email,
+      isSuperuser: res.isSuperuser,
+      isDriver: res.isDriver, // 👈 keep this for role checks
+      permissions: mapPermissions(res.permissions, res.isSuperuser),
+    };
 
-const admin = {
-  email,
-  isSuperuser: res.isSuperuser,
-  permissions: mapPermissions(res.permissions, res.isSuperuser),
-};
+    login({
+      token: accessToken,
+      admin,
+    });
 
-login({
-  token: accessToken,
-  admin,
-});
-
-
-    router.push("/admin");
+    // ✅ ROLE-BASED REDIRECT
+    if (res.isDriver) {
+      router.push("/drivers");
+    } else {
+      router.push("/admin");
+    }
   } catch (err) {
     if (err instanceof Error) {
       setError(err.message || "The email or password you entered is incorrect.");

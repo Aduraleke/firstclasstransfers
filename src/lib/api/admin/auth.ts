@@ -6,14 +6,19 @@ export interface LoginPayload {
 }
 
 export interface LoginResponse {
-  isSuperuser: boolean
   message: string
+
+  isSuperuser: boolean
+  isDriver: boolean
+
   permissions: string[]
+
   tokens: {
     access: string
     refresh: string
   }
 }
+
 
 
 export async function loginAdmin(

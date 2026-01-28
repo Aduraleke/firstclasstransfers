@@ -57,13 +57,13 @@ export const VEHICLE_TYPES = [
 
 export const TIME_PERIODS = [
   {
-    id: "day" as const,
-    label: "Day tariff",
+    id: "Day Tariff" as const,
+    label: "Day Tariff",
     range: "06:00 – 22:00",
   },
   {
-    id: "night" as const,
-    label: "Night tariff",
+    id: "Night Tariff" as const,
+    label: "Night Tariff",
     range: "22:00 – 06:00",
   },
 ];
@@ -74,22 +74,22 @@ export const BAGGAGE_OPTIONS: {
   description: string;
 }[] = [
   {
-    id: "hand",
+    id: "Hand",
     label: "Hand luggage only",
     description: "Cabin bags & backpacks only",
   },
   {
-    id: "medium",
+    id: "Medium",
     label: "Medium (1–2 suitcases)",
     description: "Ideal for light trips",
   },
   {
-    id: "large",
+    id: "Large",
     label: "Large (3–4 suitcases)",
     description: "Perfect for families",
   },
   {
-    id: "extra_large",
+    id: "Extra Large",
     label: "Extra large (5+ suitcases)",
     description: "Group or long-stay luggage",
   },

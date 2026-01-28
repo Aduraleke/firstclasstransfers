@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import { AdminUser } from "@/lib/api/admin/types";
 import { Icon } from "@iconify/react";
 
+/* ───────────────── Types ───────────────── */
+
 interface Props {
   open: boolean;
   mode?: "create" | "edit";
@@ -20,6 +22,21 @@ interface Props {
   onClose: () => void;
 }
 
+/* ───────────────── Constants ───────────────── */
+
+const PERMISSION_LABELS: Record<
+  keyof AdminUser["permissions"],
+  string
+> = {
+  bookings: "Bookings",
+  drivers: "Drivers",
+  routes: "Routes",
+  adminUsers: "Admin Users",
+  vehicles: "Vehicles",
+};
+
+/* ───────────────── Component ───────────────── */
+
 export const AdminUserFormModal: React.FC<Props> = ({
   open,
   mode = "create",
@@ -29,27 +46,49 @@ export const AdminUserFormModal: React.FC<Props> = ({
   onSubmit,
   onClose,
 }) => {
-  /* ───────── State (lazy init, runs ONCE per mount) ───────── */
+  /* ───────── Local State ───────── */
 
-  const [name, setName] = useState(() => initialData?.name ?? "");
-  const [email, setEmail] = useState(() => initialData?.email ?? "");
-  const [phone, setPhone] = useState(() => initialData?.phone ?? "");
+  const [name, setName] = useState(initialData?.name ?? "");
+  const [email, setEmail] = useState(initialData?.email ?? "");
+  const [phone, setPhone] = useState(initialData?.phone ?? "");
   const [dp, setDp] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(
-    () => initialData?.dp ?? null,
+    initialData?.dp ?? null,
   );
 
-  const [permissions, setPermissions] = useState<AdminUser["permissions"]>(
-    () =>
-      initialData?.permissions ?? {
-        bookings: true,
-        drivers: true,
-        routes: true,
-        adminUsers: false,
-      },
+  const [permissions, setPermissions] = useState<
+    AdminUser["permissions"]
+  >(
+    initialData?.permissions ?? {
+      bookings: false,
+      drivers: false,
+      routes: false,
+      adminUsers: false,
+      vehicles: false,
+    },
   );
 
-  /* ───────── Cleanup preview blob URL ───────── */
+  /* ───────── Derived State ───────── */
+
+  const isSubmitting = submitting;
+  const isFormInvalid = !name || !email;
+  const emailHasError = error?.toLowerCase().includes("email");
+
+  /* ───────── Effects ───────── */
+
+  // Escape key closes modal
+  useEffect(() => {
+    if (!open) return;
+
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, [open, onClose]);
+
+  // Cleanup blob URL
   useEffect(() => {
     return () => {
       if (preview?.startsWith("blob:")) {
@@ -62,7 +101,9 @@ export const AdminUserFormModal: React.FC<Props> = ({
 
   /* ───────── Handlers ───────── */
 
-  const handleTogglePerm = (key: keyof AdminUser["permissions"]) => {
+  const handleTogglePerm = (
+    key: keyof AdminUser["permissions"],
+  ) => {
     setPermissions((prev) => ({ ...prev, [key]: !prev[key] }));
   };
 
@@ -73,14 +114,13 @@ export const AdminUserFormModal: React.FC<Props> = ({
       URL.revokeObjectURL(preview);
     }
 
-    const url = URL.createObjectURL(file);
     setDp(file);
-    setPreview(url);
+    setPreview(URL.createObjectURL(file));
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name || !email || submitting) return;
+    if (isSubmitting || isFormInvalid) return;
 
     onSubmit({
       name,
@@ -91,21 +131,34 @@ export const AdminUserFormModal: React.FC<Props> = ({
     });
   };
 
-  const emailHasError = error?.toLowerCase().includes("email");
-
   /* ───────── UI ───────── */
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4">
-      <div className="w-full max-w-lg rounded-xl border border-slate-700 bg-slate-900 p-6 shadow-2xl">
-        <h2 className="mb-5 text-lg font-semibold text-white">
-          {mode === "edit" ? "Edit Admin User" : "Add Admin User"}
-        </h2>
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4"
+      onClick={onClose}
+    >
+      <div
+        className="w-full max-w-lg rounded-xl border border-slate-700 bg-slate-900 p-6 shadow-2xl"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Header */}
+        <div className="flex items-center justify-between border-b border-slate-800 py-4">
+          <h2 className="text-lg font-semibold text-white">
+            {mode === "edit" ? "Edit Admin User" : "Add Admin User"}
+          </h2>
+          <button onClick={onClose}>
+            <Icon
+              icon="mdi:close"
+              className="text-xl text-slate-400 hover:text-white"
+            />
+          </button>
+        </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4 text-sm">
-          {/* ───────── Avatar ───────── */}
+        <form onSubmit={handleSubmit} className="mt-4 space-y-4 text-sm">
+          {/* Avatar */}
           <div className="flex items-center gap-4">
-            <div className="relative h-16 w-16 rounded-full bg-slate-800 overflow-hidden flex items-center justify-center border border-slate-700">
+            <div className="relative flex h-16 w-16 items-center justify-center overflow-hidden rounded-full border border-slate-700 bg-slate-800">
               {preview ? (
                 <img
                   src={preview}
@@ -113,7 +166,10 @@ export const AdminUserFormModal: React.FC<Props> = ({
                   className="h-full w-full object-cover"
                 />
               ) : (
-                <Icon icon="mdi:account" className="text-3xl text-slate-400" />
+                <Icon
+                  icon="mdi:account"
+                  className="text-3xl text-slate-400"
+                />
               )}
             </div>
 
@@ -123,24 +179,30 @@ export const AdminUserFormModal: React.FC<Props> = ({
                 type="file"
                 accept="image/*"
                 hidden
-                onChange={(e) => handleImageChange(e.target.files?.[0] ?? null)}
+                onChange={(e) =>
+                  handleImageChange(e.target.files?.[0] ?? null)
+                }
               />
             </label>
           </div>
 
-          {/* ───────── Name ───────── */}
+          {/* Name */}
           <div>
-            <label className="mb-1 block text-slate-300">Full Name</label>
+            <label className="mb-1 block text-slate-300">
+              Full Name
+            </label>
             <input
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full rounded-lg border border-slate-600 bg-slate-900 px-3 py-2 text-white focus:border-slate-400 outline-none"
+              className="w-full rounded-lg border border-slate-600 bg-slate-900 px-3 py-2 text-white outline-none focus:border-slate-400"
             />
           </div>
 
-          {/* ───────── Email ───────── */}
+          {/* Email */}
           <div>
-            <label className="mb-1 block text-slate-300">Email</label>
+            <label className="mb-1 block text-slate-300">
+              Email
+            </label>
             <input
               type="email"
               value={email}
@@ -149,12 +211,17 @@ export const AdminUserFormModal: React.FC<Props> = ({
               className={`w-full rounded-lg px-3 py-2 text-white outline-none
                 border bg-slate-900
                 ${emailHasError ? "border-red-500" : "border-slate-600"}
-                ${mode === "edit" ? "opacity-70 cursor-not-allowed" : ""}
+                ${mode === "edit" ? "cursor-not-allowed opacity-70" : ""}
                 focus:border-slate-400`}
             />
+            {mode === "edit" && (
+              <p className="mt-1 text-xs text-slate-400">
+                Email cannot be changed after creation
+              </p>
+            )}
           </div>
 
-          {/* ───────── Phone ───────── */}
+          {/* Phone */}
           <div>
             <label className="mb-1 block text-slate-300">
               Phone (optional)
@@ -162,47 +229,49 @@ export const AdminUserFormModal: React.FC<Props> = ({
             <input
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
-              className="w-full rounded-lg border border-slate-600 bg-slate-900 px-3 py-2 text-white focus:border-slate-400 outline-none"
+              className="w-full rounded-lg border border-slate-600 bg-slate-900 px-3 py-2 text-white outline-none focus:border-slate-400"
             />
           </div>
 
-          {/* ───────── Permissions ───────── */}
+          {/* Permissions */}
           <div>
             <p className="mb-2 text-xs font-semibold uppercase text-slate-400">
               Permissions
             </p>
             <div className="grid grid-cols-2 gap-2 text-xs">
-              {(
-                Object.keys(permissions) as (keyof AdminUser["permissions"])[]
-              ).map((key) => (
-                <label
-                  key={key}
-                  className="flex items-center gap-2 text-slate-200"
-                >
-                  <input
-                    type="checkbox"
-                    checked={permissions[key]}
-                    onChange={() => handleTogglePerm(key)}
-                  />
-                  <span className="capitalize">{key}</span>
-                </label>
-              ))}
+              {(Object.keys(
+                permissions,
+              ) as (keyof AdminUser["permissions"])[]).map(
+                (key) => (
+                  <label
+                    key={key}
+                    className="flex cursor-pointer items-center gap-2 text-slate-200"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={permissions[key]}
+                      onChange={() => handleTogglePerm(key)}
+                    />
+                    <span>{PERMISSION_LABELS[key]}</span>
+                  </label>
+                ),
+              )}
             </div>
           </div>
 
-          {/* ───────── Error ───────── */}
+          {/* Error */}
           {error && (
             <div className="rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-xs text-red-300">
               {error}
             </div>
           )}
 
-          {/* ───────── Actions ───────── */}
+          {/* Actions */}
           <div className="mt-4 flex gap-3">
             <button
               type="button"
               onClick={onClose}
-              disabled={submitting}
+              disabled={isSubmitting}
               className="flex-1 rounded-lg bg-slate-700 px-4 py-2 text-white disabled:opacity-50"
             >
               Cancel
@@ -210,14 +279,12 @@ export const AdminUserFormModal: React.FC<Props> = ({
 
             <button
               type="submit"
-              disabled={submitting}
+              disabled={isSubmitting || isFormInvalid}
               className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2 font-semibold text-white disabled:opacity-60"
             >
-              {submitting && (
+              {isSubmitting && (
                 <svg
-                  className="h-4 w-4 animate-spin text-white"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
+                  className="h-4 w-4 animate-spin"
                   viewBox="0 0 24 24"
                 >
                   <circle
@@ -236,13 +303,13 @@ export const AdminUserFormModal: React.FC<Props> = ({
                 </svg>
               )}
 
-              {submitting
+              {isSubmitting
                 ? mode === "edit"
                   ? "Updating…"
                   : "Creating…"
                 : mode === "edit"
-                  ? "Update Admin"
-                  : "Create Admin"}
+                ? "Update Admin"
+                : "Create Admin"}
             </button>
           </div>
         </form>

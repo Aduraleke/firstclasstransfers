@@ -1,191 +1,312 @@
-"use client"
+"use client";
 
-import { Icon } from "@iconify/react"
-import { Driver } from "@/lib/api/admin/types"
-import { BRAND } from "./brand"
+import { useMemo, useState } from "react";
+import Image from "next/image";
+import { Icon } from "@iconify/react";
+import { Driver } from "@/lib/api/admin/types";
+import { BRAND } from "./brand";
+
+/* ───────────────── TYPES ───────────────── */
 
 interface Props {
-  drivers: Driver[]
+  drivers: Driver[];
   counts: {
-    total: number
-    available: number
-    unavailable: number
-  }
-  activeTab: "all" | "available" | "unavailable"
-  onTabChange: (tab: "all" | "available" | "unavailable") => void
-  search: string
-  onSearchChange: (value: string) => void
-  onAddDriver: () => void
-  onDeleteDriver: (id: string) => void
-  loading?: boolean
+    total: number;
+    available: number;
+    unavailable: number;
+  };
+  activeTab: "all" | "available" | "unavailable";
+  onTabChange: (tab: "all" | "available" | "unavailable") => void;
+  search: string;
+  onSearchChange: (v: string) => void;
+  onAddDriver: () => void;
+  onEditDriver: (driver: Driver) => void;
+  onDeleteDriver: (id: string) => Promise<void>;
+  loading?: boolean;
+
+  // ✅ ADD THIS
+  pagination?: {
+    next: string | null;
+    previous: string | null;
+  };
 }
+
+/* ───────────────── MAIN ───────────────── */
 
 export const DriversView: React.FC<Props> = ({
   drivers,
-  counts = { total: 0, available: 0, unavailable: 0 }, // ✅ DEFAULT
+  counts,
   activeTab,
   onTabChange,
   search,
   onSearchChange,
   onAddDriver,
+  onEditDriver,
   onDeleteDriver,
   loading = false,
+  pagination,
 }) => {
+  const [focused, setFocused] = useState<Driver | null>(null);
+
+  const subtitle = useMemo(() => {
+    if (activeTab === "available") return "Signals currently online";
+    if (activeTab === "unavailable") return "Offline driver signals";
+    return "All operational driver signals";
+  }, [activeTab]);
 
   return (
-    <div className="space-y-6">
-      {/* ───────── HEADER ───────── */}
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-white">Driver Management</h1>
+    <section className="relative min-h-full px-2">
+      {/* HEADER */}
+      <div className="mb-14 flex items-end justify-between">
+        <div>
+          <h1 className="text-4xl font-semibold tracking-tight text-white">
+            Drivers
+          </h1>
+          <p className="mt-2 text-sm text-slate-400">{subtitle}</p>
+        </div>
 
         <button
           onClick={onAddDriver}
-          className="inline-flex items-center gap-2 rounded-lg px-5 py-2.5 text-sm font-semibold text-white transition hover:opacity-90"
+          className="rounded-full px-6 py-3 text-sm font-semibold text-white shadow-lg transition hover:scale-[1.02]"
           style={{ backgroundColor: BRAND.navy }}
         >
-          <Icon icon="mdi:plus" className="text-lg" />
-          Add Driver
+          + Add Driver
         </button>
       </div>
 
-      {/* ───────── STATS ───────── */}
-      <div className="grid gap-4 sm:grid-cols-3">
-        <StatCard label="Total Drivers" value={counts.total} />
-        <StatCard
-          label="Available Drivers"
+      {/* FILTER FIELD */}
+      <div className="mb-12 grid grid-cols-3 gap-6">
+        <SignalNode
+          label="All"
+          value={counts.total}
+          active={activeTab === "all"}
+          onClick={() => onTabChange("all")}
+        />
+        <SignalNode
+          label="Online"
           value={counts.available}
-          valueClass="text-green-400"
+          active={activeTab === "available"}
+          accent="emerald"
+          onClick={() => onTabChange("available")}
         />
-        <StatCard
-          label="Unavailable Drivers"
+        <SignalNode
+          label="Offline"
           value={counts.unavailable}
-          valueClass="text-red-400"
+          active={activeTab === "unavailable"}
+          accent="rose"
+          onClick={() => onTabChange("unavailable")}
         />
       </div>
 
-      {/* ───────── TABS + SEARCH ───────── */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        {/* Tabs */}
-        <div className="flex gap-2">
-          {(["all", "available", "unavailable"] as const).map((tab) => (
-            <button
-              key={tab}
-              onClick={() => onTabChange(tab)}
-              className={`rounded-lg px-4 py-2 text-sm font-medium transition ${
-                activeTab === tab
-                  ? "bg-slate-800 text-white"
-                  : "text-slate-400 hover:bg-slate-900"
-              }`}
-            >
-              {tab.charAt(0).toUpperCase() + tab.slice(1)}
-            </button>
-          ))}
-        </div>
+      {/* SEARCH */}
+      {/* <div className="mb-16 max-w-xl">
+        <input
+          value={search}
+          onChange={(e) => onSearchChange(e.target.value)}
+          placeholder="Search signals…"
+          className="
+            w-full rounded-full
+            bg-slate-900/80
+            px-6 py-4
+            text-sm text-white
+            ring-1 ring-slate-800
+            focus:ring-slate-600
+            outline-none
+          "
+        />
+      </div> */}
 
-        {/* Search */}
-        <div className="relative w-full sm:w-72">
-          <Icon
-            icon="mdi:magnify"
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
-          />
-          <input
-            value={search}
-            onChange={(e) => onSearchChange(e.target.value)}
-            placeholder="Search by name or email"
-            className="w-full rounded-lg bg-slate-900 pl-10 pr-4 py-2 text-sm text-white outline-none ring-1 ring-slate-800 focus:ring-slate-700"
-          />
-        </div>
-      </div>
-
-      {/* ───────── LIST ───────── */}
+      {/* SIGNAL FIELD */}
       {loading ? (
-        <DriversSkeleton />
+        <SignalSkeleton />
       ) : drivers.length === 0 ? (
-        <EmptyState />
+        <EmptyState onAddDriver={onAddDriver} />
       ) : (
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <div className="space-y-8">
           {drivers.map((driver) => (
-            <div
+            <SignalLane
               key={driver.id}
-              className="rounded-xl border border-slate-800 bg-slate-900/70 p-6"
-            >
-              <div className="mb-4 flex items-start justify-between">
-                <div className="rounded-full bg-slate-800 p-3">
-                  <Icon
-                    icon="mdi:steering"
-                    className="text-2xl"
-                    style={{ color: BRAND.gold }}
-                  />
-                </div>
-
-                <button
-                  onClick={() => onDeleteDriver(driver.id)}
-                  className="rounded-lg p-2 text-red-400 hover:bg-red-950/40"
-                >
-                  <Icon icon="mdi:trash-can-outline" className="text-lg" />
-                </button>
-              </div>
-
-              <h3 className="mb-1 text-lg font-semibold text-white">
-                {driver.name}
-              </h3>
-
-              <p className="text-sm text-slate-300">📱 {driver.phone}</p>
-              <p className="text-sm text-slate-300">✉️ {driver.email}</p>
-
-              <span
-                className={`mt-3 inline-block rounded-full px-3 py-1 text-xs font-medium ${
-                  driver.isActive
-                    ? "bg-green-100 text-green-800"
-                    : "bg-red-100 text-red-800"
-                }`}
-              >
-                {driver.isActive ? "Available" : "Unavailable"}
-              </span>
-            </div>
+              driver={driver}
+              focused={focused?.id === driver.id}
+              onFocus={() =>
+                setFocused(focused?.id === driver.id ? null : driver)
+              }
+              onEdit={onEditDriver}
+              onDelete={onDeleteDriver}
+            />
           ))}
         </div>
       )}
-    </div>
-  )
-}
 
-/* ───────────────── SUB-COMPONENTS ───────────────── */
+      {pagination?.next && (
+        <button className="text-xs text-slate-400">Next</button>
+      )}
+    </section>
+  );
+};
 
-function StatCard({
-  label,
-  value,
-  valueClass = "text-white",
+function SignalLane({
+  driver,
+  focused,
+  onFocus,
+  onEdit,
+  onDelete,
 }: {
-  label: string
-  value: number
-  valueClass?: string
+  driver: Driver;
+  focused: boolean;
+  onFocus: () => void;
+  onEdit: (d: Driver) => void;
+  onDelete: (id: string) => void;
 }) {
   return (
-    <div className="rounded-xl border border-slate-800 bg-slate-900/70 p-4">
-      <p className="text-xs text-slate-400">{label}</p>
-      <p className={`mt-1 text-2xl font-bold ${valueClass}`}>{value}</p>
+    <div
+      className={`
+        relative overflow-hidden
+        rounded-[28px]
+        px-8 py-7
+        transition-all duration-300
+        ${
+          focused
+            ? "bg-slate-900 ring-2 ring-slate-600"
+            : "bg-slate-900/50 ring-1 ring-slate-800"
+        }
+      `}
+    >
+      {/* ENERGY LINE */}
+      <div
+        className={`absolute left-0 top-0 h-full w-1 ${
+          driver.isActive ? "bg-emerald-400" : "bg-rose-400"
+        }`}
+      />
+
+      <div className="flex items-center justify-between">
+        {/* IDENTITY */}
+        <div className="flex items-center gap-6">
+          <div className="relative h-12 w-12 rounded-full overflow-hidden bg-slate-800">
+            {driver.profilePicture ? (
+              <Image
+                src={driver.profilePicture}
+                alt={driver.name}
+                fill
+                className="object-cover"
+              />
+            ) : (
+              <div className="flex h-full w-full items-center justify-center">
+                <Icon icon="mdi:account" className="text-xl text-slate-500" />
+              </div>
+            )}
+          </div>
+
+          <div>
+            <p className="text-lg font-medium text-white">{driver.name}</p>
+            <p className="text-xs text-slate-400">
+              {driver.isActive ? "Online" : "Offline"} · Joined{" "}
+              {new Date(driver.createdAt).toLocaleDateString()}
+            </p>
+          </div>
+        </div>
+
+        {/* FOCUS */}
+        <button
+          onClick={onFocus}
+          className="rounded-full px-4 py-2 text-xs font-medium text-slate-300 hover:text-white"
+        >
+          {focused ? "Close" : "Focus"}
+        </button>
+      </div>
+
+      {/* EXPANDED CONTROL */}
+      {focused && (
+        <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-3 text-sm">
+          <Meta label="Phone" value={driver.phone || "—"} />
+          <Meta label="License" value={driver.licenseNumber || "—"} />
+          <Meta label="Email" value={driver.email} />
+
+          <div className="col-span-full flex justify-end gap-3 pt-4">
+            <button
+              onClick={() => onEdit(driver)}
+              className="rounded-full bg-slate-800 px-5 py-2 text-sm text-white"
+            >
+              Edit
+            </button>
+            <button
+              onClick={() => onDelete(driver.id)}
+              className="rounded-full bg-rose-600 px-5 py-2 text-sm text-white"
+            >
+              Remove
+            </button>
+          </div>
+        </div>
+      )}
     </div>
-  )
+  );
 }
 
-function EmptyState() {
+function SignalNode({
+  label,
+  value,
+  active,
+  onClick,
+  accent = "slate",
+}: {
+  label: string;
+  value: number;
+  active: boolean;
+  onClick: () => void;
+  accent?: "slate" | "emerald" | "rose";
+}) {
   return (
-    <div className="rounded-xl border border-dashed border-slate-800 bg-slate-900/40 p-10 text-center text-slate-400">
-      No drivers found.
-    </div>
-  )
+    <button
+      onClick={onClick}
+      className={`
+        rounded-3xl px-6 py-5 text-left transition
+        ${active ? "bg-slate-900 ring-2 ring-slate-600" : "bg-slate-900/40 ring-1 ring-slate-800"}
+      `}
+    >
+      <p className="text-xs uppercase tracking-wide text-slate-400">{label}</p>
+      <p className={`mt-2 text-3xl font-semibold text-${accent}-400`}>
+        {value}
+      </p>
+    </button>
+  );
 }
 
-function DriversSkeleton() {
+function Meta({ label, value }: { label: string; value: string }) {
   return (
-    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-      {Array.from({ length: 6 }).map((_, i) => (
+    <div>
+      <p className="text-xs text-slate-500">{label}</p>
+      <p className="mt-1 font-medium text-slate-200">{value}</p>
+    </div>
+  );
+}
+
+function EmptyState({ onAddDriver }: { onAddDriver: () => void }) {
+  return (
+    <div className="rounded-4xl bg-slate-900/40 p-20 text-center">
+      <p className="text-xl font-semibold text-white">No active signals</p>
+      <p className="mt-2 text-sm text-slate-400">
+        Add drivers to initialize the system.
+      </p>
+      <button
+        onClick={onAddDriver}
+        className="mt-8 rounded-full px-8 py-3 text-sm font-semibold text-white"
+        style={{ backgroundColor: BRAND.navy }}
+      >
+        Add Driver
+      </button>
+    </div>
+  );
+}
+
+function SignalSkeleton() {
+  return (
+    <div className="space-y-8">
+      {Array.from({ length: 4 }).map((_, i) => (
         <div
           key={i}
-          className="h-48 animate-pulse rounded-xl bg-slate-900/60"
+          className="h-28 animate-pulse rounded-[28px] bg-slate-900/50"
         />
       ))}
     </div>
-  )
+  );
 }

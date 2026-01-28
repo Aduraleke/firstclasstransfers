@@ -9,36 +9,40 @@ import Step2Details from "@/components/booking/Step2Details";
 import type { BookingRoute } from "@/lib/booking/bookingRoute";
 
 import type { BookingDraft } from "@/lib/booking/types";
+import { bookTrip } from "@/lib/api/bookTrip";
+
 
 type BookingProps = {
   initialRouteId?: string;
   initialVehicleTypeId?: string;
 };
 
-function createInitialDraft(initialRouteId?: string): BookingDraft {
+function createInitialDraft(initialRouteSlug?: string): BookingDraft {
   return {
-    routeId: initialRouteId ?? "",
+    routeId: "",                     // backend ID (unknown yet)
+    routeSlug: initialRouteSlug ?? "",
+
     vehicleTypeId: "",
-    timePeriod: "day",
+    timePeriod: "Day Tariff",
     date: "",
     time: "",
 
-    tripType: "one-way",
+    tripType: "One Way",
     returnDate: "",
     returnTime: "",
-    returnTimePeriod: "day",
+    returnTimePeriod: "Day Tariff",
 
     flightNumber: "",
     adults: 1,
     children: 0,
-    baggageType: "hand",
-
+    baggageType: "Hand",
+    totalPrice: 0,
     name: "",
     phone: "",
     email: "",
     notes: "",
 
-    paymentMethod: "cash",
+    paymentMethod: "Cash",
   };
 }
 
@@ -58,7 +62,7 @@ export default function Booking({
   const [submitError, setSubmitError] = useState<string | null>(null);
 
   const [routeList, setRouteList] = useState<BookingRoute[]>([]);
-  const [routesLoading, setRoutesLoading] = useState(true);
+  const [, setRoutesLoading] = useState(true);
   const [routeFetchError, setRouteFetchError] = useState<string | null>(null);
 
   const [paymentLoading, setPaymentLoading] = useState(false);
@@ -100,6 +104,19 @@ export default function Booking({
     };
   }, []);
 
+  useEffect(() => {
+  if (!draft.routeSlug || draft.routeId || routeList.length === 0) return;
+
+  const route = routeList.find(r => r.slug === draft.routeSlug);
+  if (!route) return;
+
+  setDraft(prev => ({
+    ...prev,
+    routeId: route.routeId,   // fct2cp1e1 ✅
+  }));
+}, [draft.routeSlug, draft.routeId, routeList]);
+
+
   /* ---------- update draft ---------- */
   const updateDraft = useCallback(
     <K extends keyof BookingDraft>(key: K, value: BookingDraft[K]) => {
@@ -109,48 +126,28 @@ export default function Booking({
   );
 
   /* ---------- confirm ---------- */
-  const handleConfirm = async () => {
-    if (submitting) return;
+const handleConfirm = async () => {
+  if (submitting) return;
 
-    setSubmitError(null);
+  setSubmitError(null);
 
-    if (!draft.name || !draft.phone || !draft.email) {
-      setSubmitError("Please complete all required fields.");
-      scrollToTop();
-      return;
-    }
+  if (!draft.name || !draft.phone || !draft.email) {
+    setSubmitError("Please complete all required fields.");
+    scrollToTop();
+    return;
+  }
 
-    if (routesLoading) {
-      setSubmitError("Routes are still loading.");
-      return;
-    }
-
-    // 💳 CARD → handled fully by Step2Details
-    if (draft.paymentMethod === "card") {
-      setPaymentLoading(true);
-      return;
-    }
-
-    // 💶 CASH
-    try {
-      setSubmitting(true);
-      const res = await fetch("/api/bookings", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(draft),
-      });
-
-      if (!res.ok) {
-        throw new Error(`Booking failed: ${res.status} ${res.statusText}`);
-      }
-      setSubmitted(true);
-    } catch (error) {
-      console.error("Error while submitting booking:", error);
-      setSubmitError("Booking failed. Please try again or contact support.");
-    } finally {
-      setSubmitting(false);
-    }
-  };
+  try {
+    setSubmitting(true);
+    await bookTrip(draft);
+    setSubmitted(true);
+  } catch (error) {
+    console.error("Booking failed:", error);
+    setSubmitError("Booking failed. Please try again or contact support.");
+  } finally {
+    setSubmitting(false);
+  }
+};
 
   /* ---------- success ---------- */
   if (submitted) {

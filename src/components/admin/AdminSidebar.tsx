@@ -6,14 +6,18 @@ import Image from "next/image";
 import { BRAND } from "./brand";
 import { AuthAdmin } from "@/lib/api/admin/types";
 
+/* ───────────────── TYPES ───────────────── */
+
 export type AdminViewId =
+  | "home"
   | "dashboard"
   | "bookings"
   | "drivers"
   | "routes"
-  | "emails"
+  | "vehicles"
   | "admins"
   | "audit";
+
 
 interface SidebarProps {
   sidebarOpen: boolean;
@@ -26,13 +30,26 @@ interface SidebarProps {
 
 type PermissionKey = keyof AuthAdmin["permissions"];
 
+/* ───────────────── NAV CONFIG ───────────────── */
+
 const NAV_ITEMS: {
   id: AdminViewId;
   label: string;
   icon: string;
   permission?: PermissionKey;
+  superuserOnly?: boolean;
 }[] = [
-  { id: "dashboard", label: "Dashboard", icon: "mdi:view-dashboard-outline" },
+  {
+    id: "home",
+    label: "Home",
+    icon: "mdi:home-outline",
+  },
+  {
+    id: "dashboard",
+    label: "Dashboard",
+    icon: "mdi:view-dashboard-outline",
+    superuserOnly: true, // 🔒 SUPERUSER ONLY
+  },
   {
     id: "bookings",
     label: "Bookings",
@@ -52,10 +69,10 @@ const NAV_ITEMS: {
     permission: "routes",
   },
   {
-    id: "emails",
-    label: "Emails",
-    icon: "mdi:email-outline",
-    permission: "bookings",
+    id: "vehicles",
+    label: "Vehicles",
+    icon: "mdi:car-outline",
+    permission: "vehicles",
   },
   {
     id: "admins",
@@ -63,7 +80,15 @@ const NAV_ITEMS: {
     icon: "mdi:account-group-outline",
     permission: "adminUsers",
   },
+{
+  id: "audit",
+  label: "Audit Logs",
+  icon: "mdi:shield-search",
+  superuserOnly: true,
+}
 ];
+
+/* ───────────────── COMPONENT ───────────────── */
 
 export const AdminSidebar = ({
   sidebarOpen,
@@ -73,20 +98,25 @@ export const AdminSidebar = ({
   onLogout,
   admin,
 }: SidebarProps) => {
- 
-  const hasAnyPermission =
-  admin?.isSuperuser ||
-  Object.values(admin?.permissions ?? {}).some(Boolean);
 
 
-  const hasPermission = (permission?: PermissionKey) => {
+const canAccess = (
+  permission?: PermissionKey,
+  superuserOnly?: boolean,
+) => {
   if (!admin) return false;
 
-  // Dashboard (no permission key)
-  if (!permission) {
-    return admin.isSuperuser || hasAnyPermission;
+  // 🔒 Superuser-only items
+  if (superuserOnly) {
+    return admin.isSuperuser;
   }
 
+  // 🏠 Public items (like Home) → ALWAYS visible
+  if (!permission) {
+    return true;
+  }
+
+  // 🔐 Permission-based items
   return admin.isSuperuser || !!admin.permissions[permission];
 };
 
@@ -101,24 +131,14 @@ export const AdminSidebar = ({
         ${sidebarOpen ? "w-64" : "w-20"}
       `}
     >
-      {/* BRAND HEADER */}
-      <div className="relative px-4 py-4 border-b border-slate-800">
+      {/* ───────── BRAND ───────── */}
+      <div className="relative border-b border-slate-800 px-4 py-4">
         <div
-          className={`
-            flex items-center gap-3
-            ${sidebarOpen ? "justify-start" : "justify-center"}
-          `}
+          className={`flex items-center gap-3 ${
+            sidebarOpen ? "justify-start" : "justify-center"
+          }`}
         >
-          {/* Logo Container */}
-          <div
-            className="
-              flex items-center justify-center
-              h-14 w-16
-              rounded-xl
-              bg-white
-              ring-1 ring-slate-800
-            "
-          >
+          <div className="flex h-14 w-16 items-center justify-center rounded-xl bg-white ring-1 ring-slate-800">
             <Image
               src="/firstclass.png"
               alt="FirstClass Transfers"
@@ -129,7 +149,6 @@ export const AdminSidebar = ({
             />
           </div>
 
-          {/* Brand Text */}
           {sidebarOpen && (
             <div className="leading-tight">
               <p className="text-sm font-semibold text-white">
@@ -147,15 +166,14 @@ export const AdminSidebar = ({
           onClick={() => setSidebarOpen((p) => !p)}
           className="
             absolute -right-3 top-1/2 -translate-y-1/2
-            flex items-center justify-center
-            h-6 w-6
+            flex h-6 w-6 items-center justify-center
             rounded-full
-            bg-slate-900
             border border-slate-800
+            bg-slate-900
             text-slate-400
-            hover:text-slate-200
-            hover:bg-slate-800
             transition
+            hover:bg-slate-800
+            hover:text-slate-200
           "
         >
           <Icon
@@ -165,56 +183,53 @@ export const AdminSidebar = ({
         </button>
       </div>
 
-      {/* NAVIGATION */}
-      <nav className="flex-1 px-3 py-4 space-y-1">
-        {NAV_ITEMS.filter((i) => hasPermission(i.permission)).map(
-          (item) => {
-            const active = currentView === item.id;
+      {/* ───────── NAV ───────── */}
+      <nav className="flex-1 space-y-1 px-3 py-4">
+        {NAV_ITEMS.filter((item) =>
+          canAccess(item.permission, item.superuserOnly),
+        ).map((item) => {
+          const active = currentView === item.id;
 
-            return (
-              <button
-                key={item.id}
-                onClick={() => setCurrentView(item.id)}
-                className={`
-                  flex items-center gap-3
-                  w-full
-                  rounded-xl px-3 py-2.5
-                  text-sm font-medium
-                  transition
-                  ${
-                    active
-                      ? "bg-slate-900 text-white"
-                      : "text-slate-400 hover:bg-slate-900/60 hover:text-slate-200"
-                  }
-                `}
-              >
-                <Icon
-                  icon={item.icon}
-                  width={18}
-                  style={active ? { color: BRAND.gold } : undefined}
-                  className={!active ? "text-slate-400" : ""}
-                />
-                {sidebarOpen && (
-                  <span className="truncate">{item.label}</span>
-                )}
-              </button>
-            );
-          },
-        )}
+          return (
+            <button
+              key={item.id}
+              onClick={() => setCurrentView(item.id)}
+              className={`
+                flex w-full items-center gap-3
+                rounded-xl px-3 py-2.5
+                text-sm font-medium
+                transition
+                ${
+                  active
+                    ? "bg-slate-900 text-white"
+                    : "text-slate-400 hover:bg-slate-900/60 hover:text-slate-200"
+                }
+              `}
+            >
+              <Icon
+                icon={item.icon}
+                width={18}
+                style={active ? { color: BRAND.gold } : undefined}
+              />
+              {sidebarOpen && (
+                <span className="truncate">{item.label}</span>
+              )}
+            </button>
+          );
+        })}
       </nav>
 
-      {/* FOOTER */}
+      {/* ───────── FOOTER ───────── */}
       <div className="border-t border-slate-800 px-3 py-4">
         <button
           onClick={onLogout}
           className="
-            flex items-center gap-3
-            w-full
+            flex w-full items-center gap-3
             rounded-xl px-3 py-2.5
             text-sm font-medium
             text-red-400
-            hover:bg-red-950/40
             transition
+            hover:bg-red-950/40
           "
         >
           <Icon icon="mdi:logout" width={18} />

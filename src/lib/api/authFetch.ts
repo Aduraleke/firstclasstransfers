@@ -1,7 +1,7 @@
-const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL
+const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 if (!BASE_URL) {
-  throw new Error("API base URL is not defined")
+  throw new Error("API base URL is not defined");
 }
 
 function extractErrorMessages(
@@ -34,7 +34,9 @@ export async function authFetch<T>(
   endpoint: string,
   options: RequestInit = {},
 ): Promise<T> {
-  const token = localStorage.getItem("admin_token");
+  const token =
+    localStorage.getItem("driver_token") ??
+    localStorage.getItem("admin_token");
 
   if (!token) {
     throw new Error("Not authenticated");
@@ -52,22 +54,17 @@ export async function authFetch<T>(
 
   try {
     data = await res.json();
-  } catch {
-    // ignore JSON parse errors
-  }
+  } catch {}
 
   if (!res.ok) {
     if (data && typeof data === "object") {
       const messages = extractErrorMessages(data);
-
-      if (messages.length > 0) {
+      if (messages.length) {
         throw new Error(messages.join("\n"));
       }
     }
-
     throw new Error("Unable to complete request.");
   }
 
   return data as T;
 }
-
