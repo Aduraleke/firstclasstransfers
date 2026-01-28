@@ -1,8 +1,6 @@
-const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL
 
-if (!BASE_URL) {
-  throw new Error("API base URL is not defined")
-}
+
+
 
 function extractErrorMessages(
   value: unknown,
@@ -35,6 +33,7 @@ export async function authFetch<T>(
   options: RequestInit = {},
 ): Promise<T> {
   const token = localStorage.getItem("admin_token");
+  const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL
 
   if (!token) {
     throw new Error("Not authenticated");
