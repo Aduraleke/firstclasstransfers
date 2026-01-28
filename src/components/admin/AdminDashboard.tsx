@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
+
 
 import { AdminSidebar, AdminViewId } from "@/components/admin/AdminSidebar";
 import { DashboardView } from "@/components/admin/DashboardView";
@@ -172,48 +173,45 @@ export default function AdminDashboard() {
         return "Pending";
     }
   }
-  function mapBookingApiToBooking(api: BookingApiResponse): Booking {
-    return {
-      id: api.bookingId,
+const mapBookingApiToBooking = useCallback(
+  (api: BookingApiResponse): Booking => ({
+    id: api.bookingId,
 
-      customerName: api.passengerInformation.fullName,
-      email: api.passengerInformation.emailAddress,
-      phone: api.passengerInformation.phoneNumber,
+    customerName: api.passengerInformation.fullName,
+    email: api.passengerInformation.emailAddress,
+    phone: api.passengerInformation.phoneNumber,
 
-      airport: api.route.fromLocation,
-      destination: api.route.toLocation,
+    airport: api.route.fromLocation,
+    destination: api.route.toLocation,
 
-      date: api.pickupDate,
-      time: api.pickupTime,
+    date: api.pickupDate,
+    time: api.pickupTime,
 
-      tripType: normalizeTripType(api.tripType),
-      timePeriod: api.timePeriod,
+    tripType: normalizeTripType(api.tripType),
+    timePeriod: api.timePeriod,
 
-      price: api.price ?? null,
-      paymentMethod: api.paymentType,
-      paymentStatus: normalizePaymentStatus(api.paymentStatus),
+    price: api.price ?? null,
+    paymentMethod: api.paymentType,
+    paymentStatus: normalizePaymentStatus(api.paymentStatus),
 
-      status: api.status,
+    status: api.status,
 
-      driver: api.driver?.fullName ?? null,
-      vehicleType: api.vehicleType ?? null,
+    driver: api.driver?.fullName ?? null,
+    vehicleType: api.vehicleType ?? null,
 
-      // ✅ REQUIRED FIELDS (now satisfied)
-      passengers:
-        (api.transferInformation?.adults ?? 0) +
-          (api.transferInformation?.children ?? 0) || null,
+    passengers:
+      (api.transferInformation?.adults ?? 0) +
+        (api.transferInformation?.children ?? 0) || null,
 
-      stripeRef: Boolean(api.paymentId),
+    stripeRef: Boolean(api.paymentId),
 
-      notes:
-        api.passengerInformation.additionalInformation ??
-        "",
+    notes: api.passengerInformation.additionalInformation ?? "",
 
+    raw: api,
+  }),
+  [],
+);
 
-      // ✅ keep raw API
-      raw: api,
-    };
-  }
 
   // Initial load from mock API
   useEffect(() => {
@@ -259,7 +257,7 @@ export default function AdminDashboard() {
     }
 
     load();
-  }, [hydrated, admin]);
+  }, [hydrated, admin, mapBookingApiToBooking]);
 
   useEffect(() => {
     if (!admin?.permissions.drivers) return;

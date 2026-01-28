@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { AdminUser } from "@/lib/api/admin/types";
 import { Icon } from "@iconify/react";
+import Image from "next/image";
 
 /* ───────────────── Types ───────────────── */
 
@@ -24,10 +25,7 @@ interface Props {
 
 /* ───────────────── Constants ───────────────── */
 
-const PERMISSION_LABELS: Record<
-  keyof AdminUser["permissions"],
-  string
-> = {
+const PERMISSION_LABELS: Record<keyof AdminUser["permissions"], string> = {
   bookings: "Bookings",
   drivers: "Drivers",
   routes: "Routes",
@@ -56,9 +54,7 @@ export const AdminUserFormModal: React.FC<Props> = ({
     initialData?.dp ?? null,
   );
 
-  const [permissions, setPermissions] = useState<
-    AdminUser["permissions"]
-  >(
+  const [permissions, setPermissions] = useState<AdminUser["permissions"]>(
     initialData?.permissions ?? {
       bookings: false,
       drivers: false,
@@ -101,9 +97,7 @@ export const AdminUserFormModal: React.FC<Props> = ({
 
   /* ───────── Handlers ───────── */
 
-  const handleTogglePerm = (
-    key: keyof AdminUser["permissions"],
-  ) => {
+  const handleTogglePerm = (key: keyof AdminUser["permissions"]) => {
     setPermissions((prev) => ({ ...prev, [key]: !prev[key] }));
   };
 
@@ -160,16 +154,15 @@ export const AdminUserFormModal: React.FC<Props> = ({
           <div className="flex items-center gap-4">
             <div className="relative flex h-16 w-16 items-center justify-center overflow-hidden rounded-full border border-slate-700 bg-slate-800">
               {preview ? (
-                <img
+                <Image
                   src={preview}
                   alt="Avatar preview"
-                  className="h-full w-full object-cover"
+                  fill
+                  className="object-cover"
+                  unoptimized
                 />
               ) : (
-                <Icon
-                  icon="mdi:account"
-                  className="text-3xl text-slate-400"
-                />
+                <Icon icon="mdi:account" className="text-3xl text-slate-400" />
               )}
             </div>
 
@@ -179,18 +172,14 @@ export const AdminUserFormModal: React.FC<Props> = ({
                 type="file"
                 accept="image/*"
                 hidden
-                onChange={(e) =>
-                  handleImageChange(e.target.files?.[0] ?? null)
-                }
+                onChange={(e) => handleImageChange(e.target.files?.[0] ?? null)}
               />
             </label>
           </div>
 
           {/* Name */}
           <div>
-            <label className="mb-1 block text-slate-300">
-              Full Name
-            </label>
+            <label className="mb-1 block text-slate-300">Full Name</label>
             <input
               value={name}
               onChange={(e) => setName(e.target.value)}
@@ -200,9 +189,7 @@ export const AdminUserFormModal: React.FC<Props> = ({
 
           {/* Email */}
           <div>
-            <label className="mb-1 block text-slate-300">
-              Email
-            </label>
+            <label className="mb-1 block text-slate-300">Email</label>
             <input
               type="email"
               value={email}
@@ -239,23 +226,21 @@ export const AdminUserFormModal: React.FC<Props> = ({
               Permissions
             </p>
             <div className="grid grid-cols-2 gap-2 text-xs">
-              {(Object.keys(
-                permissions,
-              ) as (keyof AdminUser["permissions"])[]).map(
-                (key) => (
-                  <label
-                    key={key}
-                    className="flex cursor-pointer items-center gap-2 text-slate-200"
-                  >
-                    <input
-                      type="checkbox"
-                      checked={permissions[key]}
-                      onChange={() => handleTogglePerm(key)}
-                    />
-                    <span>{PERMISSION_LABELS[key]}</span>
-                  </label>
-                ),
-              )}
+              {(
+                Object.keys(permissions) as (keyof AdminUser["permissions"])[]
+              ).map((key) => (
+                <label
+                  key={key}
+                  className="flex cursor-pointer items-center gap-2 text-slate-200"
+                >
+                  <input
+                    type="checkbox"
+                    checked={permissions[key]}
+                    onChange={() => handleTogglePerm(key)}
+                  />
+                  <span>{PERMISSION_LABELS[key]}</span>
+                </label>
+              ))}
             </div>
           </div>
 
@@ -283,10 +268,7 @@ export const AdminUserFormModal: React.FC<Props> = ({
               className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2 font-semibold text-white disabled:opacity-60"
             >
               {isSubmitting && (
-                <svg
-                  className="h-4 w-4 animate-spin"
-                  viewBox="0 0 24 24"
-                >
+                <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24">
                   <circle
                     className="opacity-25"
                     cx="12"
@@ -308,8 +290,8 @@ export const AdminUserFormModal: React.FC<Props> = ({
                   ? "Updating…"
                   : "Creating…"
                 : mode === "edit"
-                ? "Update Admin"
-                : "Create Admin"}
+                  ? "Update Admin"
+                  : "Create Admin"}
             </button>
           </div>
         </form>

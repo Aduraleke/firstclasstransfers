@@ -78,7 +78,7 @@ export const DashboardView: React.FC<Props> = ({
 
             {/* subtle accent line */}
             <div
-              className="absolute bottom-0 left-0 h-[2px] w-full rounded-b-2xl"
+              className="absolute bottom-0 left-0 h-0.5 w-full rounded-b-2xl"
               style={{ backgroundColor: BRAND.gold, opacity: 0.25 }}
             />
           </div>
