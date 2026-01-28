@@ -54,9 +54,7 @@ export default function DriverBookings({ driverId }: { driverId: number }) {
     <div className="space-y-6">
       {/* HEADER + TABS */}
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-white">
-          Your Bookings
-        </h2>
+        <h2 className="text-lg font-semibold text-white">Your Bookings</h2>
 
         <div className="flex gap-2 overflow-x-auto">
           {TABS.map((tab) => (
@@ -84,8 +82,11 @@ export default function DriverBookings({ driverId }: { driverId: number }) {
         <p className="text-white/50">No bookings in this category.</p>
       ) : (
         <div className="space-y-4">
-          {filteredBookings.map((booking) => (
-            <BookingCard key={booking.booking_id} booking={booking} />
+          {filteredBookings.map((booking, index) => (
+            <BookingCard
+              key={booking.bookingId ?? `booking-${index}`}
+              booking={booking}
+            />
           ))}
         </div>
       )}
@@ -106,10 +107,10 @@ function BookingCard({ booking }: { booking: AssignedBooking }) {
       <div className="flex items-start justify-between mb-3">
         <div>
           <h3 className="font-medium text-white">
-            {booking.route.from_location} → {booking.route.to_location}
+            {booking.route.fromLocation} → {booking.route.toLocation}
           </h3>
           <p className="text-xs text-white/50">
-            Booking ID · {booking.booking_id}
+            Booking ID · {booking.bookingId}
           </p>
         </div>
 
@@ -120,7 +121,7 @@ function BookingCard({ booking }: { booking: AssignedBooking }) {
       <div className="grid sm:grid-cols-2 gap-3 text-sm text-white/70">
         <div className="flex items-center gap-2">
           <Icon icon={calendarIcon} width={16} />
-          {booking.pickup_date} · {booking.pickup_time}
+          {booking.pickupDate} · {booking.pickupTime}
         </div>
 
         <div className="flex items-center gap-2">
@@ -130,7 +131,7 @@ function BookingCard({ booking }: { booking: AssignedBooking }) {
 
         <div className="flex items-center gap-2">
           <Icon icon={cashIcon} width={16} />
-          {booking.payment_type} ({booking.payment_status})
+          {booking.paymentType} ({booking.paymentStatus})
         </div>
 
         <div className="font-semibold text-[#f3c97a]">
@@ -139,13 +140,15 @@ function BookingCard({ booking }: { booking: AssignedBooking }) {
       </div>
 
       {/* PASSENGER */}
-      <div className="mt-3 text-xs text-white/50">
-        Passenger · {booking.passenger_information.full_name} ·{" "}
-        {booking.passenger_information.phone_number}
+      <div className="mt-3 text-md text-white/50 capitalize">
+        Passenger ·{" "}
+        {booking.passengerInformation?.fullName ?? "Unknown"} ·{" "}
+        {booking.passengerInformation?.phoneNumber ?? "—"}
       </div>
     </motion.div>
   );
 }
+
 
 function StatusPill({ status }: { status: string }) {
   const styles: Record<string, string> = {

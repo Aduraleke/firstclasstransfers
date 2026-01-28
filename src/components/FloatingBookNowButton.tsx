@@ -10,7 +10,8 @@ export default function FloatingBookNowButton() {
   // ❌ Hide on booking pages and admin pages
   if (
     pathname?.startsWith("/booking") ||
-    pathname?.startsWith("/admin")
+    pathname?.startsWith("/admin") ||
+    pathname?.startsWith("/drivers")
   ) {
     return null;
   }

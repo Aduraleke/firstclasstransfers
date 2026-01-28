@@ -37,29 +37,33 @@ export type BookingStatus =
   | "Assigned";
 
 export interface AssignedBooking {
-  booking_id: string;
-  status: BookingStatus;
-  price: number;
-  vehicle_type: string;
-  payment_type: string;
-  payment_status: string;
-  trip_type: string;
+  bookingId: string;
+  status: string;
 
-  pickup_date: string;
-  pickup_time: string;
+  pickupDate: string;
+  pickupTime: string;
+  returnDate?: string | null;
+  returnTime?: string | null;
+
+  price: number;
+  paymentType: string;
+  paymentStatus: string;
 
   route: {
-    from_location: string;
-    to_location: string;
+    fromLocation: string;
+    toLocation: string;
     distance: string;
     time: string;
+    durationMinutes?: number;
   };
 
-  passenger_information: {
-    full_name: string;
-    phone_number: string;
+  passengerInformation?: {
+    fullName: string;
+    phoneNumber?: string;
+    emailAddress?: string;
   };
 }
+
 
 export interface AssignedBookingsResponse {
   count: number;
