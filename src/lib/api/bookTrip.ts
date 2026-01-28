@@ -2,15 +2,12 @@
 
 import type { BookingDraft } from "@/lib/booking/types";
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
-if (!BASE_URL) {
-  throw new Error("NEXT_PUBLIC_BASE_URL is not defined");
-}
+
 
 export async function bookTrip(draft: BookingDraft) {
   const formData = new FormData();
-
+const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
   // ─────────────────────────────
   // REQUIRED TOP-LEVEL FIELDS
   // ─────────────────────────────

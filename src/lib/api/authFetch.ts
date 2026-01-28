@@ -1,8 +1,6 @@
-const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
-if (!BASE_URL) {
-  throw new Error("API base URL is not defined");
-}
+
+
 
 function extractErrorMessages(
   value: unknown,
@@ -41,6 +39,7 @@ export async function authFetch<T>(
   if (!token) {
     throw new Error("Not authenticated");
   }
+  const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
   const res = await fetch(`${BASE_URL}${endpoint}`, {
     ...options,

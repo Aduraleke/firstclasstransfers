@@ -1,13 +1,11 @@
-const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL
 
-if (!BASE_URL) {
-  throw new Error("API base URL is not defined")
-}
+
 
 export async function publicFetch<T>(
   endpoint: string,
   options: RequestInit = {},
 ): Promise<T> {
+  const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL
   const res = await fetch(`${BASE_URL}${endpoint}`, {
     ...options,
     headers: {

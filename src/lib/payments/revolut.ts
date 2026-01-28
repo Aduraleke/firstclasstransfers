@@ -1,7 +1,7 @@
 import crypto from "crypto";
 
 // Production-only Revolut API base URL
-const BASE_URL = "https://merchant.revolut.com";
+
 
 // Consistent API version across all Revolut endpoints
 const API_VERSION = "2025-12-04";
@@ -13,6 +13,7 @@ function requireEnv(name: string): string {
 }
 
 export async function createRevolutOrder(params: {
+  
   amount: number; // Amount in euros (will be converted to cents for Revolut API)
   currency: "EUR";
   orderId: string;
@@ -21,6 +22,7 @@ export async function createRevolutOrder(params: {
   failureUrl?: string;
   cancelUrl?: string;
 }) {
+  const BASE_URL = "https://merchant.revolut.com";
   const res = await fetch(`${BASE_URL}/api/orders`, {
     method: "POST",
     headers: {
