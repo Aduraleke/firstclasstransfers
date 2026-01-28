@@ -75,6 +75,7 @@ import {
   BookingApiResponse,
   getBookings,
 } from "@/lib/api/admin/bookingDetails";
+import Loader from "../Loader";
 
 type ActiveModal =
   | { type: "bookingDetails"; booking: Booking }
@@ -148,6 +149,8 @@ export default function AdminDashboard() {
   const admin = useAuthStore((s) => s.admin);
   const hydrated = useAuthStore((s) => s.hydrated);
 
+
+
   // Stats derived from bookings
 
   const stats: DashboardStats = {
@@ -214,50 +217,42 @@ const mapBookingApiToBooking = useCallback(
 
 
   // Initial load from mock API
-  useEffect(() => {
-    if (!hydrated || !admin) return;
+useEffect(() => {
+  if (!hydrated || !admin) return;
 
-    const currentAdmin = admin; // 👈 snapshot (now non-null)
+  const currentAdmin = admin;
 
-    async function load() {
-      setAdminsLoading(true);
-      setRoutesLoading(true);
+  async function load() {
+    setAdminsLoading(true);
+    setRoutesLoading(true);
 
-      try {
-        // BOOKINGS
-        if (currentAdmin.permissions.bookings) {
-          const bookingsData = await getBookings();
-          setBookings(bookingsData.map(mapBookingApiToBooking));
-        } else {
-          setBookings([]);
-        }
-
-        // ROUTES
-        if (currentAdmin.permissions.routes) {
-          const routesData = await getRoutes();
-          setRoutes(routesData);
-        } else {
-          setRoutes([]);
-        }
-
-        // ADMINS
-        if (currentAdmin.isSuperuser || currentAdmin.permissions.adminUsers) {
-          const adminsData = await getAdminUsers();
-          setAdmins(adminsData);
-        } else {
-          setAdmins([]);
-        }
-      } catch (err) {
-        console.error("Dashboard load error:", err);
-      } finally {
-        setAdminsLoading(false);
-        setRoutesLoading(false);
-        setBookingsLoading(false);
+    try {
+      // ROUTES
+      if (currentAdmin.permissions.routes) {
+        const routesData = await getRoutes();
+        setRoutes(routesData);
+      } else {
+        setRoutes([]);
       }
-    }
 
-    load();
-  }, [hydrated, admin, mapBookingApiToBooking]);
+      // ADMINS
+      if (currentAdmin.isSuperuser || currentAdmin.permissions.adminUsers) {
+        const adminsData = await getAdminUsers();
+        setAdmins(adminsData);
+      } else {
+        setAdmins([]);
+      }
+    } catch (err) {
+      console.error("Dashboard load error:", err);
+    } finally {
+      setAdminsLoading(false);
+      setRoutesLoading(false);
+    }
+  }
+
+  load();
+}, [hydrated, admin]);
+
 
   useEffect(() => {
     if (!admin?.permissions.drivers) return;
@@ -343,6 +338,40 @@ const mapBookingApiToBooking = useCallback(
 
     loadActivityLogs();
   }, [admin]);
+
+  useEffect(() => {
+  if (!hydrated || !admin || !admin.permissions.bookings) return;
+
+  async function loadBookings() {
+    setBookingsLoading(true);
+
+    try {
+      const params = {
+        passenger_name: bookingFilters.passenger_name || undefined,
+        from_location: bookingFilters.from_location || undefined,
+        to_location: bookingFilters.to_location || undefined,
+        pickup_date: bookingFilters.pickup_date || undefined,
+        return_date: bookingFilters.return_date || undefined,
+        vehicle_type: bookingFilters.vehicle_type || undefined,
+        status:
+          bookingFilters.status !== "all"
+            ? bookingFilters.status
+            : undefined,
+      };
+
+      const bookingsData = await getBookings(params);
+      setBookings(bookingsData.map(mapBookingApiToBooking));
+    } catch (err) {
+      console.error("Failed to load bookings", err);
+      setBookings([]);
+    } finally {
+      setBookingsLoading(false);
+    }
+  }
+
+  loadBookings();
+}, [hydrated, admin, bookingFilters, mapBookingApiToBooking]);
+
 
   const activeRoute =
     activeModal?.type === "routeForm" ? activeModal.route : undefined;
@@ -685,13 +714,12 @@ const mapBookingApiToBooking = useCallback(
 
   // ───────────────────────── UI ─────────────────────────
 
-  if (!hydrated) {
-    return (
-      <div className="flex h-screen items-center justify-center text-slate-400">
-        Loading admin session…
-      </div>
-    );
-  }
+
+
+if (!hydrated) {
+  return <Loader />;
+}
+
 
   if (!admin) {
     router.replace("/admin/login");

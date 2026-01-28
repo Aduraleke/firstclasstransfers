@@ -2,8 +2,6 @@
 
 import { Icon } from "@iconify/react";
 
-/* ───────────────── TYPES ───────────────── */
-
 export interface BookingFilters {
   passenger_name: string;
   from_location: string;
@@ -19,8 +17,6 @@ interface Props {
   setFilters: (v: BookingFilters) => void;
 }
 
-/* ───────────────── COMPONENT ───────────────── */
-
 export const BookingsFilters: React.FC<Props> = ({
   filters,
   setFilters,
@@ -29,75 +25,69 @@ export const BookingsFilters: React.FC<Props> = ({
     key: K,
     value: BookingFilters[K],
   ) => {
-    setFilters({
-      ...filters,
-      [key]: value,
-    });
+    setFilters({ ...filters, [key]: value });
   };
 
+  const base =
+    "w-full rounded-xl border border-white/10 bg-slate-900/70 px-4 py-2.5 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[#b07208]";
+
   return (
-    <div className="mb-4 grid grid-cols-1 gap-4 md:grid-cols-3 lg:grid-cols-4">
-      {/* Passenger */}
+    <div className="grid grid-cols-1 gap-4 md:grid-cols-3 lg:grid-cols-4">
+
       <div className="relative">
         <Icon
           icon="mdi:account"
-          className="absolute left-3 top-2.5 text-slate-500"
+          className="absolute left-3 top-3 text-slate-500"
         />
         <input
           placeholder="Passenger name"
           value={filters.passenger_name}
           onChange={(e) => update("passenger_name", e.target.value)}
-          className="w-full rounded-lg border border-slate-700 bg-slate-900 pl-10 pr-4 py-2.5 text-sm text-white"
+          className={`${base} pl-10`}
         />
       </div>
 
-      {/* From */}
       <input
-        placeholder="From location"
+        placeholder="From"
         value={filters.from_location}
         onChange={(e) => update("from_location", e.target.value)}
-        className="rounded-lg border border-slate-700 bg-slate-900 px-4 py-2.5 text-sm text-white"
+        className={base}
       />
 
-      {/* To */}
       <input
-        placeholder="To location"
+        placeholder="To"
         value={filters.to_location}
         onChange={(e) => update("to_location", e.target.value)}
-        className="rounded-lg border border-slate-700 bg-slate-900 px-4 py-2.5 text-sm text-white"
+        className={base}
       />
 
-      {/* Pickup date */}
       <input
         type="date"
         value={filters.pickup_date}
         onChange={(e) => update("pickup_date", e.target.value)}
-        className="rounded-lg border border-slate-700 bg-slate-900 px-4 py-2.5 text-sm text-white"
+        className={base}
       />
 
-      {/* Return date */}
       <input
         type="date"
         value={filters.return_date}
         onChange={(e) => update("return_date", e.target.value)}
-        className="rounded-lg border border-slate-700 bg-slate-900 px-4 py-2.5 text-sm text-white"
+        className={base}
       />
 
-      {/* Vehicle */}
       <input
-        placeholder="Vehicle type (e.g. V-Class)"
+        placeholder="Vehicle type"
         value={filters.vehicle_type}
         onChange={(e) => update("vehicle_type", e.target.value)}
-        className="rounded-lg border border-slate-700 bg-slate-900 px-4 py-2.5 text-sm text-white"
+        className={base}
       />
 
-      {/* Status */}
       <select
         value={filters.status}
         onChange={(e) => update("status", e.target.value)}
-        className="rounded-lg border border-slate-700 bg-slate-900 px-4 py-2.5 text-sm text-white"
+        className={base}
       >
-        <option value="all">All Status</option>
+        <option value="all">All status</option>
         <option value="Pending">Pending</option>
         <option value="Assigned">Assigned</option>
         <option value="Completed">Completed</option>

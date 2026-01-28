@@ -27,8 +27,7 @@ export async function getDriverDashboard() {
   console.log("🚗 Driver dashboard data:", data);
   return data;
 }
-
-
+/* ───────────────── TYPES ───────────────── */
 
 export type BookingStatus =
   | "Pending"
@@ -38,7 +37,7 @@ export type BookingStatus =
 
 export interface AssignedBooking {
   bookingId: string;
-  status: string;
+  status: BookingStatus;
 
   pickupDate: string;
   pickupTime: string;
@@ -64,7 +63,6 @@ export interface AssignedBooking {
   };
 }
 
-
 export interface AssignedBookingsResponse {
   count: number;
   next: string | null;
@@ -72,17 +70,28 @@ export interface AssignedBookingsResponse {
   results: AssignedBooking[];
 }
 
+/* ───────────────── API ───────────────── */
+
 export async function getAssignedBookingsByDriver(
   driverId: number,
-  page = 1,
-  pageSize = 10,
+  params?: {
+    status?: BookingStatus;
+    page?: number;
+    pageSize?: number;
+  },
 ): Promise<AssignedBookingsResponse> {
+  const query = new URLSearchParams();
+
+  if (params?.status) query.append("status", params.status);
+  if (params?.page) query.append("page", String(params.page));
+  if (params?.pageSize)
+    query.append("page_size", String(params.pageSize));
+
   const response = await authFetch<AssignedBookingsResponse>(
-    `/booking/assigned-bookings/${driverId}?page=${page}&page_size=${pageSize}`,
+    `/booking/assigned-bookings/${driverId}?${query.toString()}`,
     { method: "GET" },
   );
 
   console.log("🚗 Driver Assigned bookings:", response);
   return response;
 }
-

@@ -27,14 +27,22 @@ export default function DriverPage() {
   const [error, setError] = useState<string | null>(null);
 
   const router = useRouter();
-  const logout = useDriverAuthStore((s) => s.logout);
 
-  const handleLogout = () => {
-    logout();
-    router.push("/drivers/login");
-  };
+ const token = useDriverAuthStore((s) => s.token);
+const logout = useDriverAuthStore((s) => s.logout);
 
+
+  /* ───────── AUTH GUARD ───────── */
   useEffect(() => {
+    if (!token) {
+      router.replace("/drivers/login");
+    }
+  }, [token, router]);
+
+  /* ───────── FETCH DASHBOARD ───────── */
+  useEffect(() => {
+    if (!token) return;
+
     const fetchDashboard = async () => {
       try {
         const res = await getDriverDashboard();
@@ -47,7 +55,17 @@ export default function DriverPage() {
     };
 
     fetchDashboard();
-  }, []);
+  }, [token]);
+
+  const handleLogout = () => {
+    logout();
+    router.replace("/drivers/login");
+  };
+
+  /* ───────── BLOCK RENDER ───────── */
+  if (!token) {
+    return null; // prevents UI flash
+  }
 
   if (loading) {
     return (
@@ -67,7 +85,6 @@ export default function DriverPage() {
 
   return (
     <div className="min-h-screen bg-[#020513] text-white">
-      {/* PAGE SPINE */}
       <div className="max-w-6xl mx-auto px-6 py-10 space-y-12">
 
         {/* ───────── PROFILE ───────── */}
@@ -76,7 +93,6 @@ export default function DriverPage() {
           animate={{ opacity: 1, y: 0 }}
           className="rounded-3xl bg-black/70 border border-white/10 backdrop-blur p-6 shadow-[0_18px_50px_rgba(0,0,0,0.8)]"
         >
-          {/* HEADER */}
           <div className="flex items-start justify-between mb-6">
             <div className="flex items-center gap-4">
               <div className="relative h-20 w-20 rounded-full bg-white/10 overflow-hidden">
@@ -118,19 +134,10 @@ export default function DriverPage() {
             </button>
           </div>
 
-          {/* DETAILS */}
           <div className="grid sm:grid-cols-2 gap-4">
             <InfoItem icon={emailIcon} label="Email" value={driver.email} />
-            <InfoItem
-              icon={phoneIcon}
-              label="Phone"
-              value={driver.phoneNumber}
-            />
-            <InfoItem
-              icon={licenseIcon}
-              label="License"
-              value={driver.licenseNumber}
-            />
+            <InfoItem icon={phoneIcon} label="Phone" value={driver.phoneNumber} />
+            <InfoItem icon={licenseIcon} label="License" value={driver.licenseNumber} />
             <InfoItem
               icon={statusIcon}
               label="Status"
@@ -140,8 +147,7 @@ export default function DriverPage() {
           </div>
 
           <div className="mt-6 pt-4 border-t border-white/10 text-xs text-white/50">
-            Joined on{" "}
-            {new Date(driver.dateJoined).toLocaleDateString()}
+            Joined on {new Date(driver.dateJoined).toLocaleDateString()}
           </div>
         </motion.div>
 

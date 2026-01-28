@@ -73,7 +73,7 @@ export async function getBookings(
   const response = authFetch<BookingApiResponse[]>(
     `/booking/list/${query.toString() ? `?${query}` : ""}`,
   );
-  console.log("Raw bookings", response)
+
   return response
 }
 

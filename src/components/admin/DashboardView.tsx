@@ -35,96 +35,111 @@ export const DashboardView: React.FC<Props> = ({
       label: "Revenue",
       value: stats.revenue,
       icon: "mdi:cash-multiple",
+      prefix: "€",
     },
   ]
 
   return (
-    <div className="space-y-10">
+    <div className="space-y-12">
 
       {/* HEADER */}
-      <div>
+      <header className="space-y-1">
         <h1 className="text-2xl font-semibold text-white">
           Dashboard
         </h1>
-        <p className="mt-1 text-sm text-slate-400">
-          Operational overview & recent activity
+        <p className="text-sm text-slate-400">
+          Live operational snapshot
         </p>
-      </div>
+      </header>
 
       {/* STATS */}
-      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+      <section className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
         {cards.map((c) => (
           <div
             key={c.label}
             className="
-              relative rounded-2xl border border-white/5
-              bg-slate-900/60 p-6
+              group relative overflow-hidden
+              rounded-2xl border border-white/5
+              bg-linear-to-br from-slate-900/70 to-slate-900/40
+              p-6 transition
+              hover:border-white/10
             "
           >
-            <div className="flex items-center justify-between">
-              <p className="text-xs uppercase tracking-widest text-slate-400">
-                {c.label}
-              </p>
-              <Icon
-                icon={c.icon}
-                className="text-xl"
-                style={{ color: BRAND.gold }}
-              />
-            </div>
+            {/* ICON WATERMARK */}
+            <Icon
+              icon={c.icon}
+              className="absolute -right-6 -top-6 text-[96px]"
+              style={{ color: BRAND.gold, opacity: 0.06 }}
+            />
 
-            <p className="mt-4 text-3xl font-semibold text-white">
-              {c.value}
+            <p className="text-xs uppercase tracking-widest text-slate-400">
+              {c.label}
             </p>
 
-            {/* subtle accent line */}
+            <div className="mt-4 flex items-end gap-1">
+              {c.prefix && (
+                <span className="text-lg text-slate-400">
+                  {c.prefix}
+                </span>
+              )}
+              <span className="text-3xl font-semibold text-white">
+                {c.value}
+              </span>
+            </div>
+
+            {/* GLOW */}
             <div
-              className="absolute bottom-0 left-0 h-0.5 w-full rounded-b-2xl"
-              style={{ backgroundColor: BRAND.gold, opacity: 0.25 }}
+              className="pointer-events-none absolute inset-x-0 bottom-0 h-0.5"
+              style={{
+                background: `linear-gradient(90deg, transparent, ${BRAND.gold}, transparent)`,
+                opacity: 0.4,
+              }}
             />
           </div>
         ))}
-      </div>
+      </section>
 
       {/* RECENT BOOKINGS */}
-      <div className="rounded-2xl border border-white/5 bg-slate-900/60 p-6">
+      <section className="rounded-2xl border border-white/5 bg-slate-900/50 p-6">
 
         <div className="mb-6 flex items-center justify-between">
           <h2 className="text-lg font-semibold text-white">
-            Recent Bookings
+            Recent Activity
           </h2>
           <span className="text-xs text-slate-400">
-            Last {Math.min(bookings.length, 5)} entries
+            Last {Math.min(bookings.length, 5)} bookings
           </span>
         </div>
 
-        <div className="space-y-2">
+        <div className="divide-y divide-white/5">
           {bookings.slice(0, 5).map((booking) => (
             <button
               key={booking.id}
               onClick={() => onOpenBooking(booking)}
               className="
-                group w-full rounded-xl border border-white/5
-                bg-slate-800/60 px-4 py-3
-                transition hover:bg-slate-800
-                flex items-center justify-between
+                group flex w-full items-center justify-between
+                px-2 py-4 transition
+                hover:bg-white/5
               "
             >
-              <div>
-                <p className="font-medium text-white">
+              <div className="space-y-1 text-left">
+                <p className="font-medium text-white capitalize">
                   {booking.customerName}
                 </p>
                 <p className="text-xs text-slate-400">
-                  {booking.destination} • {booking.id}
+                  {booking.destination} · {booking.id}
                 </p>
               </div>
 
               <div className="flex items-center gap-4">
                 <StatusPill status={booking.status} />
                 <Icon
-                  icon="mdi:chevron-right"
+                  icon="mdi:arrow-right"
                   className="
-                    text-xl text-slate-400
-                    transition group-hover:text-white
+                    text-xl text-slate-500
+                    transition-transform
+                    group-hover:translate-x-1
+                    group-hover:text-white
                   "
                 />
               </div>
@@ -132,17 +147,17 @@ export const DashboardView: React.FC<Props> = ({
           ))}
 
           {bookings.length === 0 && (
-            <p className="py-6 text-center text-sm text-slate-400">
+            <p className="py-8 text-center text-sm text-slate-400">
               No bookings yet.
             </p>
           )}
         </div>
-      </div>
+      </section>
     </div>
   )
 }
 
-/* ───────────────────────── SMALL UI PARTS ───────────────────────── */
+/* ───────────────────────── STATUS ───────────────────────── */
 
 function StatusPill({ status }: { status: string }) {
   const styles: Record<string, string> = {
