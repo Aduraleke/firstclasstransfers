@@ -1,212 +1,219 @@
-// app/api/payments/revolut/checkout-order/route.ts
-import { NextResponse } from "next/server";
-import { BookingBaseSchema } from "@/lib/booking/schema";
-import { computePriceOrThrow } from "@/lib/payments/pricing";
-import { connectDB } from "@/lib/db/mongo";
-import { Booking } from "@/lib/db/models/Booking";
-console.log(
-  "[REVOLUT] Env var starts with:",
-  process.env.REVOLUT_SECRET_KEY?.slice(0, 8),
-);
-// Production-only Revolut API base URL
-const BASE_URL = "https://merchant.revolut.com";
+// // app/api/payments/revolut/checkout-order/route.ts
+// import { NextResponse } from "next/server";
+// import { BookingBaseSchema } from "@/lib/booking/schema";
+// import { computePriceOrThrow } from "@/lib/payments/pricing";
+// import { connectDB } from "@/lib/db/mongo";
+// import { Booking } from "@/lib/db/models/Booking";
+// console.log(
+//   "[REVOLUT] Env var starts with:",
+//   process.env.REVOLUT_SECRET_KEY?.slice(0, 8),
+// );
+// // Production-only Revolut API base URL
+// const BASE_URL = "https://merchant.revolut.com";
 
-// Consistent API version across all Revolut endpoints
-const API_VERSION = "2025-12-04";
+// // Consistent API version across all Revolut endpoints
+// const API_VERSION = "2025-12-04";
 
-function requireEnv(name: string): string {
-  const v = process.env[name];
-  if (!v) throw new Error(`Missing env var: ${name}`);
-  return v;
-}
-console.log(
-  "[REVOLUT] Env var starts with:",
-  process.env.REVOLUT_SECRET_KEY?.slice(0, 8),
-);
+// function requireEnv(name: string): string {
+//   const v = process.env[name];
+//   if (!v) throw new Error(`Missing env var: ${name}`);
+//   return v;
+// }
+// console.log(
+//   "[REVOLUT] Env var starts with:",
+//   process.env.REVOLUT_SECRET_KEY?.slice(0, 8),
+// );
 
-function getBaseUrl(): string {
-  // Prefer explicit base URL from environment
-  if (process.env.NEXT_PUBLIC_BASE_URL) {
-    return process.env.NEXT_PUBLIC_BASE_URL;
-  }
+// function getBaseUrl(): string {
+//   // Prefer explicit base URL from environment
+//   if (process.env.NEXT_PUBLIC_BASE_URL) {
+//     return process.env.NEXT_PUBLIC_BASE_URL;
+//   }
 
-  // In production, fail fast if misconfigured instead of using a hardcoded fallback
-  if (process.env.NODE_ENV === "production") {
-    throw new Error("NEXT_PUBLIC_BASE_URL must be set in production");
-  }
+//   // In production, fail fast if misconfigured instead of using a hardcoded fallback
+//   if (process.env.NODE_ENV === "production") {
+//     throw new Error("NEXT_PUBLIC_BASE_URL must be set in production");
+//   }
 
-  // Fallback for development / non-production
-  console.warn(
-    "[REVOLUT] NEXT_PUBLIC_BASE_URL not set; using development fallback http://localhost:3005",
+//   // Fallback for development / non-production
+//   console.warn(
+//     "[REVOLUT] NEXT_PUBLIC_BASE_URL not set; using development fallback http://localhost:3005",
+//   );
+//   return "http://localhost:3005";
+// }
+
+// export async function POST(req: Request) {
+//   try {
+//     const raw = await req.json();
+//     console.log("[REVOLUT] Raw booking payload:", raw);
+
+//     const booking = BookingBaseSchema.parse(raw);
+//     console.log("[REVOLUT] Parsed booking:", booking);
+
+//     const fullAmount = computePriceOrThrow({
+//       routeId: booking.routeId,
+//       vehicleTypeId: booking.vehicleTypeId,
+//       tripType: booking.tripType,
+//     });
+
+//     const chargeAmount = Number(raw.chargeAmount);
+
+//     if (!Number.isFinite(chargeAmount) || chargeAmount <= 0) {
+//       throw new Error("Invalid charge amount");
+//     }
+
+//     if (booking.paymentMethod === "Cash") {
+//   const expectedDeposit = Math.round(fullAmount * 0.2);
+
+//   if (chargeAmount !== expectedDeposit) {
+//     throw new Error(
+//       `Invalid deposit amount. Expected ${expectedDeposit}, got ${chargeAmount}`
+//     );
+//   }
+// } else {
+//   // Card payment → must be full amount
+//   if (chargeAmount !== fullAmount) {
+//     throw new Error(
+//       `Invalid charge amount. Expected full amount ${fullAmount}`
+//     );
+//   }
+// }
+
+
+//     console.log("[REVOLUT] Computed amount (EUR):", chargeAmount);
+
+//     // Revolut expects amount in minor units (cents)
+//     const amountMinor = Math.round(chargeAmount * 100)
+// const isCash = booking.paymentMethod === "Cash";
+
+// if (isCash) {
+//   const expectedDeposit = Math.round(fullAmount * 0.2);
+
+//   if (chargeAmount !== expectedDeposit) {
+//     throw new Error(
+//       `Invalid deposit amount. Expected ${expectedDeposit}, got ${chargeAmount}`
+//     );
+//   }
+// } else {
+//   if (chargeAmount !== fullAmount) {
+//     throw new Error(
+//       `Invalid charge amount. Expected full amount ${fullAmount}`
+//     );
+//   }
+// }
+
+//     console.log("[REVOLUT] Computed amount (cents):", amountMinor);
+
+//     const baseUrl = getBaseUrl();
+//     const orderId = `BKG-${Date.now()}`;
+
+//     // Create booking record in database
+//     await connectDB();
+//    await Booking.create({
+//   orderId,
+//   routeId: booking.routeId,
+//   vehicleTypeId: booking.vehicleTypeId,
+//   tripType: booking.tripType,
+
+//   expectedAmount: fullAmount,
+//   chargedAmount: chargeAmount,
+
+//   currency: "EUR",
+//   paymentMethod: isCash ? "Cash" : "Card",
+//   paymentStatus: "pending_payment",
+
+//   depositAmount:
+//     booking.paymentMethod === "Cash" ? chargeAmount : undefined,
+//   amountDue:
+//     booking.paymentMethod === "Cash"
+//       ? fullAmount - chargeAmount
+//       : 0,
+
+//   customer: {
+//     name: booking.name,
+//     email: booking.email,
+//     phone: booking.phone,
+//   },
+// });
+
+
+//     console.log(`[REVOLUT] Created booking record: ${orderId}`);
+
+//     // 1️⃣ Create order with redirect URLs
+//     const orderPayload = {
+//       amount: amountMinor,
+//       currency: "EUR",
+//       capture_mode: "automatic",
+//       customer: { email: booking.email },
+//       merchant_order_ext_ref: orderId,
+//       success_url: `${baseUrl}/payment/success?orderId=${orderId}`,
+//       failure_url: `${baseUrl}/payment/failed?orderId=${orderId}`,
+//       cancel_url: `${baseUrl}/payment/cancelled?orderId=${orderId}`,
+//     };
+
+//     console.log("[REVOLUT] Order payload:", orderPayload);
+
+//     const orderRes = await fetch(`${BASE_URL}/api/orders`, {
+//       method: "POST",
+//       headers: {
+//         Authorization: `Bearer ${requireEnv("REVOLUT_SECRET_KEY")}`,
+//         "Content-Type": "application/json",
+//         Accept: "application/json",
+//         "Revolut-Api-Version": API_VERSION,
+//       },
+//       body: JSON.stringify(orderPayload),
+//     });
+
+//     const orderText = await orderRes.text();
+//     console.log("[REVOLUT] Order response:", orderText);
+
+//     if (!orderRes.ok) {
+//       return NextResponse.json({ error: orderText }, { status: 500 });
+//     }
+
+//     const order = JSON.parse(orderText);
+
+//     if (!order?.token) {
+//       throw new Error("Missing token in Revolut response");
+//     }
+//     console.log("[REVOLUT] Final public token:", order.token);
+
+//     return NextResponse.json({
+//       token: order.token,
+//       checkoutUrl: order.checkout_url,
+//       orderId: orderId,
+//       revolutOrderId: order.id,
+//     });
+//   } catch (err) {
+//     console.error("[REVOLUT] Checkout failed:", err);
+
+//     const isProd = process.env.NODE_ENV === "production";
+//     const defaultMessage = "Invalid order request";
+//     const errorMessage =
+//       !isProd && err instanceof Error ? err.message : defaultMessage;
+
+//     const responseBody: {
+//       error: string;
+//       code: string;
+//       details?: { stack?: string };
+//     } = {
+//       error: errorMessage,
+//       code: "REVOLUT_CHECKOUT_ERROR",
+//     };
+
+//     if (!isProd && err instanceof Error) {
+//       responseBody.details = {
+//         stack: err.stack,
+//       };
+//     }
+
+//     return NextResponse.json(responseBody, { status: 400 });
+//   }
+// }
+
+export async function POST() {
+  return new Response(
+    JSON.stringify({ message: "Route under development" }),
+    { status: 501 }
   );
-  return "http://localhost:3005";
-}
-
-export async function POST(req: Request) {
-  try {
-    const raw = await req.json();
-    console.log("[REVOLUT] Raw booking payload:", raw);
-
-    const booking = BookingBaseSchema.parse(raw);
-    console.log("[REVOLUT] Parsed booking:", booking);
-
-    const fullAmount = computePriceOrThrow({
-      routeId: booking.routeId,
-      vehicleTypeId: booking.vehicleTypeId,
-      tripType: booking.tripType,
-    });
-
-    const chargeAmount = Number(raw.chargeAmount);
-
-    if (!Number.isFinite(chargeAmount) || chargeAmount <= 0) {
-      throw new Error("Invalid charge amount");
-    }
-
-    if (booking.paymentMethod === "Cash") {
-  const expectedDeposit = Math.round(fullAmount * 0.2);
-
-  if (chargeAmount !== expectedDeposit) {
-    throw new Error(
-      `Invalid deposit amount. Expected ${expectedDeposit}, got ${chargeAmount}`
-    );
-  }
-} else {
-  // Card payment → must be full amount
-  if (chargeAmount !== fullAmount) {
-    throw new Error(
-      `Invalid charge amount. Expected full amount ${fullAmount}`
-    );
-  }
-}
-
-
-    console.log("[REVOLUT] Computed amount (EUR):", chargeAmount);
-
-    // Revolut expects amount in minor units (cents)
-    const amountMinor = Math.round(chargeAmount * 100)
-const isCash = booking.paymentMethod === "Cash";
-
-if (isCash) {
-  const expectedDeposit = Math.round(fullAmount * 0.2);
-
-  if (chargeAmount !== expectedDeposit) {
-    throw new Error(
-      `Invalid deposit amount. Expected ${expectedDeposit}, got ${chargeAmount}`
-    );
-  }
-} else {
-  if (chargeAmount !== fullAmount) {
-    throw new Error(
-      `Invalid charge amount. Expected full amount ${fullAmount}`
-    );
-  }
-}
-
-    console.log("[REVOLUT] Computed amount (cents):", amountMinor);
-
-    const baseUrl = getBaseUrl();
-    const orderId = `BKG-${Date.now()}`;
-
-    // Create booking record in database
-    await connectDB();
-   await Booking.create({
-  orderId,
-  routeId: booking.routeId,
-  vehicleTypeId: booking.vehicleTypeId,
-  tripType: booking.tripType,
-
-  expectedAmount: fullAmount,
-  chargedAmount: chargeAmount,
-
-  currency: "EUR",
-  paymentMethod: isCash ? "Cash" : "Card",
-  paymentStatus: "pending_payment",
-
-  depositAmount:
-    booking.paymentMethod === "Cash" ? chargeAmount : undefined,
-  amountDue:
-    booking.paymentMethod === "Cash"
-      ? fullAmount - chargeAmount
-      : 0,
-
-  customer: {
-    name: booking.name,
-    email: booking.email,
-    phone: booking.phone,
-  },
-});
-
-
-    console.log(`[REVOLUT] Created booking record: ${orderId}`);
-
-    // 1️⃣ Create order with redirect URLs
-    const orderPayload = {
-      amount: amountMinor,
-      currency: "EUR",
-      capture_mode: "automatic",
-      customer: { email: booking.email },
-      merchant_order_ext_ref: orderId,
-      success_url: `${baseUrl}/payment/success?orderId=${orderId}`,
-      failure_url: `${baseUrl}/payment/failed?orderId=${orderId}`,
-      cancel_url: `${baseUrl}/payment/cancelled?orderId=${orderId}`,
-    };
-
-    console.log("[REVOLUT] Order payload:", orderPayload);
-
-    const orderRes = await fetch(`${BASE_URL}/api/orders`, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${requireEnv("REVOLUT_SECRET_KEY")}`,
-        "Content-Type": "application/json",
-        Accept: "application/json",
-        "Revolut-Api-Version": API_VERSION,
-      },
-      body: JSON.stringify(orderPayload),
-    });
-
-    const orderText = await orderRes.text();
-    console.log("[REVOLUT] Order response:", orderText);
-
-    if (!orderRes.ok) {
-      return NextResponse.json({ error: orderText }, { status: 500 });
-    }
-
-    const order = JSON.parse(orderText);
-
-    if (!order?.token) {
-      throw new Error("Missing token in Revolut response");
-    }
-    console.log("[REVOLUT] Final public token:", order.token);
-
-    return NextResponse.json({
-      token: order.token,
-      checkoutUrl: order.checkout_url,
-      orderId: orderId,
-      revolutOrderId: order.id,
-    });
-  } catch (err) {
-    console.error("[REVOLUT] Checkout failed:", err);
-
-    const isProd = process.env.NODE_ENV === "production";
-    const defaultMessage = "Invalid order request";
-    const errorMessage =
-      !isProd && err instanceof Error ? err.message : defaultMessage;
-
-    const responseBody: {
-      error: string;
-      code: string;
-      details?: { stack?: string };
-    } = {
-      error: errorMessage,
-      code: "REVOLUT_CHECKOUT_ERROR",
-    };
-
-    if (!isProd && err instanceof Error) {
-      responseBody.details = {
-        stack: err.stack,
-      };
-    }
-
-    return NextResponse.json(responseBody, { status: 400 });
-  }
 }
