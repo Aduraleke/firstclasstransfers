@@ -496,7 +496,7 @@ useEffect(() => {
 
       sedanPrice: route.sedanPrice,
       vanPrice: route.vanPrice,
-
+      duration_minutes: route.duration_minutes,
       whatMakesBetter: route.whatMakesBetter ?? [],
       whatsIncluded: route.whatsIncluded ?? [],
       destinationHighlights: route.destinationHighlights ?? [],
@@ -536,7 +536,7 @@ useEffect(() => {
           time: input.time,
           sedanPrice: input.sedanPrice,
           vanPrice: input.vanPrice,
-
+          duration_minutes: input.duration_minutes,
           // 🔥 REQUIRED
           faqs: input.faqs,
           vehicleOptions: input.vehicleOptions,
@@ -567,7 +567,7 @@ useEffect(() => {
           time: input.time,
           sedanPrice: input.sedanPrice,
           vanPrice: input.vanPrice,
-
+          duration_minutes: input.duration_minutes,
           whatMakesBetter: input.whatMakesBetter,
           whatsIncluded: input.whatsIncluded,
           destinationHighlights: input.destinationHighlights,

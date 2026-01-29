@@ -11,7 +11,6 @@ import type { BookingRoute } from "@/lib/booking/bookingRoute";
 import type { BookingDraft } from "@/lib/booking/types";
 import { bookTrip } from "@/lib/api/bookTrip";
 
-
 type BookingProps = {
   initialRouteId?: string;
   initialVehicleTypeId?: string;
@@ -19,7 +18,7 @@ type BookingProps = {
 
 function createInitialDraft(initialRouteSlug?: string): BookingDraft {
   return {
-    routeId: "",                     // backend ID (unknown yet)
+    routeId: "", // backend ID (unknown yet)
     routeSlug: initialRouteSlug ?? "",
 
     vehicleTypeId: "",
@@ -41,7 +40,7 @@ function createInitialDraft(initialRouteSlug?: string): BookingDraft {
     phone: "",
     email: "",
     notes: "",
-
+    paymentStatus: "",
     paymentMethod: "Cash",
   };
 }
@@ -58,7 +57,7 @@ export default function Booking({
     vehicleTypeId: initialVehicleTypeId || "",
   }));
 
-  const [submitting, setSubmitting] = useState(false);
+  const [submitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
   const [routeList, setRouteList] = useState<BookingRoute[]>([]);
@@ -105,17 +104,16 @@ export default function Booking({
   }, []);
 
   useEffect(() => {
-  if (!draft.routeSlug || draft.routeId || routeList.length === 0) return;
+    if (!draft.routeSlug || draft.routeId || routeList.length === 0) return;
 
-  const route = routeList.find(r => r.slug === draft.routeSlug);
-  if (!route) return;
+    const route = routeList.find((r) => r.slug === draft.routeSlug);
+    if (!route) return;
 
-  setDraft(prev => ({
-    ...prev,
-    routeId: route.routeId,   // fct2cp1e1 ✅
-  }));
-}, [draft.routeSlug, draft.routeId, routeList]);
-
+    setDraft((prev) => ({
+      ...prev,
+      routeId: route.routeId, // fct2cp1e1 ✅
+    }));
+  }, [draft.routeSlug, draft.routeId, routeList]);
 
   /* ---------- update draft ---------- */
   const updateDraft = useCallback(
@@ -126,28 +124,47 @@ export default function Booking({
   );
 
   /* ---------- confirm ---------- */
-const handleConfirm = async () => {
-  if (submitting) return;
+  const handleConfirm = async () => {
+    if (submitting) return;
 
-  setSubmitError(null);
+    setSubmitError(null);
 
-  if (!draft.name || !draft.phone || !draft.email) {
-    setSubmitError("Please complete all required fields.");
-    scrollToTop();
-    return;
-  }
+    // 1️⃣ Basic validation
+    if (!draft.name || !draft.phone || !draft.email) {
+      setSubmitError("Please complete all required fields.");
+      scrollToTop();
+      return;
+    }
 
-  try {
-    setSubmitting(true);
-    await bookTrip(draft);
-    setSubmitted(true);
-  } catch (error) {
-    console.error("Booking failed:", error);
-    setSubmitError("Booking failed. Please try again or contact support.");
-  } finally {
-    setSubmitting(false);
-  }
-};
+    // 2️⃣ Safety: total price must exist
+    if (!draft.totalPrice || draft.totalPrice <= 0) {
+      setSubmitError("Unable to calculate trip price. Please try again.");
+      return;
+    }
+
+    // 3️⃣ Decide how much to charge
+    let amountToCharge: number;
+
+    if (draft.paymentMethod === "Cash") {
+      // 🧾 20% commitment fee
+      amountToCharge = Math.round(draft.totalPrice * 0.2);
+    } else {
+      // 💳 Full payment
+      amountToCharge = draft.totalPrice;
+    }
+
+    // 4️⃣ Store payment breakdown in draft
+    setDraft((prev) => ({
+      ...prev,
+      depositAmount: prev.paymentMethod === "Cash" ? amountToCharge : undefined,
+      amountPaid: amountToCharge,
+      amountDue:
+        prev.paymentMethod === "Cash" ? prev.totalPrice - amountToCharge : 0,
+    }));
+
+    // 5️⃣ Open payment modal (Revolut)
+    setPaymentLoading(true);
+  };
 
   /* ---------- success ---------- */
   if (submitted) {
@@ -195,26 +212,24 @@ const handleConfirm = async () => {
             onBack={() => setStep(1)}
             onConfirm={handleConfirm}
             paymentLoading={paymentLoading}
-            onPaymentSuccess={async () => {
+            onPaymentSuccess={async (tx) => {
               try {
-                const res = await fetch("/api/bookings", {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({
-                    ...draft,
-                    paymentMethod: "card",
-                  }),
-                });
+                await bookTrip({
+                  ...draft,
 
-                if (!res.ok) {
-                  throw new Error("Booking creation failed after payment");
-                }
+                  // payment facts
+                  paymentStatus: "paid",
+
+                  // 🔑 TRANSACTION REFERENCES
+                  revolutOrderId: tx.revolutOrderId,
+                  revolutPublicId: tx.revolutPublicId,
+                });
 
                 setSubmitted(true);
               } catch (err) {
-                console.error("Card booking finalization failed:", err);
+                console.error("Booking creation failed after payment:", err);
                 setSubmitError(
-                  "Payment succeeded but booking failed. Contact support.",
+                  "Payment succeeded but booking could not be saved. Please contact support.",
                 );
               } finally {
                 setPaymentLoading(false);

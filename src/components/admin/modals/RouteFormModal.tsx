@@ -26,6 +26,7 @@ const emptyForm: RouteFormInput = {
   distance: "",
   time: "",
   sedanPrice: 0,
+  duration_minutes: 0,
   vanPrice: 0,
   whatMakesBetter: [],
   whatsIncluded: [],

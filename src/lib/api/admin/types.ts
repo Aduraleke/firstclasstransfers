@@ -221,7 +221,7 @@ export type FAQItem = {
 export type RouteFormInput = {
   fromLocation: string;
   toLocation: string;
-
+  duration_minutes: number;
   metaTitle: string;
   metaDescription: string;
   heroTitle: string;

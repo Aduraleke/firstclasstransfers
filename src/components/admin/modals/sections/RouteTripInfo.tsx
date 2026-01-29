@@ -74,6 +74,42 @@ export const RouteTripInfo = ({ form, update }: Props) => (
             onChange={(e) => update("time", e.target.value)}
           />
         </div>
+
+        <div className="space-y-2">
+          <label className="text-sm font-medium text-slate-300 flex items-center gap-2">
+            <Icon
+              icon="mdi:clock-outline"
+              className="text-indigo-400"
+              width={18}
+            />
+            Duration (minutes)
+          </label>
+
+          <input
+            type="number"
+            min={1}
+            step={1}
+            required
+            value={form.duration_minutes}
+            className="
+      w-full rounded-xl
+      bg-slate-900/80
+      border border-slate-700
+      px-4 py-3
+      text-slate-100
+      placeholder:text-slate-500
+      transition-all duration-200
+      focus:outline-none
+      focus:border-indigo-500
+      focus:ring-2 focus:ring-indigo-500/20
+      hover:border-slate-600
+    "
+            placeholder="90"
+            onChange={(e) =>
+              update("duration_minutes", parseInt(e.target.value, 10))
+            }
+          />
+        </div>
       </div>
 
       {/* PRICING */}

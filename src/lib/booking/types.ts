@@ -8,11 +8,10 @@ export type BaggageType = "Hand" | "Medium" | "Large" | "Extra Large";
 export const VEHICLE_TYPES = ["sedan", "vclass"] as const;
 export type VehicleTypeId = (typeof VEHICLE_TYPES)[number];
 
-
 export type BookingDraft = {
-  // main route  
-  routeId: string;     // slug (for UI)
-  routeSlug: string;   // UI / URL → nicosia-larnaca-airport-lca
+  // main route
+  routeId: string; // slug (for UI)
+  routeSlug: string; // UI / URL → nicosia-larnaca-airport-lca
 
   vehicleTypeId: string;
   timePeriod: TimePeriod;
@@ -24,6 +23,7 @@ export type BookingDraft = {
   returnDate: string;
   returnTime: string;
   returnTimePeriod: TimePeriod;
+  paymentMethod: string;
 
   // flight / pax / baggage
   flightNumber: string;
@@ -36,8 +36,15 @@ export type BookingDraft = {
   phone: string;
   email: string;
   notes: string;
-totalPrice: number
+  totalPrice: number;
   // payment
-  paymentMethod: PaymentMethod;
-};
 
+  paymentStatus: string;
+
+  revolutOrderId?: string;
+  revolutPublicId?: string;
+
+  depositAmount?: number; // 20% if cash
+  amountPaid?: number; // what was charged
+  amountDue?: number;
+};

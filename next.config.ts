@@ -1,20 +1,14 @@
-// next.config.ts
-import type { NextConfig } from "next";
-
-const nextConfig: NextConfig = {
-  reactCompiler: true,
-
+/** @type {import('next').NextConfig} */
+const nextConfig = {
   images: {
-  remotePatterns: [
-    {
-      protocol: "http",
-      hostname: "92.113.29.160",
-      port: "1805",
-      pathname: "/**",
-    },
-  ],
-},
-
+    remotePatterns: [
+      {
+        protocol: "http",
+        hostname: "fct-backend.techtenets.com",
+        pathname: "/media/**",
+      },
+    ],
+  },
 };
 
-export default nextConfig;
+module.exports = nextConfig;

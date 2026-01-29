@@ -29,9 +29,13 @@ export const BookingBaseSchema = z
     phone: z.string().min(6),
     email: z.string().email(),
     notes: z.string().optional().nullable().or(z.literal("")),
+    totalPrice: z.number(),
+    depositAmount: z.number().optional(),
+    amountPaid: z.number(),
+    amountDue: z.number(),
 
     // payment
-    paymentMethod: z.enum(["cash", "card"]).default("cash"),
+    paymentMethod: z.enum(["Cash", "Card"]).default("Cash"),
   })
   .refine(
     (data) =>
@@ -40,9 +44,10 @@ export const BookingBaseSchema = z
         Boolean(data.returnTime) &&
         Boolean(data.returnTimePeriod)),
     {
-      message: "Return date, time and time period are required for return trips",
+      message:
+        "Return date, time and time period are required for return trips",
       path: ["returnDate"],
-    }
+    },
   );
 
 export type BookingBase = z.infer<typeof BookingBaseSchema>;

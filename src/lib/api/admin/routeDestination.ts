@@ -16,7 +16,7 @@ export interface Route {
 
   sedanPrice: number;
   vanPrice: number;
-
+  duration_minutes: number
   metaTitle: string;
   metaDescription: string;
   heroTitle: string;
@@ -39,6 +39,7 @@ export interface Route {
 /* ───────────────── BACKEND TYPES ───────────────── */
 
 interface BackendRoute {
+  duration_minutes: number;
   id?: number;
   route_id: string;
   slug: string;
@@ -112,7 +113,7 @@ function mapRouteToFrontend(route: BackendRoute): Route {
 
     distance: route.distance,
     time: route.time,
-
+    duration_minutes: route.duration_minutes,
     sedanPrice: Number(route.sedan_price),
     vanPrice: Number(route.van_price),
 
@@ -138,7 +139,7 @@ export async function getRoutes(): Promise<Route[]> {
     method: "GET",
   });
 
-  console.log("Get routee details",response);
+  console.log("Get routee details", response);
   return response;
 }
 
@@ -171,6 +172,7 @@ export interface CreateRouteInput {
   whatsIncluded: string[];
   destinationHighlights: string[];
   idealFor: string[];
+  duration_minutes: number;
   faqs: FAQItem[];
   vehicleOptions: VehicleOption[];
   image: File | null;
@@ -180,6 +182,14 @@ export interface CreateRouteInput {
 
 export async function createRoute(input: CreateRouteInput): Promise<Route> {
   const formData = new FormData();
+
+
+
+  formData.append(
+  "duration_minutes",
+  String(input.duration_minutes)
+);
+
 
   formData.append("from_location", input.fromLocation);
   formData.append("to_location", input.toLocation);
@@ -209,15 +219,13 @@ export async function createRoute(input: CreateRouteInput): Promise<Route> {
     JSON.stringify(input.destinationHighlights),
   );
   formData.append("ideal_for", JSON.stringify(input.idealFor));
-for (const [key, value] of formData.entries()) {
-  console.log(`FormData → ${key}:`, value);
-}
+  for (const [key, value] of formData.entries()) {
+    console.log(`FormData → ${key}:`, value);
+  }
   const response = await authFetch<BackendRoute>("/control/routes/create/", {
     method: "POST",
     body: formData,
-    
   });
-
 
   return mapRouteToFrontend(response);
 }
@@ -236,7 +244,7 @@ export interface UpdateRouteInput {
   time?: string;
   sedanPrice?: number;
   vanPrice?: number;
-
+  duration_minutes: number;
   whatMakesBetter?: string[];
   whatsIncluded?: string[];
   destinationHighlights?: string[];
@@ -268,6 +276,9 @@ export async function updateRoute(
   if (input.heroTitle) formData.append("hero_title", input.heroTitle);
 
   if (input.subHeadline) formData.append("sub_headline", input.subHeadline);
+  if (typeof input.duration_minutes === "number") {
+    formData.append("duration_minutes", String(input.duration_minutes));
+  }
 
   if (input.body) formData.append("body", input.body);
   if (input.distance) formData.append("distance", input.distance);
@@ -298,11 +309,7 @@ export async function updateRoute(
   if (input.vehicleOptions) {
     formData.append("vehicle_options", JSON.stringify(input.vehicleOptions));
   }
-  console.log(
-  "📤 Sending vehicle options:",
-  input.vehicleOptions
-);
-
+  console.log("📤 Sending vehicle options:", input.vehicleOptions);
 
   if (input.idealFor)
     formData.append("ideal_for", JSON.stringify(input.idealFor));
@@ -314,13 +321,10 @@ export async function updateRoute(
   if (input.bookCtaSupport)
     formData.append("book_cta_support", input.bookCtaSupport);
 
-  const response = await authFetch<BackendRoute>(
-    `/control/routes/${routeId}`,
-    {
-      method,
-      body: formData,
-    },
-  );
+  const response = await authFetch<BackendRoute>(`/control/routes/${routeId}`, {
+    method,
+    body: formData,
+  });
 
   return mapRouteToFrontend(response);
 }

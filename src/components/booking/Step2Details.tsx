@@ -7,16 +7,21 @@ import { BAGGAGE_OPTIONS, TIME_PERIODS } from "@/lib/booking/options";
 
 type Props = {
   data: BookingDraft;
-  routeList: BookingRoute[]; // ✅ NEW (same as Step 1)
+  routeList: BookingRoute[];
   onChange: <K extends keyof BookingDraft>(
     key: K,
     value: BookingDraft[K],
   ) => void;
   onBack: () => void;
   onConfirm: () => void;
-  revolutOrderId?: string | null;
   paymentLoading: boolean;
-  onPaymentSuccess: () => void;
+
+  // ✅ Accept transaction info
+  onPaymentSuccess: (tx: {
+    revolutOrderId: string;
+    revolutPublicId: string;
+  }) => void;
+
   onPaymentCancel: () => void;
 };
 
@@ -47,7 +52,6 @@ export default function Step2Details({
   onChange,
   onBack,
   onConfirm,
-  revolutOrderId,
   paymentLoading,
   onPaymentSuccess,
   onPaymentCancel,
@@ -59,10 +63,10 @@ export default function Step2Details({
   const [showUpgradeModal, setShowUpgradeModal] = React.useState(false);
   const [checkoutMounted, setCheckoutMounted] = React.useState(false);
 
-const routeDetail = useMemo(
-  () => routeList.find((r) => r.routeId === data.routeId),
-  [routeList, data.routeId],
-);
+  const routeDetail = useMemo(
+    () => routeList.find((r) => r.routeId === data.routeId),
+    [routeList, data.routeId],
+  );
 
   const vehicleIndex = useMemo(() => {
     if (!routeDetail) return -1;
@@ -88,18 +92,6 @@ const routeDetail = useMemo(
       .slice(vehicleIndex + 1)
       .find((v) => v.maxPassengers >= totalPassengers);
   }, [routeDetail, vehicleIndex, totalPassengers]);
-
-  useEffect(() => {
-    if (revolutOrderId) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
-    }
-
-    return () => {
-      document.body.style.overflow = "";
-    };
-  }, [revolutOrderId]);
 
   React.useEffect(() => {
     if (exceedsCapacity && upgradeVehicleOption) {
@@ -150,6 +142,16 @@ const routeDetail = useMemo(
 
   const total = subtotal != null ? Math.round(subtotal) : null;
 
+  const depositAmount = useMemo(() => {
+    if (total == null) return null;
+
+    if (data.paymentMethod === "Cash") {
+      return Math.round(total * 0.2); // 20%
+    }
+
+    return total; // Card = full payment
+  }, [total, data.paymentMethod]);
+
   const perLegDisplay = formatEuro(perLegPriceNumber);
   const subtotalDisplay = formatEuro(subtotal);
   const totalDisplay = formatEuro(total);
@@ -180,7 +182,15 @@ const routeDetail = useMemo(
           const res = await fetch("/api/payments/revolut/checkout-order", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(data),
+            body: JSON.stringify({
+              ...data,
+
+              // 🔑 THIS IS THE KEY LINE
+              chargeAmount:
+                data.paymentMethod === "Cash"
+                  ? data.depositAmount
+                  : data.totalPrice,
+            }),
           });
 
           const json = await res.json();
@@ -191,15 +201,32 @@ const routeDetail = useMemo(
 
           return { publicId: json.token };
         },
+        onSuccess(...args: unknown[]) {
+          const event = args[0];
 
-        onSuccess() {
-          onPaymentSuccess();
+          if (
+            typeof event !== "object" ||
+            event === null ||
+            !("order" in event)
+          ) {
+            console.error("[REVOLUT] Invalid success payload", event);
+            return;
+          }
+
+          const order = (
+            event as { order?: { id?: string; public_id?: string } }
+          ).order;
+
+          if (!order?.id || !order?.public_id) {
+            console.error("[REVOLUT] Missing order data", event);
+            return;
+          }
+
+          onPaymentSuccess({
+            revolutOrderId: order.id,
+            revolutPublicId: order.public_id,
+          });
         },
-
-        onCancel() {
-          onPaymentCancel();
-        },
-
         onError(err) {
           console.error("[REVOLUT] Checkout error:", err);
         },
@@ -221,11 +248,15 @@ const routeDetail = useMemo(
     return `€${value.toFixed(0)}`;
   }
   useEffect(() => {
-  if (total != null) {
-    onChange("totalPrice", total);
-  }
-}, [total, onChange]);
+    if (total == null || depositAmount == null) return;
 
+    onChange("depositAmount", depositAmount);
+    onChange("amountPaid", depositAmount);
+    onChange(
+      "amountDue",
+      data.paymentMethod === "Cash" ? total - depositAmount : 0,
+    );
+  }, [total, depositAmount, data.paymentMethod, onChange]);
 
   return (
     <div className="bg-white rounded-3xl border border-gray-100 shadow-lg shadow-gray-100/70 p-5 sm:p-6 lg:p-7 space-y-6">
@@ -258,6 +289,13 @@ const routeDetail = useMemo(
               <div className="text-[11px] opacity-85 mt-1">
                 {perLegDisplay} {isReturn ? "· per leg" : "· per vehicle"}
               </div>
+
+              {data.paymentMethod === "Cash" && (
+                <p className="text-xs text-gray-600 mt-1">
+                  Deposit now: €{data.depositAmount} · Pay driver: €
+                  {data.amountDue}
+                </p>
+              )}
             </div>
           </div>
         </div>
@@ -738,8 +776,8 @@ const routeDetail = useMemo(
                   }`}
                 >
                   {method.id === "Cash"
-                    ? "Pay the driver in EUR at the end of the trip."
-                    : "We’ll send a secure payment link to confirm your booking."}
+                    ? "Pay 20% now to confirm. Balance paid to driver in cash."
+                    : "Pay full amount now to confirm your booking."}
                 </span>
               </button>
             );
