@@ -11,6 +11,7 @@ import carIcon from "@iconify/icons-mdi/car-sports";
 import arrowRightIcon from "@iconify/icons-mdi/arrow-right";
 import airplaneTakeoff from "@iconify/icons-mdi/airplane-takeoff";
 import { fetchAllRoutes } from "@/lib/api/routes"; // adjust path if needed
+import Loader from "../Loader";
 
 // 🔑 Import your shared route data
 
@@ -154,7 +155,7 @@ export default function PopularRoutesShowcase() {
   if (loading) {
     return (
       <section className="py-16 text-center text-slate-500">
-        Loading popular routes…
+        <Loader/>
       </section>
     );
   }

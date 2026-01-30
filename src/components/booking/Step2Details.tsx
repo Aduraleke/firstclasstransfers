@@ -142,6 +142,14 @@ export default function Step2Details({
 
   const total = subtotal != null ? Math.round(subtotal) : null;
 
+  // 🔑 sync computed price back to parent draft
+useEffect(() => {
+  if (total != null && total > 0 && data.totalPrice !== total) {
+    onChange("totalPrice", total);
+  }
+}, [total, data.totalPrice, onChange]);
+
+
   const depositAmount = useMemo(() => {
     if (total == null) return null;
 
