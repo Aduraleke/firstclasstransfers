@@ -82,7 +82,7 @@ export default function Booking({
 
     (async () => {
       try {
-        const res = await fetch("http://92.113.29.160:1805/routes/");
+        const res = await fetch("https://fct-backend.techtenets.com/routes/");
         if (!res.ok) throw new Error("Failed to load routes");
         const routes = await res.json();
 

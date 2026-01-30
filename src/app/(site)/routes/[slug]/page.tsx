@@ -95,27 +95,12 @@ export default async function RouteDetailsPage({
   }
 
   const VEHICLE_IMAGE_MAP: Record<string, string> = {
-    "Standard Car": "/ford-carpri.jpg",
-    Sedan: "/ford-carpri.jpg",
-    Minivan: "/mercedesVclass.jpg",
-    "V-Class": "/mercedesVclass.jpg",
+    sedan: "/ford-carpri.jpg",
+    vclass: "/mercedesVclass.jpg",
   };
 
   function getVehicleImage(type: string): string | null {
-    if (VEHICLE_IMAGE_MAP[type]) return VEHICLE_IMAGE_MAP[type];
-
-    const lower = type.toLowerCase();
-    if (
-      lower.includes("minivan") ||
-      lower.includes("v-class") ||
-      lower.includes("van")
-    ) {
-      return "/mercedesVclass.jpg";
-    }
-    if (lower.includes("car") || lower.includes("sedan")) {
-      return "/capri.jpg";
-    }
-    return null;
+    return VEHICLE_IMAGE_MAP[type];
   }
 
   const sedanPrice = route.vehicleOptions?.[0]?.fixedPrice ?? route.sedanPrice;
@@ -124,10 +109,9 @@ export default async function RouteDetailsPage({
 
   const vehicleOptions = route.vehicleOptions ?? [];
 
-const sortedVehicleOptions = [...vehicleOptions].sort(
-  (a, b) => Number(a.fixedPrice) - Number(b.fixedPrice)
-);
-
+  const sortedVehicleOptions = [...vehicleOptions].sort(
+    (a, b) => Number(a.fixedPrice) - Number(b.fixedPrice),
+  );
 
   /* -----------------------------
      helpers
@@ -388,8 +372,8 @@ const sortedVehicleOptions = [...vehicleOptions].sort(
                 style={{ backgroundColor: `${BRAND.accent}99` }}
               />
               <ul className="mt-3 space-y-2 list-disc pl-5 text-sm">
-                {route.whatMakesBetter.map((item) => (
-                  <li key={item}>{item}</li>
+                {route.whatMakesBetter.map((item, key) => (
+                  <li key={key}>{item}</li>
                 ))}
               </ul>
             </section>
@@ -469,7 +453,7 @@ const sortedVehicleOptions = [...vehicleOptions].sort(
               <div className="relative mt-4 space-y-2 rounded-2xl bg-slate-900/80 px-3 py-3 text-[12px] ring-1 ring-slate-800">
                 {sortedVehicleOptions.map((vehicle, idx) => (
                   <div
-                    key={vehicle.vehicleType}
+                    key={idx}
                     className={[
                       "flex items-center justify-between",
                       idx > 0 ? "border-t border-slate-800 pt-2" : "",
@@ -551,25 +535,12 @@ const sortedVehicleOptions = [...vehicleOptions].sort(
               const imgSrc = getVehicleImage(vehicle.vehicleType);
               const isPrimary = idx === 0;
 
-              // --- NEW: map displayed type → booking vehicleTypeId
-              function mapVehicleTypeToId(type: string): "sedan" | "vclass" {
-                const t = type.toLowerCase();
-                if (t.includes("sedan") || t.includes("car")) return "sedan";
-                if (
-                  t.includes("v-class") ||
-                  t.includes("van") ||
-                  t.includes("minivan")
-                )
-                  return "vclass";
-                return "sedan";
-              }
-
-              const vehicleTypeId = mapVehicleTypeToId(vehicle.vehicleType);
+              const vehicleTypeId = vehicle.vehicleType;
               const bookingHref = `/booking?routeId=${route.slug}&vehicleTypeId=${vehicleTypeId}`;
 
               return (
                 <Link
-                  key={vehicle.vehicleType}
+                  key={idx}
                   href={bookingHref}
                   className={[
                     "group flex flex-col overflow-hidden rounded-2xl border backdrop-blur-sm transition cursor-pointer",
@@ -585,7 +556,7 @@ const sortedVehicleOptions = [...vehicleOptions].sort(
                     <div className="absolute -left-16 top-0 h-40 w-40 rounded-full bg-[#b07208]/25 blur-3xl" />
                     <div className="absolute -right-16 bottom-0 h-40 w-40 rounded-full bg-sky-400/15 blur-3xl" />
 
-                    {imgSrc ? (
+                    {imgSrc && (
                       <Image
                         src={imgSrc}
                         alt={vehicle.vehicleType}
@@ -594,10 +565,6 @@ const sortedVehicleOptions = [...vehicleOptions].sort(
                         className="relative z-10 object-cover object-center transition-transform duration-500 group-hover:scale-105"
                         priority={isPrimary}
                       />
-                    ) : (
-                      <div className="relative z-10 flex h-full w-full items-center justify-center text-4xl">
-                        🚗
-                      </div>
                     )}
 
                     {isPrimary && (
