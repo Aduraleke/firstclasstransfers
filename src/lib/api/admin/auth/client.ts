@@ -33,7 +33,7 @@ export async function authFetch<T>(
   options: RequestInit = {},
 ): Promise<T> {
   const token = localStorage.getItem("admin_token");
-  const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL
+  const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "https://fct-backend.techtenets.com"
 
   if (!token) {
     throw new Error("Not authenticated");
