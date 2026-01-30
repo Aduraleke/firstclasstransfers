@@ -82,7 +82,9 @@ export default function Booking({
 
     (async () => {
       try {
-        const res = await fetch("https://fct-backend.techtenets.com/routes/");
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_API_BASE_URL}/routes/`,
+        );
         if (!res.ok) throw new Error("Failed to load routes");
         const routes = await res.json();
 

@@ -7,7 +7,7 @@ import type { BookingDraft } from "@/lib/booking/types";
 
 export async function bookTrip(draft: BookingDraft) {
   const formData = new FormData();
-const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+
   // ─────────────────────────────
   // REQUIRED TOP-LEVEL FIELDS
   // ─────────────────────────────
@@ -54,7 +54,7 @@ const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
     console.log(k, v);
   }
 
-  const res = await fetch(`${BASE_URL}/booking/create/`, {
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/booking/create/`, {
     method: "POST",
     body: formData, // ✅ DO NOT set Content-Type
   });

@@ -2,13 +2,8 @@ import { NextResponse } from "next/server";
 
 
 export async function GET() {
-
-  const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_BASE_URL ??
-  "http://92.113.29.160:1805";
-
   try {
-    const res = await fetch(`${API_BASE_URL}/routes/`, {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/routes/`, {
       cache: "no-store",
     });
 
